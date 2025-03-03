@@ -5,9 +5,9 @@ package com.bytefacets.diaspore.common;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.functional.IntIterable;
+import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
-import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
 import java.util.ArrayList;

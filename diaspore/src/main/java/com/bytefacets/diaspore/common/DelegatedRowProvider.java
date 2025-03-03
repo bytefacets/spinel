@@ -5,8 +5,8 @@ package com.bytefacets.diaspore.common;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.functional.IntConsumer;
-import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.RowProvider;
+import com.bytefacets.diaspore.TransformOutput;
 import java.util.function.Supplier;
 
 public final class DelegatedRowProvider implements RowProvider {

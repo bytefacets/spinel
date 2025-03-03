@@ -9,9 +9,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.collections.hash.GenericIndexedSet;
+import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
-import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.cache.Cache;
 import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.common.StateChangeSet;
