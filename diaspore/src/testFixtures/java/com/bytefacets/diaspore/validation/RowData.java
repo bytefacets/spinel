@@ -27,7 +27,7 @@ public record RowData(Map<String, Object> data) {
         return new RowDataTemplate(List.of(fieldNames));
     }
 
-    public static class RowDataTemplate {
+    public static final class RowDataTemplate {
         private final List<String> fieldNames;
 
         private RowDataTemplate(final List<String> fieldNames) {

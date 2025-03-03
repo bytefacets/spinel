@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public record Key(List<Object> values) {
-    public static Key key(Object... values) {
+    public static Key key(final Object... values) {
         return new Key(Stream.of(values).toList());
     }
 }
