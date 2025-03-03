@@ -17,5 +17,5 @@ pluginManagement {
     }
 }
 
-include("facets")
+include("diaspore")
 include("examples")
