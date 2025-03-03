@@ -159,7 +159,7 @@ subprojects {
     }
 
     tasks.jar {
-        archiveBaseName.set(rootProject.name)
+        archiveBaseName.set(group)
     }
 
     configure<PublishingExtension> {
@@ -176,6 +176,7 @@ subprojects {
             }
             create<MavenPublication>("gpr") {
                 from(components["java"])
+                groupId = "com.bytefacets"
                 artifactId = "bytefacets-${project.name}"
             }
         }
