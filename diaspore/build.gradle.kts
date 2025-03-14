@@ -1,3 +1,5 @@
+import java.time.Instant
+
 plugins {
     `java-library`
     id("java-test-fixtures")
@@ -16,9 +18,11 @@ template_processor {
     main {
         excludedFiles.set(listOf(
             "BoolIndexedTable.java",
-            "BoolTableHandle.java",
             "BoolIndexedTableBuilder.java",
-            "BoolRowInterner.java"))
+            "BoolIndexedStructTable.java",
+            "BoolIndexedStructTableBuilder.java",
+            "BoolRowInterner.java",
+            "BoolTableHandle.java"))
     }
     test {
         excludedFiles.set(listOf(
@@ -40,5 +44,18 @@ tasks.named("compileJava") {
 
 dependencies {
     api("com.bytefacets:collections:0.1.0")
+    implementation("org.javassist:javassist:3.30.2-GA") // https://mvnrepository.com/artifact/org.javassist/javassist
     testImplementation(testFixtures(project(":diaspore")))
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes(mapOf(
+            "Implementation-Title" to "diaspore",
+            "Implementation-Version" to project.version.toString(),
+            "Implementation-Vendor" to "Byte Facets",
+            "Built-By" to System.getProperty("user.name"),
+            "Build-Date" to Instant.now().toString()
+        ))
+    }
 }
