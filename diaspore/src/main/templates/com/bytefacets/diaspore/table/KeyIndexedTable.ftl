@@ -7,11 +7,15 @@ import com.bytefacets.collections.hash.${type.name}IndexedSet;
 import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.schema.WritableField;
 
 import static com.bytefacets.diaspore.exception.DuplicateKeyException.duplicateKeyException;
 import static com.bytefacets.diaspore.exception.KeyException.unknownKeyException;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A table keyed by ${type.javaType}.
+ */
 public final class ${type.name}IndexedTable${generics} {
     private final String name;
     private final OutputManager outputManager;
@@ -30,19 +34,46 @@ public final class ${type.name}IndexedTable${generics} {
         this.name = schema.name();
     }
 
+    /** The schema of this table with access to the table's Fields. */
     public Schema schema() {
         return outputManager.schema();
     }
 
-    public int fieldId(final String name) {
-        return schema().field(name).fieldId();
+    /**
+     * Looks up the fieldId associated with the fieldName. This can be used in
+     * combination with the TableRow to set values in specific fields. You could also
+     * directly use {@link writableField} instead of TableRow.
+     */
+    public int fieldId(final String fieldName) {
+        return schema().field(fieldName).fieldId();
     }
 
+    /**
+     * Returns the WritableField associated with fieldName. Note that the key field will
+     * not be a WritableField; it will be managed by the modification methods.
+     *
+     * @throws ClassCastException if the underlying field is not an instance of the
+     *                            interface to which it's being cast
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends WritableField> T writableField(final String fieldName) {
+        return (T) schema().field(fieldName).field();
+    }
+
+    /**
+     * A convenience method to access table fields associated with a particular row.
+     * Use in conjunction with {@link fieldId} to lookup the fieldIds to use in the
+     * TableRow methods.
+     */
     public TableRow tableRow() {
         tableRow.setRow(stateChange.currentRow());
         return tableRow;
     }
 
+    /**
+     * Begins an add operation for the given key and returns the row assigned
+     * to the key. The operation should be closed by {@link #endAdd}.
+     */
     public int beginAdd(final ${type.javaType} key) {
         final int before = index.size();
         final int row = index.add(key);
@@ -54,6 +85,10 @@ public final class ${type.name}IndexedTable${generics} {
         return row;
     }
 
+    /**
+     * Begins an change operation for the given key and returns the row assigned
+     * to the key. The operation should be closed by {@link #endChange}.
+     */
     public int beginChange(final ${type.javaType} key) {
         int row = index.lookupEntry(key);
         if(row == -1) {
@@ -64,20 +99,46 @@ public final class ${type.name}IndexedTable${generics} {
         return row;
     }
 
+    /**
+     * Begins an add or change operation for the given key and returns the row assigned
+     * to the key. The operation should be closed by {@link #endUpsert}.
+     */
+    public int beginUpsert(final ${type.javaType} key) {
+        final int before = index.size();
+        final int row = index.add(key);
+        if(before != index.size()) {
+            stateChange.addRow(row);
+        } else {
+            stateChange.changeRow(row);
+        }
+        tableRow.setRow(row);
+        return row;
+    }
+
+    /** Returns the row associated with the given key */
     public int lookupKeyRow(final ${type.javaType} key) {
         return index.lookupEntry(key);
     }
 
+    /** Called to close off a {@link #beginAdd} and register the row for firing. */
     public void endAdd() {
         tableRow.setNoRow();
         stateChange.endAdd();
     }
 
+    /** Called to close off a {@link #beginChange} and register the row for firing. */
     public void endChange() {
         tableRow.setNoRow();
         stateChange.endChange();
     }
 
+    /** Called to close off a {@link beginUpsert} and register the row for firing. */
+    public void endUpsert() {
+        tableRow.setNoRow();
+        stateChange.endUpsert();
+    }
+
+    /** Removes the row associated with the key and register the row for firing. */
     public int remove(final ${type.javaType} key) {
         int row = index.lookupEntry(key);
         if(row == -1) {
@@ -88,10 +149,12 @@ public final class ${type.name}IndexedTable${generics} {
         return row;
     }
 
+    /** Fires the accumulated changes. */
     public void fireChanges() {
         stateChange.fire(outputManager, index::freeReservedEntry);
     }
 
+    /** The output of this table to which you can attach various inputs to receive updates. */
     public TransformOutput output() {
         return outputManager.output();
     }
