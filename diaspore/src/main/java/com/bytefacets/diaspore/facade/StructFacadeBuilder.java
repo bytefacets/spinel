@@ -14,6 +14,8 @@ import com.bytefacets.diaspore.schema.SchemaBindable;
 import com.bytefacets.diaspore.schema.TypeId;
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javassist.ClassPool;
 import javassist.CtClass;
 
@@ -55,6 +57,7 @@ final class StructFacadeBuilder implements ClassBuilder {
         state.defineClass();
     }
 
+    @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
     private final class DefinitionState {
         private final Class<?> type;
         private final CtClass dynamicClass;

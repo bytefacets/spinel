@@ -2,6 +2,7 @@ package com.bytefacets.diaspore.gen;
 
 import static com.bytefacets.diaspore.gen.CodeGenException.codeGenException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -11,6 +12,7 @@ import javassist.CtMethod;
 
 @SuppressWarnings("NeedBraces")
 public final class DynamicClassUtils {
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
     public static boolean debug = false;
 
     private DynamicClassUtils() {}
