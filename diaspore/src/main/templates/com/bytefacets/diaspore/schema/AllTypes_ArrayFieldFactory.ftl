@@ -13,6 +13,18 @@ import java.util.Objects;
 public final class ArrayFieldFactory {
     private ArrayFieldFactory() {
     }
+    public static Field writableArrayField(final byte typeId,
+                                           final int initialSize,
+                                           final int fieldId,
+                                           final FieldChangeListener changeListener) {
+        return switch(typeId) {
+<#list types as type>
+            case TypeId.${type.name} ->
+                writable${type.name}ArrayField(initialSize, fieldId, changeListener);
+</#list>
+            default -> throw new IllegalArgumentException("Unknown typeId: " + typeId);
+        };
+    }
 
 <#list types as type>
     public static ${type.name}WritableField writable${type.name}ArrayField(

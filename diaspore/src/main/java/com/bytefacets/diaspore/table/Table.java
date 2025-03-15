@@ -10,6 +10,7 @@ import com.bytefacets.collections.queue.IntDeque;
 import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.schema.WritableField;
 
 public final class Table {
     private final OutputManager outputManager;
@@ -29,6 +30,19 @@ public final class Table {
     public TableRow tableRow() {
         tableRow.setRow(stateChange.currentRow());
         return tableRow;
+    }
+
+    public Schema schema() {
+        return outputManager.schema();
+    }
+
+    public int fieldId(final String fieldName) {
+        return outputManager.schema().field(fieldName).fieldId();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends WritableField> T writableField(final String fieldName) {
+        return (T) schema().field(fieldName).field();
     }
 
     public int beginAdd() {
