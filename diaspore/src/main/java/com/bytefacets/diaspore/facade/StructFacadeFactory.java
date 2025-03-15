@@ -6,7 +6,7 @@ import com.bytefacets.diaspore.gen.DynamicClassFactory;
 
 public final class StructFacadeFactory {
     private static final StructFacadeFactory instance = new StructFacadeFactory();
-    private final DynamicClassFactory<StructFacade> factory;
+    private final DynamicClassFactory factory;
 
     public static StructFacadeFactory structFacadeFactory() {
         return instance;
