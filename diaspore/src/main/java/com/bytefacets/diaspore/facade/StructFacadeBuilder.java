@@ -12,10 +12,9 @@ import com.bytefacets.diaspore.gen.ClassBuilder;
 import com.bytefacets.diaspore.schema.FieldResolver;
 import com.bytefacets.diaspore.schema.SchemaBindable;
 import com.bytefacets.diaspore.schema.TypeId;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javassist.ClassPool;
 import javassist.CtClass;
 
