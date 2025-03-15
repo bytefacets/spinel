@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public final class StructFieldExtractor {
+    private StructFieldExtractor() {}
 
     public static List<FieldDescriptor> getFieldList(final Class<?> type) {
         final TypeInfo info = Inspector.typeInspector().inspect(type);

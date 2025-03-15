@@ -9,8 +9,9 @@ import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 
+@SuppressWarnings("NeedBraces")
 public final class DynamicClassUtils {
-    public static boolean debug = true;
+    public static boolean debug = false;
 
     private DynamicClassUtils() {}
 

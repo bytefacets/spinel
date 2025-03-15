@@ -6,11 +6,12 @@ import static java.util.Objects.requireNonNull;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
-import javassist.*;
+import javassist.ClassPool;
+import javassist.CtClass;
 
 public final class DynamicClassFactory {
+    private static final Object[] NO_ARG = new Object[0];
     private final Map<Class<?>, Constructor<?>> instantiated = new HashMap<>();
-    private final Object[] NO_ARG = new Object[0];
     private final ClassPool classPool;
     private final ClassBuilder classBuilder;
 

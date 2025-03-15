@@ -55,7 +55,7 @@ final class StructFacadeBuilder implements ClassBuilder {
         state.defineClass();
     }
 
-    private class DefinitionState {
+    private final class DefinitionState {
         private final Class<?> type;
         private final CtClass dynamicClass;
         private final TypeInfo typeInfo;
