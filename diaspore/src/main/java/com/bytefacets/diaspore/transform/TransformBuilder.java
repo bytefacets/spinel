@@ -4,6 +4,7 @@ package com.bytefacets.diaspore.transform;
 
 import static com.bytefacets.diaspore.common.DefaultNameSupplier.resolveName;
 
+import com.bytefacets.diaspore.conflation.ChangeConflatorBuilder;
 import com.bytefacets.diaspore.filter.FilterBuilder;
 import com.bytefacets.diaspore.groupby.GroupByBuilder;
 import com.bytefacets.diaspore.projection.ProjectionBuilder;
@@ -123,6 +124,21 @@ public final class TransformBuilder {
 
     public UnionBuilder union(final String name) {
         return UnionBuilder.union(newContext(resolveName("Union", name)));
+    }
+
+    /**
+     * @see com.bytefacets.diaspore.conflation.ChangeConflator
+     */
+    public ChangeConflatorBuilder changeConflator() {
+        return changeConflator(null);
+    }
+
+    /**
+     * @see com.bytefacets.diaspore.conflation.ChangeConflator
+     */
+    public ChangeConflatorBuilder changeConflator(final String name) {
+        return ChangeConflatorBuilder.changeConflator(
+                newContext(resolveName("ChangeConflator", name)));
     }
 
     public void registerTransformNode(final TransformNode<?> node) {

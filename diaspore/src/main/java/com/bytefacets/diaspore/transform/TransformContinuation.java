@@ -6,6 +6,7 @@ import static com.bytefacets.diaspore.common.DefaultNameSupplier.resolveName;
 import static com.bytefacets.diaspore.exception.OperatorSetupException.setupException;
 import static java.util.Objects.requireNonNull;
 
+import com.bytefacets.diaspore.conflation.ChangeConflatorBuilder;
 import com.bytefacets.diaspore.filter.FilterBuilder;
 import com.bytefacets.diaspore.groupby.GroupByBuilder;
 import com.bytefacets.diaspore.projection.ProjectionBuilder;
@@ -89,20 +90,22 @@ public class TransformContinuation {
         return UnionBuilder.union(newContext(resolveName("Union", name)));
     }
 
+    /**
+     * @see com.bytefacets.diaspore.conflation.ChangeConflator
+     */
+    public ChangeConflatorBuilder changeConflator() {
+        return changeConflator(null);
+    }
+
+    /**
+     * @see com.bytefacets.diaspore.conflation.ChangeConflator
+     */
+    public ChangeConflatorBuilder changeConflator(final @Nullable String name) {
+        return ChangeConflatorBuilder.changeConflator(
+                newContext(resolveName("ChangeConflator", name)));
+    }
+
     private TransformContext newContext(final String name) {
         return new TransformContext(name, owner, sourceOutput);
     }
-
-    //    public LogBuilder log() {
-    //        return new LogBuilder(owner, sourceName);
-    //    }
-    //
-    //    public JoinBuilder joinLeft(String leftSourceName) {
-    //        return new JoinBuilder(owner, leftSourceName, sourceName);
-    //    }
-    //
-    //    public JoinBuilder joinRight(String rightSourceName) {
-    //        return new JoinBuilder(owner, sourceName, rightSourceName);
-    //    }
-
 }
