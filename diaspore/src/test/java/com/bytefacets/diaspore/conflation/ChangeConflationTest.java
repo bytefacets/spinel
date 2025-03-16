@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class ConflationTest {
+class ChangeConflationTest {
     private static final boolean print = true;
     private final ChangeConflatorBuilder builder = ChangeConflatorBuilder.changeConflator();
     private final ValidationOperator validation =
