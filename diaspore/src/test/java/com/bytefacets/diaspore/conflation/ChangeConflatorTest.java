@@ -5,10 +5,13 @@ package com.bytefacets.diaspore.conflation;
 import static com.bytefacets.diaspore.schema.FieldDescriptor.intField;
 import static com.bytefacets.diaspore.table.IntIndexedTableBuilder.intIndexedTable;
 import static com.bytefacets.diaspore.validation.Key.key;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import com.bytefacets.diaspore.printer.OutputPrinter;
 import com.bytefacets.diaspore.table.IntIndexedTable;
 import com.bytefacets.diaspore.testing.IntTableHandle;
+import com.bytefacets.diaspore.transform.TransformBuilder;
 import com.bytefacets.diaspore.validation.RowData;
 import com.bytefacets.diaspore.validation.ValidationOperator;
 import java.util.stream.IntStream;
@@ -17,12 +20,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class ConflationTest {
+class ChangeConflatorTest {
     private static final boolean print = true;
-    private final ConflationBuilder builder = ConflationBuilder.conflation();
-    private ValidationOperator validation =
+    private final ChangeConflatorBuilder builder = ChangeConflatorBuilder.changeConflator();
+    private final ValidationOperator validation =
             new ValidationOperator(new String[] {"Id"}, "Value1", "Value2");
-    private Conflation conflation;
+    private ChangeConflator conflation;
     private IntIndexedTable table;
     private IntTableHandle tableHandle;
     private final RowData.RowDataTemplate template = RowData.template("Value1", "Value2");
@@ -174,6 +177,47 @@ class ConflationTest {
             tableHandle.change(2, 2000, null).change(3, 3000, null).fire();
             tableHandle.remove(3).fire();
             validation.expect().changed(key(2), rowData(2000, null)).removed(key(3)).validate();
+        }
+    }
+
+    @Nested
+    class TransformTests {
+        private final TransformBuilder transform = TransformBuilder.transform();
+
+        @BeforeEach
+        void setUp() {
+            transform
+                    .intIndexedTable("table")
+                    .addFields(intField("Value1"), intField("Value2"))
+                    .keyFieldName("Id")
+                    .then()
+                    .changeConflator("conflator")
+                    .initialCapacity(2)
+                    .maxPendingRows(3);
+            transform.build();
+            table = transform.lookupNode("table");
+            tableHandle = IntTableHandle.intTableHandle("Id", table);
+            conflation = transform.lookupNode("conflator");
+            conflation.output().attachInput(validation.input());
+            IntStream.rangeClosed(1, 10).forEach(i -> tableHandle.add(i, i * 10, i * 100));
+            tableHandle.fire();
+            validation.clearChanges();
+        }
+
+        @Test
+        void shouldPassThruConflator() {
+            for (int i = 0; i < 10; i++) {
+                tableHandle.change(2, 2000 + i, null).change(3, 3000 + i, null).fire();
+                validation.validateNoChanges();
+                validation.clearChanges();
+            }
+            assertThat(conflation.changesPending(), equalTo(2));
+            conflation.firePendingChanges();
+            validation
+                    .expect()
+                    .changed(key(2), rowData(2009, null))
+                    .changed(key(3), rowData(3009, null))
+                    .validate();
         }
     }
 

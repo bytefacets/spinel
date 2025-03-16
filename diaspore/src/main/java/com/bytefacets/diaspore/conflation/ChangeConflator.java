@@ -17,14 +17,31 @@ import com.bytefacets.diaspore.schema.FieldMapping;
 import com.bytefacets.diaspore.schema.Schema;
 import javax.annotation.Nullable;
 
-public final class Conflation {
+/**
+ * An operator which conflates changes. The behavior on different event types is:
+ *
+ * <ul>
+ *   <li>adds: Adds are passed directly through. This means that changes on other rows could arrive
+ *       later.
+ *   <li>changes: Changed rows are held up to the configured maxPendingRows. Field changes are
+ *       combined, so when rows are released, the field change set will include all fields which
+ *       changed for the group. E.g. if row 1 had changes on field A, and row 2 had a change on
+ *       field B, when the rows are released, you would see rows 1 and 2, which changed fields A and
+ *       B.
+ *   <li>removes: Removed rows cause pending changes to be fired first, and then the removes
+ * </ul>
+ */
+public final class ChangeConflator {
     private final OutputManager outputManager;
     private final Input input;
     private final TransformOutput output;
-    private final ConflationSchemaBuilder schemaBuilder;
+    private final ChangeConflatorSchemaBuilder schemaBuilder;
 
-    Conflation(
-            final ConflationSchemaBuilder schemaBuilder,
+    /**
+     * @see ChangeConflatorBuilder#build()
+     */
+    ChangeConflator(
+            final ChangeConflatorSchemaBuilder schemaBuilder,
             final int initialCapacity,
             final int maxPendingRows) {
         this.schemaBuilder = requireNonNull(schemaBuilder, "schemaBuilder");
@@ -41,10 +58,12 @@ public final class Conflation {
         return output;
     }
 
+    /** Fires any pending changes */
     public void firePendingChanges() {
         input.pending.fire();
     }
 
+    /** The number of pending changes */
     public int changesPending() {
         return input.pending.pendingRows.size();
     }
@@ -92,6 +111,7 @@ public final class Conflation {
             private final int batchSize;
             private final IntIndexedSet pendingRowsSet;
             private final IntIndexedSet tmpRemovedRows;
+            // store the unique rows in an array to preserve arrival order
             private final IntVector pendingRows;
             private FieldMapping fieldMapping;
             private ChangedFieldSet inboundChangedFields;
@@ -108,7 +128,7 @@ public final class Conflation {
                 outputManager.notifyChanges(this, fieldSet);
                 fieldSet.clear();
                 forEach(pendingRowsSet::remove);
-                pending.tmpRemovedRows.clear();
+                tmpRemovedRows.clear();
                 pendingRows.clear();
                 fieldChangesNeedApplying = true;
             }
