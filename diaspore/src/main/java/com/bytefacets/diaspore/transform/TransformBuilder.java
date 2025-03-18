@@ -9,14 +9,23 @@ import com.bytefacets.diaspore.filter.FilterBuilder;
 import com.bytefacets.diaspore.groupby.GroupByBuilder;
 import com.bytefacets.diaspore.projection.ProjectionBuilder;
 import com.bytefacets.diaspore.prototype.PrototypeBuilder;
+import com.bytefacets.diaspore.table.ByteIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.ByteIndexedTableBuilder;
+import com.bytefacets.diaspore.table.CharIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.CharIndexedTableBuilder;
+import com.bytefacets.diaspore.table.DoubleIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.DoubleIndexedTableBuilder;
+import com.bytefacets.diaspore.table.FloatIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.FloatIndexedTableBuilder;
+import com.bytefacets.diaspore.table.GenericIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.GenericIndexedTableBuilder;
+import com.bytefacets.diaspore.table.IntIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.IntIndexedTableBuilder;
+import com.bytefacets.diaspore.table.LongIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.LongIndexedTableBuilder;
+import com.bytefacets.diaspore.table.ShortIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.ShortIndexedTableBuilder;
+import com.bytefacets.diaspore.table.StringIndexedStructTableBuilder;
 import com.bytefacets.diaspore.table.StringIndexedTableBuilder;
 import com.bytefacets.diaspore.table.TableBuilder;
 import com.bytefacets.diaspore.union.UnionBuilder;
@@ -84,6 +93,43 @@ public final class TransformBuilder {
     public <K> GenericIndexedTableBuilder<K> genericIndexedTable(final String name) {
         return GenericIndexedTableBuilder.genericIndexedTable(
                 newContext(resolveName("GenericIndexedTable", name)));
+    }
+
+    public <S> ByteIndexedStructTableBuilder<S> byteIndexedStructTable(final Class<S> type) {
+        return ByteIndexedStructTableBuilder.byteIndexedStructTable(type);
+    }
+
+    public <S> ShortIndexedStructTableBuilder<S> shortIndexedStructTable(final Class<S> type) {
+        return ShortIndexedStructTableBuilder.shortIndexedStructTable(type);
+    }
+
+    public <S> CharIndexedStructTableBuilder<S> charIndexedStructTable(final Class<S> type) {
+        return CharIndexedStructTableBuilder.charIndexedStructTable(type);
+    }
+
+    public <S> IntIndexedStructTableBuilder<S> intIndexedStructTable(final Class<S> type) {
+        return IntIndexedStructTableBuilder.intIndexedStructTable(type);
+    }
+
+    public <S> LongIndexedStructTableBuilder<S> longIndexedStructTable(final Class<S> type) {
+        return LongIndexedStructTableBuilder.longIndexedStructTable(type);
+    }
+
+    public <S> FloatIndexedStructTableBuilder<S> floatIndexedStructTable(final Class<S> type) {
+        return FloatIndexedStructTableBuilder.floatIndexedStructTable(type);
+    }
+
+    public <S> DoubleIndexedStructTableBuilder<S> doubleIndexedStructTable(final Class<S> type) {
+        return DoubleIndexedStructTableBuilder.doubleIndexedStructTable(type);
+    }
+
+    public <S> StringIndexedStructTableBuilder<S> stringIndexedStructTable(final Class<S> type) {
+        return StringIndexedStructTableBuilder.stringIndexedStructTable(type);
+    }
+
+    public <T, S> GenericIndexedStructTableBuilder<T, S> genericIndexedStructTable(
+            final Class<S> type) {
+        return GenericIndexedStructTableBuilder.genericIndexedStructTable(type);
     }
 
     public FilterBuilder filter() {
