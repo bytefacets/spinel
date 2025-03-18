@@ -10,6 +10,12 @@ import com.bytefacets.diaspore.schema.FieldBitSet;
 import java.util.BitSet;
 import javax.annotation.Nullable;
 
+/**
+ * Manages row changes for an operator, but is a little more sophisticated than {@link StateChange}.
+ * This class has functionality which handles cases where a row change may occur multiple times
+ * during processing, such as an aggregation where two inbound rows could result in an add, then a
+ * change.
+ */
 public final class StateChangeSet {
     private final FieldBitSet changedFields;
     private final IntIndexedSet addedRows = new IntIndexedSet(16);
@@ -36,21 +42,25 @@ public final class StateChangeSet {
         changedFields = requireNonNull(changeSet, "changeSet");
     }
 
+    /** Adds the row to the remove set, and removes from changed and added. */
     public void removeRow(final int row) {
         changedRows.remove(row);
         addedRows.remove(row);
         removedRows.add(row);
     }
 
+    /** Adds the row to the added set, and removes from the removed set. */
     public void addRow(final int row) {
         addedRows.add(row);
         removedRows.remove(row);
     }
 
+    /** Adds the row to the changed set. */
     public void changeRow(final int row) {
         changedRows.add(row);
     }
 
+    /** Adds the row to the changed set if it is not already added. */
     public void changeRowIfNotAdded(final int row) {
         if (!addedRows.containsKey(row)) {
             changedRows.add(row);
@@ -61,6 +71,10 @@ public final class StateChangeSet {
         changedFields.fieldChanged(fieldId);
     }
 
+    /**
+     * Notifies of removed, then added, then changed, and if there were any removes, will call back
+     * the removedRowConsumer before resetting.
+     */
     public void fire(final InputNotifier manager, @Nullable final IntConsumer removedRowConsumer) {
         if (!removedRows.isEmpty()) {
             manager.notifyRemoves(removedRows);

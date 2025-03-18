@@ -6,6 +6,7 @@ import com.bytefacets.collections.functional.IntConsumer;
 import com.bytefacets.diaspore.RowProvider;
 import java.util.BitSet;
 
+/** A RowProvider backed by a BitSet */
 public final class BitSetRowProvider implements RowProvider {
     private final BitSet activeRows;
 

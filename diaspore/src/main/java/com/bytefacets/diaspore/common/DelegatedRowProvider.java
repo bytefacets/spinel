@@ -9,6 +9,11 @@ import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.TransformOutput;
 import java.util.function.Supplier;
 
+/**
+ * A RowProvider that is used when the operator is going to report the same active rows as its
+ * input. The Supplier it uses can either return null, if the operator hasn't yet been plugged in,
+ * or the input. If the Supplier returns null, there are no active rows.
+ */
 public final class DelegatedRowProvider implements RowProvider {
     private final Supplier<TransformOutput> outputSupplier;
 
@@ -16,6 +21,10 @@ public final class DelegatedRowProvider implements RowProvider {
         this.outputSupplier = requireNonNull(outputSupplier, "outputSupplier");
     }
 
+    /**
+     * Creates the DelegatedRowProvider with a Supplier. It can return null, or the output to which
+     * this is delegating. When returning null, this provider will consider no rows active.
+     */
     public static DelegatedRowProvider delegatedRowProvider(
             final Supplier<TransformOutput> outputSupplier) {
         return new DelegatedRowProvider(outputSupplier);

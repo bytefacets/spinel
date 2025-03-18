@@ -8,6 +8,13 @@ import com.bytefacets.diaspore.schema.FieldBitSet;
 import java.util.BitSet;
 import javax.annotation.Nullable;
 
+/**
+ * A state manager for simple row changes. This class does not attempt to guard against rows
+ * appearing multiple times, or in different change types (i.e.add, remove, change). When firing,
+ * this class will fire removes, then adds, then changes. It would be, for example, the
+ * responsibility of the caller to ensure that the remove is not called on for a row which has not
+ * yet been added (this can be done by an operator by checking its RowProvider).
+ */
 public final class StateChange {
     private final FieldBitSet changedFields;
     private final IntVector addedRows = new IntVector(16);
@@ -42,6 +49,10 @@ public final class StateChange {
         changedFields.fieldChanged(fieldId);
     }
 
+    /**
+     * Notifies of removed, then added, then changed, and if there were any removes, will call back
+     * the removedRowConsumer before resetting.
+     */
     public void fire(final InputNotifier manager, @Nullable final IntConsumer removedRowConsumer) {
         if (!removedRows.isEmpty()) {
             manager.notifyRemoves(removedRows);

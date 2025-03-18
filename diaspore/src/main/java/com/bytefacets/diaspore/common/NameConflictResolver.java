@@ -4,6 +4,7 @@ package com.bytefacets.diaspore.common;
 
 import java.util.function.Predicate;
 
+/** When combining schemas, such as in a Join, this interface is used to resolve name conflicts. */
 public interface NameConflictResolver {
     default String resolveNameConflict(
             final String attemptedName, final Predicate<String> usableNameTest) {

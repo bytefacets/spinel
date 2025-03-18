@@ -14,10 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 
+/**
+ * Operators use the OutputManager to standardize management of notifications to the inputs
+ * connected to their outputs.
+ */
 public final class OutputManager implements InputNotifier {
-    private final List<TransformInput> subscriptions = new ArrayList<>();
+    private final List<TransformInput> subscriptions = new ArrayList<>(2);
     private final TransformOutput output;
-    private final ArrayList<TransformInput> iteratable = new ArrayList<>();
+    private final ArrayList<TransformInput> iteratable = new ArrayList<>(2);
     private Schema schema;
 
     public static OutputManager outputManager(final RowProvider rowProvider) {
@@ -42,14 +46,25 @@ public final class OutputManager implements InputNotifier {
         iteratable.addAll(subscriptions);
     }
 
-    public void addInput(final TransformInput input) {
+    /**
+     * Adds an input to list of subscribed inputs if it was not already registered. If it is a new
+     * input, it initializes the input by setting the source, then the schema if available, and the
+     * then the rows from the rowProvider.
+     *
+     * @see #initializeSubscription(TransformOutput, TransformInput)
+     */
+    void addInput(final TransformInput input) {
         if (!subscriptions.contains(input)) {
             subscriptions.add(input);
             initializeSubscription(output, input);
         }
     }
 
-    public void removeInput(final TransformInput input) {
+    /**
+     * Removes the input from the registered inputs, and does nothing if the input was not
+     * registered.
+     */
+    void removeInput(final TransformInput input) {
         if (subscriptions.remove(input)) {
             terminateSubscription(input);
         }
@@ -65,6 +80,7 @@ public final class OutputManager implements InputNotifier {
 
     @Override
     public void notifyAdds(final IntIterable rows) {
+        assertSchema();
         copyIterable();
         for (TransformInput input : iteratable) {
             input.rowsAdded(rows);
@@ -73,6 +89,7 @@ public final class OutputManager implements InputNotifier {
 
     @Override
     public void notifyChanges(final IntIterable rows, final ChangedFieldSet changedFields) {
+        assertSchema();
         copyIterable();
         for (TransformInput input : iteratable) {
             input.rowsChanged(rows, changedFields);
@@ -81,6 +98,7 @@ public final class OutputManager implements InputNotifier {
 
     @Override
     public void notifyRemoves(final IntIterable rows) {
+        assertSchema();
         copyIterable();
         for (TransformInput input : iteratable) {
             input.rowsRemoved(rows);
@@ -99,6 +117,12 @@ public final class OutputManager implements InputNotifier {
     private void terminateSubscription(final TransformInput input) {
         input.schemaUpdated(null);
         input.setSource(null);
+    }
+
+    private void assertSchema() {
+        if (schema == null) {
+            throw new IllegalStateException("Attempted notification before setting schema.");
+        }
     }
 
     private final class Output implements TransformOutput {

@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
+/**
+ * Utility class used in Transform building to auto-assign names when operators are not given one by
+ * th author.
+ */
 public final class DefaultNameSupplier {
     private static final Map<String, AtomicInteger> nextIdMap = new HashMap<>();
 

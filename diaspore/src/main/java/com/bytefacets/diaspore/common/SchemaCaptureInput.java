@@ -12,6 +12,7 @@ import com.bytefacets.diaspore.schema.Schema;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
+/** A utility class for capturing a schema from an output when it is set or unset. */
 public final class SchemaCaptureInput implements TransformInput {
     private final Consumer<Schema> schemaConsumer;
     private TransformOutput source;

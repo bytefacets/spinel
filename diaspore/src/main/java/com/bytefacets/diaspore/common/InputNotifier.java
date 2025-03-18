@@ -5,6 +5,7 @@ package com.bytefacets.diaspore.common;
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 
+/** Used to abstract an operator's output from the connected inputs. */
 public interface InputNotifier {
     void notifyAdds(IntIterable rows);
 
