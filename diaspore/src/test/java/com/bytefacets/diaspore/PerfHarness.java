@@ -7,7 +7,6 @@ import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.transform.TransformBuilder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import javax.annotation.Nullable;
