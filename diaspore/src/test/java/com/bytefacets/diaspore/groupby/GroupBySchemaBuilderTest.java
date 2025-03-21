@@ -16,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.bytefacets.collections.hash.GenericIndexedSet;
 import com.bytefacets.diaspore.exception.FieldNotFoundException;
 import com.bytefacets.diaspore.schema.Field;
 import com.bytefacets.diaspore.schema.FieldBitSet;
@@ -47,8 +46,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GroupBySchemaBuilderTest {
     private final GroupMapping groupMapping = new GroupMapping(2, 2);
-    private final GenericIndexedSet<AggregationFunction> triggeredFunctions =
-            new GenericIndexedSet<>(4);
     private DependencyMap depMap;
 
     @Nested
@@ -87,8 +84,7 @@ class GroupBySchemaBuilderTest {
             // this is the isolated test field
             inboundFieldIds.set(inSchema.field(groupField).fieldId());
 
-            depMap.translateInboundChangeFields(
-                    FieldBitSet.fieldBitSet(inboundFieldIds), triggeredFunctions);
+            depMap.translateInboundChangeFields(FieldBitSet.fieldBitSet(inboundFieldIds));
             final var outChanges = depMap.outboundFieldChangeSet();
             assertThat(outChanges.size(), equalTo(1));
             assertThat(
@@ -210,8 +206,8 @@ class GroupBySchemaBuilderTest {
             // this is the isolated test field
             Stream.of(inChange.split("\\|"))
                     .forEach(inField -> inboundFieldIds.set(inSchema.field(inField).fieldId()));
-            depMap.translateInboundChangeFields(
-                    FieldBitSet.fieldBitSet(inboundFieldIds), triggeredFunctions);
+            final var triggeredFunctions =
+                    depMap.translateInboundChangeFields(FieldBitSet.fieldBitSet(inboundFieldIds));
             final var expectedOut = outChanges.split("\\|");
             final Map<String, AggregationFunction> funcMap =
                     Map.of("c1", calc1, "c2", calc2, "c3", calc3);

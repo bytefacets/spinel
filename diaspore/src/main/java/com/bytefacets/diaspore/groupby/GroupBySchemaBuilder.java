@@ -26,7 +26,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 final class GroupBySchemaBuilder {
-    private final DependencyMap dependencyMap = new DependencyMap();
+    private final DependencyMap dependencyMap;
     private final String name;
     private final Collection<AggregationFunction> aggFunctions;
     private final List<String> groupFieldNames;
@@ -51,7 +51,9 @@ final class GroupBySchemaBuilder {
         this.groupFieldNames = requireNonNull(groupFieldNames, "groupFieldNames");
         this.fieldMap = new StringGenericIndexedMap<>(parentFieldCount(), 1f);
         this.cacheBuilder = CacheBuilder.cache();
+        this.dependencyMap = new DependencyMap(aggFunctions.size());
         final FieldBitSet fieldTracker = dependencyMap.outboundFieldChangeSet();
+
         this.initializeFieldMap(
                 new SummaryFieldAllocator(
                         cacheBuilder,

@@ -18,10 +18,11 @@ import javax.annotation.Nullable;
  * Operators use the OutputManager to standardize management of notifications to the inputs
  * connected to their outputs.
  */
+@SuppressWarnings("ForLoopReplaceableByForEach")
 public final class OutputManager implements InputNotifier {
     private final List<TransformInput> subscriptions = new ArrayList<>(2);
     private final TransformOutput output;
-    private final ArrayList<TransformInput> iteratable = new ArrayList<>(2);
+    private final ArrayList<TransformInput> iterable = new ArrayList<>(2);
     private Schema schema;
 
     public static OutputManager outputManager(final RowProvider rowProvider) {
@@ -41,9 +42,9 @@ public final class OutputManager implements InputNotifier {
     }
 
     private void copyIterable() {
-        iteratable.clear();
-        iteratable.ensureCapacity(subscriptions.size());
-        iteratable.addAll(subscriptions);
+        iterable.clear();
+        iterable.ensureCapacity(subscriptions.size());
+        subscriptions.forEach(iterable::add); // addAll has an allocation of Object[]
     }
 
     /**
@@ -73,7 +74,7 @@ public final class OutputManager implements InputNotifier {
     public void updateSchema(final Schema schema) {
         this.schema = schema;
         copyIterable();
-        for (TransformInput input : iteratable) {
+        for (TransformInput input : iterable) {
             input.schemaUpdated(schema);
         }
     }
@@ -82,8 +83,8 @@ public final class OutputManager implements InputNotifier {
     public void notifyAdds(final IntIterable rows) {
         assertSchema();
         copyIterable();
-        for (TransformInput input : iteratable) {
-            input.rowsAdded(rows);
+        for (int i = 0, size = iterable.size(); i < size; i++) {
+            iterable.get(i).rowsAdded(rows);
         }
     }
 
@@ -91,8 +92,8 @@ public final class OutputManager implements InputNotifier {
     public void notifyChanges(final IntIterable rows, final ChangedFieldSet changedFields) {
         assertSchema();
         copyIterable();
-        for (TransformInput input : iteratable) {
-            input.rowsChanged(rows, changedFields);
+        for (int i = 0, size = iterable.size(); i < size; i++) {
+            iterable.get(i).rowsChanged(rows, changedFields);
         }
     }
 
@@ -100,8 +101,8 @@ public final class OutputManager implements InputNotifier {
     public void notifyRemoves(final IntIterable rows) {
         assertSchema();
         copyIterable();
-        for (TransformInput input : iteratable) {
-            input.rowsRemoved(rows);
+        for (int i = 0, size = iterable.size(); i < size; i++) {
+            iterable.get(i).rowsRemoved(rows);
         }
     }
 
