@@ -96,40 +96,49 @@ public final class TransformBuilder {
     }
 
     public <S> ByteIndexedStructTableBuilder<S> byteIndexedStructTable(final Class<S> type) {
-        return ByteIndexedStructTableBuilder.byteIndexedStructTable(type);
+        return ByteIndexedStructTableBuilder.byteIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> ShortIndexedStructTableBuilder<S> shortIndexedStructTable(final Class<S> type) {
-        return ShortIndexedStructTableBuilder.shortIndexedStructTable(type);
+        return ShortIndexedStructTableBuilder.shortIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> CharIndexedStructTableBuilder<S> charIndexedStructTable(final Class<S> type) {
-        return CharIndexedStructTableBuilder.charIndexedStructTable(type);
+        return CharIndexedStructTableBuilder.charIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> IntIndexedStructTableBuilder<S> intIndexedStructTable(final Class<S> type) {
-        return IntIndexedStructTableBuilder.intIndexedStructTable(type);
+        return IntIndexedStructTableBuilder.intIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> LongIndexedStructTableBuilder<S> longIndexedStructTable(final Class<S> type) {
-        return LongIndexedStructTableBuilder.longIndexedStructTable(type);
+        return LongIndexedStructTableBuilder.longIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> FloatIndexedStructTableBuilder<S> floatIndexedStructTable(final Class<S> type) {
-        return FloatIndexedStructTableBuilder.floatIndexedStructTable(type);
+        return FloatIndexedStructTableBuilder.floatIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> DoubleIndexedStructTableBuilder<S> doubleIndexedStructTable(final Class<S> type) {
-        return DoubleIndexedStructTableBuilder.doubleIndexedStructTable(type);
+        return DoubleIndexedStructTableBuilder.doubleIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <S> StringIndexedStructTableBuilder<S> stringIndexedStructTable(final Class<S> type) {
-        return StringIndexedStructTableBuilder.stringIndexedStructTable(type);
+        return StringIndexedStructTableBuilder.stringIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public <T, S> GenericIndexedStructTableBuilder<T, S> genericIndexedStructTable(
             final Class<S> type) {
-        return GenericIndexedStructTableBuilder.genericIndexedStructTable(type);
+        return GenericIndexedStructTableBuilder.genericIndexedStructTable(
+                type, newContext(type.getSimpleName()));
     }
 
     public FilterBuilder filter() {
@@ -216,6 +225,9 @@ public final class TransformBuilder {
 
     @SuppressWarnings("unchecked")
     public <T> T lookupNode(final String name) {
+        if (!nodes.isEmpty() || !edges.isEmpty()) {
+            build();
+        }
         return (T) namedNodeMap.get(name);
     }
 

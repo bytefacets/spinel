@@ -2,6 +2,7 @@ package com.bytefacets.diaspore.facade;
 
 import static com.bytefacets.diaspore.gen.CodeGenException.codeGenException;
 
+import com.bytefacets.diaspore.schema.SchemaBindable;
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 
@@ -49,9 +50,14 @@ final class Inspector {
             typeInfo.collectGetter(method);
         } else if (isSetterMethod(method)) {
             typeInfo.collectSetter(method);
-        } else {
+        } else if (!isDiasporeIfc(method)) {
             typeInfo.collectSkippedMethod(method);
         }
+    }
+
+    private boolean isDiasporeIfc(final Method method) {
+        return method.getDeclaringClass().equals(StructFacade.class)
+                || method.getDeclaringClass().equals(SchemaBindable.class);
     }
 
     static boolean isGetterMethod(final Method method) {
