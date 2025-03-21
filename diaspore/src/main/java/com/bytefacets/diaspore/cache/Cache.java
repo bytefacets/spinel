@@ -34,6 +34,7 @@ public final class Cache {
     private final IntGenericIndexedMap<FieldCopier> inboundIdToCopier;
     private final StringGenericIndexedMap<SchemaField> fieldMap;
     private final Resolver resolver = new Resolver();
+    private final Copier copier = new Copier();
 
     Cache(final Set<String> fields, final int initialSize, final int chunkSize) {
         this.matrixStoreFactory = matrixStoreFieldFactory(initialSize, chunkSize, i -> {});
@@ -88,7 +89,7 @@ public final class Cache {
     }
 
     public void updateSelected(final IntIterable rows, final ChangedFieldSet changed) {
-        rows.forEach(row -> fireSelectedCopiers(row, changed));
+        copier.applyChanges(rows, changed);
     }
 
     public void updateAll(final IntIterable rows) {
@@ -103,14 +104,27 @@ public final class Cache {
         }
     }
 
-    private void fireSelectedCopiers(final int row, final ChangedFieldSet changed) {
-        changed.forEach(
-                inFieldId -> {
-                    final int entry = inboundIdToCopier.lookupEntry(inFieldId);
-                    if (entry != -1) {
-                        inboundIdToCopier.getValueAt(entry).copy(row);
-                    }
-                });
+    /** Copier separated out to avoid object allocation as lambda */
+    private final class Copier {
+        private int row;
+        private ChangedFieldSet changed;
+
+        private void applyChanges(final IntIterable rows, final ChangedFieldSet changed) {
+            this.changed = changed;
+            rows.forEach(this::copyChangedRowFields);
+        }
+
+        private void copyChangedRowFields(final int row) {
+            this.row = row;
+            changed.forEach(this::copyField);
+        }
+
+        private void copyField(final int inFieldId) {
+            final int entry = inboundIdToCopier.lookupEntry(inFieldId);
+            if (entry != -1) {
+                inboundIdToCopier.getValueAt(entry).copy(row);
+            }
+        }
     }
 
     private final class Resolver implements FieldResolver {

@@ -25,8 +25,13 @@ class DependencyMap {
     private final Resolver resolver = new Resolver();
     private final GenericIterator<AggregationFunction> triggerIterator =
             inboundTriggers.iterator(0);
+    private final GenericIndexedSet<AggregationFunction> changedFunctions;
     private int groupFieldId = -1;
     private int groupCountFieldId = -1;
+
+    DependencyMap(final int aggFunctionCount) {
+        changedFunctions = new GenericIndexedSet<>(Math.max(1, aggFunctionCount), 1f);
+    }
 
     void reset() {
         groupFieldId = -1;
@@ -52,9 +57,9 @@ class DependencyMap {
         return resolver;
     }
 
-    void translateInboundChangeFields(
-            final ChangedFieldSet inboundChanges,
-            final GenericIndexedSet<AggregationFunction> recalcFunctions) {
+    GenericIndexedSet<AggregationFunction> translateInboundChangeFields(
+            final ChangedFieldSet inboundChanges) {
+        changedFunctions.clear();
         inboundChanges.forEach(
                 inboundChange -> {
                     if (inboundChange < inboundFieldReferences.length) {
@@ -65,8 +70,9 @@ class DependencyMap {
                     }
                     inboundTriggers
                             .iterator(inboundChange, triggerIterator)
-                            .forEach(recalcFunctions::add);
+                            .forEach(changedFunctions::add);
                 });
+        return changedFunctions;
     }
 
     void mapInboundFieldIdToOutboundFieldId(final int inFieldId, final int outFieldId) {

@@ -64,7 +64,6 @@ public class GroupBy {
         private final FieldBitSet fieldBitSet;
         private final StateChangeSet stateChange;
         private final Collection<AggregationFunction> aggregationFunctions;
-        private final GenericIndexedSet<AggregationFunction> changedFunctions;
         private final GroupRowMods rowsChangedInGroups;
         private final GroupRowMods rowsAddedToGroups;
         private final GroupRowMods rowsRemovedFromGroups;
@@ -74,7 +73,6 @@ public class GroupBy {
 
         private Input(final Collection<AggregationFunction> aggregationFunctions) {
             this.aggregationFunctions = aggregationFunctions;
-            this.changedFunctions = new GenericIndexedSet<>(aggregationFunctions.size(), 1f);
             this.dependencyMap = schemaBuilder.dependencyMap();
             this.fieldBitSet = dependencyMap.outboundFieldChangeSet();
             this.stateChange = stateChangeSet(fieldBitSet);
@@ -128,19 +126,21 @@ public class GroupBy {
 
         @Override
         public void rowsChanged(final IntIterable rows, final ChangedFieldSet changedFields) {
-            changedFunctions.clear();
             fieldBitSet.clear();
-            dependencyMap.translateInboundChangeFields(changedFields, changedFunctions);
+            final GenericIndexedSet<AggregationFunction> changedFunctions =
+                    dependencyMap.translateInboundChangeFields(changedFields);
             if (groupFunctionBinding.isChanged(changedFields)) {
-                processChangesForPossibleChangedGroups(rows);
+                processChangesForPossibleChangedGroups(rows, changedFunctions);
             } else {
-                processChangesForStableGroups(rows);
+                processChangesForStableGroups(rows, changedFunctions);
             }
             fire();
             cache.updateSelected(rows, changedFields);
         }
 
-        private void processChangesForPossibleChangedGroups(final IntIterable rows) {
+        private void processChangesForPossibleChangedGroups(
+                final IntIterable rows,
+                final GenericIndexedSet<AggregationFunction> changedFunctions) {
             rows.forEach(
                     row -> {
                         final int newGroup = groupFunction.group(row);
@@ -153,19 +153,21 @@ public class GroupBy {
                         }
                     });
             if (rowsAddedToGroups.isEmpty() && rowsRemovedFromGroups.isEmpty()) {
-                updateChangedFunctions();
+                updateChangedFunctions(changedFunctions);
             } else {
                 updateAllFunctions();
             }
         }
 
-        private void processChangesForStableGroups(final IntIterable rows) {
+        private void processChangesForStableGroups(
+                final IntIterable rows,
+                final GenericIndexedSet<AggregationFunction> changedFunctions) {
             rows.forEach(
                     row -> {
                         final int oldGroup = groupMapping.groupOfInboundRow(row);
                         processGroupUpdateFromChange(oldGroup, row);
                     });
-            updateChangedFunctions();
+            updateChangedFunctions(changedFunctions);
         }
 
         @Override
@@ -209,7 +211,8 @@ public class GroupBy {
             rowsChangedInGroups.addGroupRow(group, row);
         }
 
-        private void updateChangedFunctions() {
+        private void updateChangedFunctions(
+                final GenericIndexedSet<AggregationFunction> changedFunctions) {
             changedFunctions.forEach(this::updateFunction);
         }
 

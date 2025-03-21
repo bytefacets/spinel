@@ -75,10 +75,10 @@ final class GroupRowMods {
 
     void reset() {
         if (nextPosition != 0) {
+            IntArray.fill(values, -1, 0, nextPosition);
+            IntArray.fill(nexts, -1, 0, nextPosition);
+            IntArray.fill(heads, -1, 0, set.size());
             set.clear();
-            IntArray.fill(values, -1);
-            IntArray.fill(nexts, -1);
-            IntArray.fill(heads, -1);
         }
     }
 
