@@ -133,31 +133,33 @@ public final class Filter {
         public void rowsChanged(final IntIterable rows, final ChangedFieldSet changedFields) {
             fieldMapping.translateInboundChangeSet(changedFields, stateChange::changeField);
             final boolean retest = changedFields.intersects(fieldDependencies);
-            rows.forEach(
-                    inRow -> {
-                        if (retest) {
-                            retestChange(inRow);
-                        } else {
-                            final int outboundRow = passingRows.lookupEntry(inRow);
-                            if (outboundRow != -1) {
-                                stateChange.changeRow(outboundRow);
-                            }
-                        }
-                    });
+            if (retest) {
+                rows.forEach(this::retestChange);
+            } else {
+                rows.forEach(this::forwardChangeIfNecessary);
+            }
             fire();
         }
 
         @Override
         public void rowsRemoved(final IntIterable rows) {
-            rows.forEach(
-                    inRow -> {
-                        final int outbound = passingRows.lookupEntry(inRow);
-                        if (outbound != -1) {
-                            passingRows.removeAtAndReserve(outbound);
-                            stateChange.removeRow(outbound);
-                        }
-                    });
+            rows.forEach(this::forwardRemoveIfNecessary);
             fire();
+        }
+
+        private void forwardRemoveIfNecessary(final int inRow) {
+            final int outbound = passingRows.lookupEntry(inRow);
+            if (outbound != -1) {
+                passingRows.removeAtAndReserve(outbound);
+                stateChange.removeRow(outbound);
+            }
+        }
+
+        private void forwardChangeIfNecessary(final int inRow) {
+            final int outboundRow = passingRows.lookupEntry(inRow);
+            if (outboundRow != -1) {
+                stateChange.changeRow(outboundRow);
+            }
         }
 
         private void retestPredicateChange(final int inRow) {

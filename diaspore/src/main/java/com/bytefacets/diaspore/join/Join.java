@@ -5,6 +5,7 @@ package com.bytefacets.diaspore.join;
 import static com.bytefacets.diaspore.join.JoinSchemaBuilder.schemaResources;
 import static java.util.Objects.requireNonNull;
 
+import com.bytefacets.collections.functional.IntConsumer;
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
@@ -139,8 +140,18 @@ public final class Join implements OutputProvider {
         public void rowsChanged(final IntIterable rows, final ChangedFieldSet changedFields) {
             final boolean reEvalKey = changedFields.intersects(joinKeyDependencies);
             fieldMapping.translateInboundChangeSet(changedFields, changeTracker::changeField);
-            rows.forEach(row -> mapper.rightRowChange(row, reEvalKey));
+            final IntConsumer consumer =
+                    reEvalKey ? this::rowChangeWithReEval : this::rowChangeWithNoReEval;
+            rows.forEach(consumer);
             changeTracker.fire(manager, mapper::cleanUpRemovedRow);
+        }
+
+        private void rowChangeWithNoReEval(final int row) {
+            mapper.rightRowChange(row, false);
+        }
+
+        private void rowChangeWithReEval(final int row) {
+            mapper.rightRowChange(row, true);
         }
 
         @Override
