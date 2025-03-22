@@ -9,6 +9,7 @@ import com.bytefacets.collections.functional.IntConsumer;
 
 public final class FieldMapping {
     private final int[] inboundToOutbound;
+    private final Translator translator = new Translator();
 
     private FieldMapping(final int[] inboundToOutbound) {
         this.inboundToOutbound = requireNonNull(inboundToOutbound, "inboundToOutbound");
@@ -16,13 +17,7 @@ public final class FieldMapping {
 
     public void translateInboundChangeSet(
             final ChangedFieldSet inboundSet, final IntConsumer outboundFieldIdConsumer) {
-        inboundSet.forEach(
-                inboundField -> {
-                    final int outboundField = outboundFieldId(inboundField);
-                    if (outboundField != -1) {
-                        outboundFieldIdConsumer.accept(outboundField);
-                    }
-                });
+        inboundSet.forEach(translator.set(outboundFieldIdConsumer));
     }
 
     public int outboundFieldId(final int inboundFieldId) {
@@ -30,6 +25,24 @@ public final class FieldMapping {
             return inboundToOutbound[inboundFieldId];
         } else {
             return -1;
+        }
+    }
+
+    /** Separate class to avoid the lambda allocation */
+    private class Translator implements IntConsumer {
+        IntConsumer outboundFieldIdConsumer;
+
+        Translator set(final IntConsumer outboundFieldIdConsumer) {
+            this.outboundFieldIdConsumer = outboundFieldIdConsumer;
+            return this;
+        }
+
+        @Override
+        public void accept(final int inboundField) {
+            final int outboundField = outboundFieldId(inboundField);
+            if (outboundField != -1) {
+                outboundFieldIdConsumer.accept(outboundField);
+            }
         }
     }
 
