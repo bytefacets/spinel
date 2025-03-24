@@ -9,21 +9,24 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.collections.hash.GenericIndexedSet;
-import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.cache.Cache;
+import com.bytefacets.diaspore.common.BitSetRowProvider;
 import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.common.StateChangeSet;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.FieldBitSet;
+import com.bytefacets.diaspore.schema.FieldMapping;
 import com.bytefacets.diaspore.schema.Schema;
+import java.util.BitSet;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
 public class GroupBy {
     private final GroupMapping groupMapping;
     private final GroupBySchemaBuilder schemaBuilder;
+    private final ChildSchemaBuilder childSchemaBuilder;
     private final OutputManager parentOutput;
     private final OutputManager childOutput;
     private final Input input;
@@ -31,13 +34,15 @@ public class GroupBy {
 
     GroupBy(
             final GroupBySchemaBuilder schemaBuilder,
+            final ChildSchemaBuilder childSchemaBuilder,
             final GroupFunction groupFunction,
             final int initialOutboundSize,
             final int initialInboundSize) {
         this.schemaBuilder = requireNonNull(schemaBuilder, "schemaBuilder");
+        this.childSchemaBuilder = requireNonNull(childSchemaBuilder, "childSchemaBuilder");
         this.groupMapping = new GroupMapping(initialOutboundSize, initialInboundSize);
         this.input = new Input(schemaBuilder.aggregationFunctions());
-        this.parentOutput = outputManager(createParentRowProvider());
+        this.parentOutput = outputManager(input.parentRowProvider);
         this.childOutput = outputManager(delegatedRowProvider(() -> input.source));
         this.groupFunction = requireNonNull(groupFunction, "groupFunction");
     }
@@ -54,10 +59,6 @@ public class GroupBy {
         return childOutput.output();
     }
 
-    private RowProvider createParentRowProvider() {
-        return action -> {}; // UPCOMING
-    }
-
     private final class Input implements TransformInput {
         private final GroupFunctionBinding groupFunctionBinding = new GroupFunctionBinding();
         private final DependencyMap dependencyMap;
@@ -67,9 +68,15 @@ public class GroupBy {
         private final GroupRowMods rowsChangedInGroups;
         private final GroupRowMods rowsAddedToGroups;
         private final GroupRowMods rowsRemovedFromGroups;
+        private final FieldBitSet childFieldBitSet = FieldBitSet.fieldBitSet();
+        private final BitSet activeGroups = new BitSet();
+        private final BitSetRowProvider parentRowProvider =
+                BitSetRowProvider.bitSetRowProvider(activeGroups);
         private TransformOutput source;
         private Schema inboundSchema;
         private Cache cache;
+        private FieldMapping childFieldMapping;
+        private int childGroupFieldId = -1;
 
         private Input(final Collection<AggregationFunction> aggregationFunctions) {
             this.aggregationFunctions = aggregationFunctions;
@@ -102,7 +109,12 @@ public class GroupBy {
             final Schema outSchema = schemaBuilder.buildParentSchema(inboundSchema, groupMapping);
             parentOutput.updateSchema(outSchema);
             cache = schemaBuilder.cache();
-            // UPCOMING: child output schema
+
+            // child output schema
+            final var child = childSchemaBuilder.buildChildSchema(inboundSchema, groupMapping);
+            childOutput.updateSchema(child.schema());
+            childFieldMapping = child.fieldMapping();
+            childGroupFieldId = child.groupFieldId();
         }
 
         private void tearDown() {
@@ -114,6 +126,7 @@ public class GroupBy {
             aggregationFunctions.forEach(AggregationFunction::unbindSchema);
             childOutput.updateSchema(null);
             parentOutput.updateSchema(null);
+            childFieldMapping = null;
         }
 
         @Override
@@ -122,11 +135,14 @@ public class GroupBy {
             updateAllFunctions();
             fire();
             cache.updateAll(rows);
+            //
+            childOutput.notifyAdds(rows);
         }
 
         @Override
         public void rowsChanged(final IntIterable rows, final ChangedFieldSet changedFields) {
             fieldBitSet.clear();
+            childFieldBitSet.clear();
             final GenericIndexedSet<AggregationFunction> changedFunctions =
                     dependencyMap.translateInboundChangeFields(changedFields);
             if (groupFunctionBinding.isChanged(changedFields)) {
@@ -136,6 +152,10 @@ public class GroupBy {
             }
             fire();
             cache.updateSelected(rows, changedFields);
+            //
+            childFieldMapping.translateInboundChangeSet(
+                    changedFields, childFieldBitSet::fieldChanged);
+            childOutput.notifyChanges(rows, childFieldBitSet);
         }
 
         private void processChangesForPossibleChangedGroups(
@@ -148,6 +168,9 @@ public class GroupBy {
                         if (newGroup == oldGroup) {
                             processGroupUpdateFromChange(newGroup, row);
                         } else {
+                            if (childGroupFieldId != -1) {
+                                childFieldBitSet.fieldChanged(childGroupFieldId);
+                            }
                             processRowRemovedFromGroup(oldGroup, row); // must remove first
                             processRowAddedToGroup(newGroup, row);
                         }
@@ -180,6 +203,7 @@ public class GroupBy {
             updateAllFunctions();
             fire();
             cache.updateAll(rows);
+            childOutput.notifyRemoves(rows);
         }
 
         private void processRowAddedToGroup(final int group, final int row) {
@@ -187,6 +211,7 @@ public class GroupBy {
             groupMapping.mapRowToGroup(row, group);
             if (oldCount == 0) {
                 stateChange.addRow(group);
+                activeGroups.set(group);
             } else {
                 dependencyMap.markCountChanged();
                 stateChange.changeRowIfNotAdded(group);
@@ -199,6 +224,7 @@ public class GroupBy {
             final int newCount = groupMapping.groupCount(group);
             if (newCount == 0) {
                 stateChange.removeRow(group);
+                activeGroups.clear(group);
             } else {
                 dependencyMap.markCountChanged();
                 stateChange.changeRow(group);
@@ -228,6 +254,7 @@ public class GroupBy {
 
         private void fire() {
             stateChange.fire(parentOutput, groupFunction::onEmptyGroup);
+
             rowsAddedToGroups.reset();
             rowsChangedInGroups.reset();
             rowsRemovedFromGroups.reset();

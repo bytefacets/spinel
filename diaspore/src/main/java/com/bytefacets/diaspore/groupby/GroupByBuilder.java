@@ -80,7 +80,16 @@ public final class GroupByBuilder {
 
     private GroupBy internalBuild() {
         builderSupport.throwIfBuilt();
-        return new GroupBy(schemaBuilder(), groupFunction, initialOutboundSize, initialInboundSize);
+        return new GroupBy(
+                schemaBuilder(),
+                childSchemaBuilder(),
+                groupFunction,
+                initialOutboundSize,
+                initialInboundSize);
+    }
+
+    private ChildSchemaBuilder childSchemaBuilder() {
+        return new ChildSchemaBuilder(name + ".child", groupIdFieldName);
     }
 
     public GroupBy build() {

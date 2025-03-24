@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.conflation;
 
+import static com.bytefacets.diaspore.common.DelegatedRowProvider.delegatedRowProvider;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.functional.IntConsumer;
@@ -46,7 +47,7 @@ public final class ChangeConflator {
             final int maxPendingRows) {
         this.schemaBuilder = requireNonNull(schemaBuilder, "schemaBuilder");
         this.input = new Input(initialCapacity, maxPendingRows);
-        this.outputManager = OutputManager.outputManager(x -> {});
+        this.outputManager = OutputManager.outputManager(delegatedRowProvider(() -> input.source));
         this.output = outputManager.output();
     }
 
@@ -71,10 +72,16 @@ public final class ChangeConflator {
     private final class Input implements TransformInput {
         private final Pending pending;
         private final FieldBitSet fieldSet;
+        private TransformOutput source;
 
         private Input(final int initialCapacity, final int maxPendingRows) {
             this.pending = new Pending(initialCapacity, maxPendingRows);
             this.fieldSet = FieldBitSet.fieldBitSet();
+        }
+
+        @Override
+        public void setSource(@Nullable final TransformOutput output) {
+            this.source = output;
         }
 
         @Override

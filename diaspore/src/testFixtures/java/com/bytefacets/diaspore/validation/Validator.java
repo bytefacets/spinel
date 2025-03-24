@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.validation;
 
+import com.bytefacets.collections.hash.IntIndexedSet;
+import com.bytefacets.diaspore.RowProvider;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,15 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 class Validator {
     private final List<String> errors = new ArrayList<>();
     private final ChangeSet observed;
     private final ChangeSet expected;
+    private final Set<Integer> calculatedActiveRows;
+    private final RowProvider rowProvider;
 
-    Validator(final ChangeSet observed, final ChangeSet expected) {
+    Validator(final ChangeSet observed, final ChangeSet expected, final Set<Integer> calculatedActiveRows, final RowProvider rowProvider) {
         this.observed = observed;
         this.expected = expected;
+        this.calculatedActiveRows = new TreeSet<>(calculatedActiveRows);
+        this.rowProvider = rowProvider;
     }
 
     List<String> validate() {
@@ -26,7 +34,22 @@ class Validator {
         validate("Added", observed.added, expected.added);
         validate("Changed", observed.changed, expected.changed);
         validateRemoved(observed.removed, expected.removed);
+        validateRowProvider();
         return errors;
+    }
+
+    private void validateRowProvider() {
+        final Set<Integer> alreadySeen = new HashSet<>();
+        rowProvider.forEach(row -> {
+            if(!alreadySeen.add(row)) {
+                errors.add(String.format("Row was provided multiple times from rowProvider: %d", row));
+            } else if(!calculatedActiveRows.remove(row)) {
+                errors.add(String.format("Row active in rowProvider, but not from events: %d", row));
+            }
+        });
+        for(int row : calculatedActiveRows) {
+            errors.add(String.format("Expected row active, but row was not provided from rowProvider: %d", row));
+        }
     }
 
     private void validateSchema(

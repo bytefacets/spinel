@@ -190,6 +190,7 @@ public final class Filter {
                 }
             } else if (wasPassingBefore) {
                 stateChange.removeRow(outboundRow);
+                passingRows.removeAtAndReserve(outboundRow);
             }
         }
 
