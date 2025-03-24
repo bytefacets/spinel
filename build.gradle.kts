@@ -15,8 +15,11 @@ fun getVersionFromGit(): String {
         commandLine("git", "describe", "--tags", "--always", "--dirty")
         standardOutput = stdout
     }
-    return stdout.toString().trim().replace("v", "")
-        .replace("dirty", "SNAPSHOT")
+    val gitVersion = stdout.toString()
+    val base = gitVersion.substring(0, gitVersion.indexOf('-'))
+    val isSnapshot = gitVersion.contains("dirty")
+    val snapshot = if (isSnapshot) "-SNAPSHOT" else ""
+    return base + snapshot
 }
 
 version = getVersionFromGit()
