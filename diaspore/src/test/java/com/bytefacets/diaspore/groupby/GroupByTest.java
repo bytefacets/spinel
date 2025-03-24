@@ -58,7 +58,8 @@ class GroupByTest {
     void initialize() {
         groupBy = builder.build();
         if (print) {
-            groupBy.parentOutput().attachInput(OutputPrinter.printer().input());
+            // groupBy.parentOutput().attachInput(OutputPrinter.printer().input());
+            groupBy.childOutput().attachInput(OutputPrinter.printer().input());
         }
         groupBy.parentOutput().attachInput(validation.input());
         groupBy.childOutput().attachInput(childValidation.input());
@@ -74,7 +75,10 @@ class GroupByTest {
         }
 
         @Test
-        void shouldCreateChildOutput() {}
+        void shouldCreateChildOutput() {
+            initialize();
+            childValidation.expect().schema(childSchema()).validate();
+        }
 
         @Test
         void shouldForwardNullSchemaToParentOutput() {
@@ -85,7 +89,12 @@ class GroupByTest {
         }
 
         @Test
-        void shouldForwardNullSchemaToChildOutput() {}
+        void shouldForwardNullSchemaToChildOutput() {
+            initialize();
+            validation.clearChanges();
+            table.output().detachInput(groupBy.input());
+            childValidation.expect().nullSchema().validate();
+        }
 
         @Test
         void shouldBindAndUnbindGroupFunction() {}
@@ -100,6 +109,7 @@ class GroupByTest {
         void setUp() {
             initialize();
             validation.clearChanges();
+            childValidation.clearChanges();
         }
 
         @Test
@@ -119,6 +129,18 @@ class GroupByTest {
             table.fireChanges();
             validation.expect().changed(key(0), parentRowData(null, 2, 58)).validate();
         }
+
+        @Test
+        void shouldDecorateChildRowWithGroup() {
+            addSourceRow(10, 4, 33);
+            addSourceRow(11, 4, 25);
+            table.fireChanges();
+            childValidation
+                    .expect()
+                    .added(key(10), childRowData(0, 4, 33))
+                    .added(key(11), childRowData(0, 4, 25))
+                    .validate();
+        }
     }
 
     @Nested
@@ -131,6 +153,7 @@ class GroupByTest {
             addSourceRow(3, 5, 11);
             table.fireChanges();
             validation.clearChanges();
+            childValidation.clearChanges();
         }
 
         @Test
@@ -160,7 +183,18 @@ class GroupByTest {
         }
 
         @Test
-        void shouldForwardChangesToChildOutput() {}
+        void shouldForwardChangesToChildOutput() {
+            changeValue2(2, 31);
+            table.fireChanges();
+            childValidation.expect().changed(key(2), childRowData(null, null, 31)).validate();
+        }
+
+        @Test
+        void shouldMarkChildGroupIdFieldChanged() {
+            changeValue1(2, 6);
+            table.fireChanges();
+            childValidation.expect().changed(key(2), childRowData(2, 6, null)).validate();
+        }
     }
 
     @Nested
@@ -173,6 +207,7 @@ class GroupByTest {
             addSourceRow(3, 5, 11);
             table.fireChanges();
             validation.clearChanges();
+            childValidation.clearChanges();
         }
 
         @Test
@@ -195,10 +230,21 @@ class GroupByTest {
             table.fireChanges();
             validation.expect().changed(key(0), parentRowData(null, 1, 17)).validate();
         }
+
+        @Test
+        void shouldRemoveFromChildOutput() {
+            table.remove(1);
+            table.fireChanges();
+            childValidation.expect().removed(key(1)).validate();
+        }
     }
 
     private Map<String, Class<?>> parentSchema() {
         return Map.of("GroupId", Integer.class, "Value1", Integer.class, "Sum2", Integer.class);
+    }
+
+    private Map<String, Class<?>> childSchema() {
+        return Map.of("GroupId", Integer.class, "Value1", Integer.class, "Value2", Integer.class);
     }
 
     private Key key(final int key) {

@@ -4,6 +4,7 @@ package com.bytefacets.diaspore.validation;
 
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.diaspore.TransformInput;
+import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Field;
 import com.bytefacets.diaspore.schema.FieldList;
@@ -16,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ValidationOperator {
@@ -45,7 +47,7 @@ public final class ValidationOperator {
     }
 
     public List<String> getValidationErrors(final ChangeSet expectation) {
-        return new Validator(input.currentChangeSet, expectation).validate();
+        return new Validator(input.currentChangeSet, expectation, input.calculatedActiveRows, input.source.rowProvider()).validate();
     }
 
     public void validate(final ChangeSet expectation) {
@@ -68,8 +70,15 @@ public final class ValidationOperator {
     }
 
     private class Input implements TransformInput {
+        private final Set<Integer> calculatedActiveRows = new TreeSet<>();
         private ChangeSet currentChangeSet = new ChangeSet();
         private Schema schema;
+        private TransformOutput source;
+
+        @Override
+        public void setSource(final TransformOutput output) {
+            this.source = output;
+        }
 
         @Override
         public void schemaUpdated(final Schema schema) {
@@ -91,6 +100,9 @@ public final class ValidationOperator {
                         if (oldKeyedRow != null) {
                             currentChangeSet.error(String.format("Duplicate row added: %d", rowId));
                         }
+                        if(!calculatedActiveRows.add(rowId)) {
+                            currentChangeSet.error(String.format("Received add for row that was already active: %d", rowId));
+                        }
                     });
         }
 
@@ -109,6 +121,9 @@ public final class ValidationOperator {
                         } else {
                             rowToData.put(rowId, oldKeyedRow.update(partialRow));
                         }
+                        if(!calculatedActiveRows.contains(rowId)) {
+                            currentChangeSet.error(String.format("Row was not active: %d", rowId));
+                        }
                     });
         }
 
@@ -122,6 +137,9 @@ public final class ValidationOperator {
                                     String.format("Removed row not found: %d", rowId));
                         } else {
                             currentChangeSet.removed(keyedRow.key());
+                        }
+                        if(!calculatedActiveRows.remove(rowId)) {
+                            currentChangeSet.error(String.format("Row was not active: %d", rowId));
                         }
                     });
         }

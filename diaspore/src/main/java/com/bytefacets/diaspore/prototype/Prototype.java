@@ -142,6 +142,7 @@ public final class Prototype implements InputProvider, OutputProvider {
                             fireDeletedRows();
                         }
                     });
+            activeRows.clear();
             if (!deletedRowBatch.isEmpty()) {
                 fireDeletedRows();
             }
