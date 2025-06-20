@@ -42,7 +42,7 @@ public final class ${type.name}IndexedTable${generics} {
     /**
      * Looks up the fieldId associated with the fieldName. This can be used in
      * combination with the TableRow to set values in specific fields. You could also
-     * directly use {@link writableField} instead of TableRow.
+     * directly use {@link #writableField} instead of TableRow.
      */
     public int fieldId(final String fieldName) {
         return schema().field(fieldName).fieldId();
@@ -62,7 +62,7 @@ public final class ${type.name}IndexedTable${generics} {
 
     /**
      * A convenience method to access table fields associated with a particular row.
-     * Use in conjunction with {@link fieldId} to lookup the fieldIds to use in the
+     * Use in conjunction with {@link #fieldId} to lookup the fieldIds to use in the
      * TableRow methods.
      */
     public TableRow tableRow() {
@@ -132,7 +132,7 @@ public final class ${type.name}IndexedTable${generics} {
         stateChange.endChange();
     }
 
-    /** Called to close off a {@link beginUpsert} and register the row for firing. */
+    /** Called to close off a {@link #beginUpsert} and register the row for firing. */
     public void endUpsert() {
         tableRow.setNoRow();
         stateChange.endUpsert();

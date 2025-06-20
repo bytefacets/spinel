@@ -1,25 +1,18 @@
-import java.io.ByteArrayOutputStream
-gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
-
 plugins {
     java
+    `bytefacets-publishing-convention` apply false
+    `bytefacets-central-portal-publishing-convention`
+    id("pl.allegro.tech.build.axion-release") version "1.18.18" // https://plugins.gradle.org/plugin/pl.allegro.tech.build.axion-release
     id("com.github.spotbugs") version "6.0.25"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
     id("com.diffplug.spotless") version "6.19.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
 }
 
+gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 group = "com.bytefacets"
 
-fun getVersionFromGit(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "describe", "--tags", "--always", "--dirty")
-        standardOutput = stdout
-    }
-    return stdout.toString().trim().replace("v", "")
-        .replace("dirty", "SNAPSHOT")
-}
+apply(plugin = "org.jreleaser")
 
-version = getVersionFromGit()
+project.version = scmVersion.version
 System.out.printf("VERSION '%s'%n", version)
 
 allprojects {
@@ -73,6 +66,10 @@ allprojects {
 subprojects {
     apply(plugin = "maven-publish")
 
+    if(project.name == "diaspore") {
+        apply(plugin = "bytefacets-publishing-convention")
+    }
+
     project.version = project.parent?.version!!
 
     extra.apply {
@@ -104,6 +101,14 @@ subprojects {
         mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") {
             isTransitive = false
         }
+    }
+
+    tasks.withType<Javadoc> {
+        options.encoding = "UTF-8"
+        (options as StandardJavadocDocletOptions).apply {
+            addStringOption("Xdoclint:none", "-quiet")
+        }
+        isFailOnError = false
     }
 
     tasks.compileJava {
@@ -159,27 +164,7 @@ subprojects {
     }
 
     tasks.jar {
-        archiveBaseName.set(group)
-    }
 
-    configure<PublishingExtension> {
-        publications {
-            repositories {
-                maven {
-                    name = "GitHubPackages"
-                    url = uri("https://maven.pkg.github.com/bytefacets/diaspore")
-                    credentials {
-                        username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-                        password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
-                    }
-                }
-            }
-            create<MavenPublication>("gpr") {
-                from(components["java"])
-                groupId = "com.bytefacets"
-                artifactId = "bytefacets-${project.name}"
-            }
-        }
     }
 
     tasks.register("pre") {

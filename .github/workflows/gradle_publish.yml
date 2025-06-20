@@ -33,12 +33,17 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Build with Gradle
-      run: ./gradlew build --stacktrace
+      run: ./gradlew create-generated-source-dir generate-typed-main-sources generate-typed-test-sources build --stacktrace
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
 
-    # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
+    # The GITHUB_ACTOR and GITHUB_TOKEN need to correspond to the credentials environment variables used in
     # the publishing section of your build.gradle
     - name: Publish to GitHub Packages
       run: ./gradlew publish
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}

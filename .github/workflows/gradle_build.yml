@@ -39,6 +39,12 @@ jobs:
         USERNAME: ${{ github.actor }}
         TOKEN: ${{ secrets.ORG_BUILD_KEY }}
 
+    - name: Build with Gradle Wrapper
+      run: ./gradlew create-generated-source-dir generate-typed-main-sources generate-typed-test-sources build --stacktrace
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
+
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
     #
@@ -69,5 +75,5 @@ jobs:
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.ORG_BUILD_KEY }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
