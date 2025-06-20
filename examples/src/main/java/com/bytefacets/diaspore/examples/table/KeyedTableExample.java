@@ -27,6 +27,7 @@ public final class KeyedTableExample {
 
     private KeyedTableExample() {}
 
+    @SuppressWarnings("resource")
     public static void main(final String[] args) throws InterruptedException {
         final IntIndexedTable table = createTable();
         // we're connecting a simple printer here so we can see what's happening
@@ -42,10 +43,11 @@ public final class KeyedTableExample {
         final MockOrderProducer producer = new MockOrderProducer(writer, exitLatch);
 
         // schedule batches to "arrive" every 1 second
-        try (var exec = Executors.newSingleThreadScheduledExecutor()) {
-            exec.scheduleAtFixedRate(producer::produce, 1000, 1000, TimeUnit.MILLISECONDS);
-            exitLatch.await(); // and wait to exit the example
-        }
+        // REVISIT: jdk-21 auto-close
+        final var exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleAtFixedRate(producer::produce, 1000, 1000, TimeUnit.MILLISECONDS);
+        exitLatch.await(); // and wait to exit the example
+        exec.shutdownNow();
     }
 
     private static final class TableWriter {
