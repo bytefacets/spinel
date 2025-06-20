@@ -36,8 +36,8 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build --stacktrace
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
 
     - name: Build with Gradle Wrapper
       run: ./gradlew create-generated-source-dir generate-typed-main-sources generate-typed-test-sources build --stacktrace
