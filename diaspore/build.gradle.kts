@@ -47,6 +47,7 @@ dependencies {
     implementation("com.bytefacets:bytefacets-collections:0.2.0")
     implementation("org.javassist:javassist:3.30.2-GA") // https://mvnrepository.com/artifact/org.javassist/javassist
     testImplementation(testFixtures(project(":diaspore")))
+    testFixturesImplementation("com.bytefacets:bytefacets-collections:0.2.0")
 }
 
 tasks.named<Jar>("jar") {
