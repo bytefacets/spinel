@@ -48,5 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
           SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           SIGNING_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           GIT_TAG: ${{ github.ref_name }}
 
