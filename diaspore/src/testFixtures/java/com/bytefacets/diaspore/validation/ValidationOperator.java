@@ -87,6 +87,7 @@ public final class ValidationOperator {
                 currentChangeSet.schema(toMap(schema.fields()));
             } else {
                 currentChangeSet.nullSchema();
+                calculatedActiveRows.clear();
             }
         }
 

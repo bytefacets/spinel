@@ -13,11 +13,16 @@ import com.bytefacets.diaspore.testing.IntTableHandle;
 import com.bytefacets.diaspore.validation.RowData;
 import com.bytefacets.diaspore.validation.ValidationOperator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,18 +58,31 @@ class LookupJoinTest {
     }
 
     private void initialize(final JoinBuilder builder) {
+        initialize(builder, true);
+    }
+
+    private void initialize(final JoinBuilder builder, final boolean leftFirst) {
         final Join join = builder.joinOn(List.of("LKey"), List.of("RKey"), 2).build();
-        left.output().attachInput(join.leftInput());
-        right.output().attachInput(join.rightInput());
-        join.output().attachInput(OutputPrinter.printer().input());
+        if (leftFirst) {
+            left.output().attachInput(join.leftInput());
+            right.output().attachInput(join.rightInput());
+        } else {
+            right.output().attachInput(join.rightInput());
+            left.output().attachInput(join.leftInput());
+        }
         join.output().attachInput(validation.input());
+        join.output().attachInput(OutputPrinter.printer().input());
     }
 
     private void addLeft() {
+        // keyed by 1, 2 in the left table
+        // joined on 100,200 in the join
         leftHandle.add(1, 100, 1000).add(2, 200, 2000).fire();
     }
 
     private void addRight() {
+        // keyed by -1, -2 in the right table
+        // joined on 100,200 in the join
         rightHandle.add(-1, 100, 1111).add(-2, 200, 2222).fire();
     }
 
@@ -73,14 +91,122 @@ class LookupJoinTest {
     }
 
     @Nested
+    class SchemaTests {
+        private final JoinBuilder builder = JoinBuilder.lookupJoin().inner();
+        private final Map<String, Class<?>> expectedSchema =
+                Stream.of("RId", "LId", "LKey", "LValue", "RValue")
+                        .collect(Collectors.toMap(String::toString, key -> Integer.class));
+        private Join join;
+
+        @BeforeEach
+        void setUp() {
+            join = builder.joinOn(List.of("LKey"), List.of("RKey"), 2).build();
+            join.output().attachInput(OutputPrinter.printer().input());
+            join.output().attachInput(validation.input());
+        }
+
+        private void attachOneSide(final boolean attachLeft) {
+            if (attachLeft) {
+                left.output().attachInput(join.leftInput());
+            } else {
+                right.output().attachInput(join.rightInput());
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void shouldProduceExpectedSchemaWhenEitherAttachedFirst(final boolean leftFirst) {
+            attachOneSide(leftFirst);
+            attachOneSide(!leftFirst);
+            validation.expect().schema(expectedSchema).validate();
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void shouldProduceRowsWhenSchemaReady(final boolean leftFirst) {
+            addLeft();
+            addRight();
+            attachOneSide(leftFirst);
+            attachOneSide(!leftFirst);
+            validation
+                    .expect()
+                    .schema(expectedSchema)
+                    .added(key(1, -1), template.rowData(100, 1000, 1111))
+                    .added(key(2, -2), template.rowData(200, 2000, 2222))
+                    .validate();
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void shouldProducedLatestWhenReceivingChangesWhileNotReady(final boolean leftFirst) {
+            attachOneSide(leftFirst);
+
+            addLeft();
+            addRight();
+            leftHandle.change(1, null, 1001).change(2, null, 2002).fire();
+            rightHandle.change(-1, null, 1112).change(-2, null, 2223).fire();
+
+            attachOneSide(!leftFirst);
+
+            validation
+                    .expect()
+                    .schema(expectedSchema)
+                    .added(key(1, -1), template.rowData(100, 1001, 1112))
+                    .added(key(2, -2), template.rowData(200, 2002, 2223))
+                    .validate();
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void shouldProducedLatestWhenReceivingRemovesWhileNotReady(final boolean leftFirst) {
+            attachOneSide(leftFirst);
+
+            addLeft();
+            addRight();
+            leftHandle.remove(2).fire();
+            rightHandle.change(-2).fire();
+
+            attachOneSide(!leftFirst);
+
+            validation
+                    .expect()
+                    .schema(expectedSchema)
+                    .added(key(1, -1), template.rowData(100, 1000, 1111))
+                    .validate();
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void shouldNotReAddRowsWhenReAttachingSide(final boolean reattachLeft) {
+            left.output().attachInput(join.leftInput());
+            right.output().attachInput(join.rightInput());
+            addLeft();
+            addRight();
+
+            if (reattachLeft) {
+                left.output().detachInput(join.leftInput());
+                validation.clearChanges();
+                left.output().attachInput(join.leftInput());
+            } else {
+                right.output().detachInput(join.rightInput());
+                validation.clearChanges();
+                right.output().attachInput(join.rightInput());
+            }
+            validation
+                    .expect()
+                    .schema(expectedSchema)
+                    .added(key(1, -1), template.rowData(100, 1000, 1111))
+                    .added(key(2, -2), template.rowData(200, 2000, 2222))
+                    .validate();
+        }
+    }
+
+    @Nested
     class InnerLookupTests {
         private final JoinBuilder builder = JoinBuilder.lookupJoin().inner();
 
         @BeforeEach
         void setUp() {}
-
-        @Nested
-        class SchemaTests {}
 
         @Nested
         class AddTests {

@@ -16,6 +16,8 @@ interface JoinMapper {
 
     RowMapper rightMapper();
 
+    void clear();
+
     void leftRowAdd(int leftRow);
 
     void rightRowAdd(int rightRow);

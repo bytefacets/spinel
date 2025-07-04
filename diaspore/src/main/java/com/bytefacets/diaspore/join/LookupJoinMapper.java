@@ -10,6 +10,7 @@ import com.bytefacets.collections.types.Pack;
 import com.bytefacets.diaspore.RowProvider;
 import com.bytefacets.diaspore.common.BitSetRowProvider;
 import com.bytefacets.diaspore.schema.RowMapper;
+import java.util.Arrays;
 import java.util.BitSet;
 
 final class LookupJoinMapper implements JoinMapper {
@@ -67,6 +68,14 @@ final class LookupJoinMapper implements JoinMapper {
             }
             return -1;
         };
+    }
+
+    @Override
+    public void clear() {
+        Arrays.fill(leftRowToKey, UNSET);
+        Arrays.fill(rightRowToKey, UNSET);
+        Arrays.fill(keyToLeftRight, EMPTY_MAPPING);
+        activeRows.clear();
     }
 
     @Override

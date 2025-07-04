@@ -52,13 +52,8 @@ public final class Join implements OutputProvider {
         return output;
     }
 
-    private void schemasUpdates() {
-        final boolean ready = leftSchema != null && rightSchema != null;
-        if (ready) {
-            bindSchemaAndUpdate();
-        } else {
-            maybeTearDownSchema();
-        }
+    private boolean haveBothSchemas() {
+        return leftSchema != null && rightSchema != null;
     }
 
     private void bindSchemaAndUpdate() {
@@ -77,6 +72,7 @@ public final class Join implements OutputProvider {
         if (manager.schema() != null) {
             manager.updateSchema(null);
         }
+        leftInput.mapper.clear();
         schemaBuilder.unbindSchemas();
     }
 
@@ -84,24 +80,43 @@ public final class Join implements OutputProvider {
         private final JoinMapper mapper;
         private FieldMapping fieldMapping;
         private BitSet joinKeyDependencies;
+        private TransformOutput source;
 
         private LeftInput(final JoinMapper mapper) {
             this.mapper = requireNonNull(mapper, "mapper");
         }
 
         @Override
+        public void setSource(@Nullable final TransformOutput output) {
+            this.source = output;
+        }
+
+        @Override
         public void schemaUpdated(@Nullable final Schema schema) {
             leftSchema = schema;
+            if (haveBothSchemas()) {
+                bindSchemaAndUpdate();
+                // catch up right side; left side will come in with the attachment
+                rightInput.addAllSourceRowsIfNecessary();
+            } else {
+                maybeTearDownSchema();
+            }
         }
 
         @Override
         public void rowsAdded(final IntIterable rows) {
+            if (!haveBothSchemas()) {
+                return; // outbound not ready
+            }
             rows.forEach(mapper::leftRowAdd);
             changeTracker.fire(manager, mapper::cleanUpRemovedRow);
         }
 
         @Override
         public void rowsChanged(final IntIterable rows, final ChangedFieldSet changedFields) {
+            if (!haveBothSchemas()) {
+                return; // outbound not ready
+            }
             final boolean reEvalKey = changedFields.intersects(joinKeyDependencies);
             fieldMapping.translateInboundChangeSet(changedFields, changeTracker::changeField);
             rows.forEach(row -> mapper.leftRowChange(row, reEvalKey));
@@ -110,8 +125,15 @@ public final class Join implements OutputProvider {
 
         @Override
         public void rowsRemoved(final IntIterable rows) {
+            if (!haveBothSchemas()) {
+                return;
+            }
             rows.forEach(mapper::leftRowRemove);
             changeTracker.fire(manager, mapper::cleanUpRemovedRow);
+        }
+
+        private void addAllSourceRowsIfNecessary() {
+            source.rowProvider().forEach(mapper::leftRowAdd);
         }
     }
 
@@ -119,25 +141,43 @@ public final class Join implements OutputProvider {
         private final JoinMapper mapper;
         private FieldMapping fieldMapping;
         private BitSet joinKeyDependencies;
+        private TransformOutput source;
 
         RightInput(final JoinMapper mapper) {
             this.mapper = requireNonNull(mapper, "mapper");
         }
 
         @Override
+        public void setSource(@Nullable final TransformOutput output) {
+            this.source = output;
+        }
+
+        @Override
         public void schemaUpdated(@Nullable final Schema schema) {
             rightSchema = schema;
-            schemasUpdates();
+            if (haveBothSchemas()) {
+                bindSchemaAndUpdate();
+                // catch up left side; right side will come in with the attachment
+                leftInput.addAllSourceRowsIfNecessary();
+            } else {
+                maybeTearDownSchema();
+            }
         }
 
         @Override
         public void rowsAdded(final IntIterable rows) {
+            if (!haveBothSchemas()) {
+                return; // outbound not ready
+            }
             rows.forEach(mapper::rightRowAdd);
             changeTracker.fire(manager, mapper::cleanUpRemovedRow);
         }
 
         @Override
         public void rowsChanged(final IntIterable rows, final ChangedFieldSet changedFields) {
+            if (!haveBothSchemas()) {
+                return; // outbound not ready
+            }
             final boolean reEvalKey = changedFields.intersects(joinKeyDependencies);
             fieldMapping.translateInboundChangeSet(changedFields, changeTracker::changeField);
             final IntConsumer consumer =
@@ -156,8 +196,15 @@ public final class Join implements OutputProvider {
 
         @Override
         public void rowsRemoved(final IntIterable rows) {
+            if (!haveBothSchemas()) {
+                return; // outbound not ready
+            }
             rows.forEach(mapper::rightRowRemove);
             changeTracker.fire(manager, mapper::cleanUpRemovedRow);
+        }
+
+        private void addAllSourceRowsIfNecessary() {
+            source.rowProvider().forEach(mapper::rightRowAdd);
         }
     }
 }
