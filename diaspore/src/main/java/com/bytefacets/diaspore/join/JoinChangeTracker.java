@@ -79,7 +79,7 @@ final class JoinChangeTracker implements JoinListener {
         if (!changedRows.isEmpty()) {
             manager.notifyChanges(changedRows, outboundFieldSet);
         }
-        if (removedRowConsumer != null) {
+        if (removedRowConsumer != null && !removedRows.isEmpty()) {
             removedRows.forEach(removedRowConsumer);
         }
         reset();
