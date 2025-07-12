@@ -43,7 +43,7 @@ template_processor {
 
 tasks.named("compileJava") {
     dependsOn(
-        "protobuf",
+        "generateProto",
         "create-generated-source-dir",
         "generate-typed-main-sources",
         "generate-typed-test-sources",
