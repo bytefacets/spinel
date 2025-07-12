@@ -19,3 +19,4 @@ pluginManagement {
 
 include("diaspore")
 include("examples")
+include("grpc")
