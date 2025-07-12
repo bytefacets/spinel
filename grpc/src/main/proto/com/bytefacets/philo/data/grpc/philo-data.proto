@@ -1,0 +1,115 @@
+syntax = "proto3";
+package com.bytefacets.diaspore.grpc;
+
+option java_generic_services = false;
+option java_multiple_files = true;
+option java_package = "com.bytefacets.diaspore.grpc";
+option java_outer_classname = "PhiloDataProto";
+
+service PhiloService {
+    rpc subscribe (stream SubscriptionRequest) returns (stream SubscriptionResponse) {}
+}
+
+message SubscriptionRequest {
+    int32 ref_token = 1;
+    RequestType request_type = 2;
+    CreateSubscription subscription = 3;
+}
+
+message SubscriptionResponse {
+    int32 ref_token = 1;
+    Response response = 2;
+    ResponseType response_type = 3;
+    SchemaUpdate schema = 4;
+    DataUpdate data = 5;
+}
+
+message CreateSubscription {
+    string name = 1;
+    repeated string field_names = 2;
+}
+
+message Metadata {
+    repeated string tags = 1;
+    map<string, bytes> attributes = 2;
+}
+
+message BoolData {
+    int32 field_id = 1;
+    repeated bool values = 2;
+}
+
+message ByteData {
+    int32 field_id = 1;
+    bytes values = 2;
+}
+
+message Int32Data {
+    int32 field_id = 1;
+    repeated int32 values = 2;
+}
+
+message Int64Data {
+    int32 field_id = 1;
+    repeated int64 values = 2;
+}
+
+message FloatData {
+    int32 field_id = 1;
+    repeated float values = 2;
+}
+
+message DoubleData {
+    int32 field_id = 1;
+    repeated double values = 2;
+}
+
+message StringData {
+    int32 field_id = 1;
+    repeated string values = 2;
+}
+
+message GenericData {
+    int32 field_id = 1;
+    repeated bytes values = 2;
+}
+
+message FieldDefinition {
+    int32 type_id = 1;
+    string name = 2;
+    Metadata metadata = 3;
+}
+
+enum RequestType {
+    REQUEST_TYPE_SUBSCRIBE = 0;
+}
+
+enum ResponseType {
+    RESPONSE_TYPE_MESSAGE = 0;
+    RESPONSE_TYPE_SCHEMA = 1;
+    RESPONSE_TYPE_ADD = 2;
+    RESPONSE_TYPE_CHG = 3;
+    RESPONSE_TYPE_REM = 4;
+}
+
+message Response {
+    bool error = 1;
+    string message = 2;
+}
+
+message DataUpdate {
+    repeated int32 rows = 2;
+    repeated BoolData bool_data = 3;
+    repeated ByteData byte_data = 4;
+    repeated Int32Data int32_data = 5;
+    repeated Int64Data int64_data = 6;
+    repeated FloatData float_data = 7;
+    repeated DoubleData double_data = 8;
+    repeated StringData string_data = 9;
+    repeated GenericData generic_data = 10;
+}
+
+message SchemaUpdate {
+    string name = 1;
+    repeated FieldDefinition fields = 2;
+}
