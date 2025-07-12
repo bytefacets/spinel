@@ -2,9 +2,9 @@ package com.bytefacets.diaspore.grpc.receive;
 
 import static java.util.Objects.requireNonNull;
 
-import com.bytefacets.diaspore.grpc.DataUpdate;
-import com.bytefacets.diaspore.grpc.ResponseType;
-import com.bytefacets.diaspore.grpc.StringData;
+import com.bytefacets.diaspore.grpc.proto.DataUpdate;
+import com.bytefacets.diaspore.grpc.proto.ResponseType;
+import com.bytefacets.diaspore.grpc.proto.StringData;
 import com.bytefacets.diaspore.schema.FieldList;
 import com.bytefacets.diaspore.schema.SchemaField;
 import com.bytefacets.diaspore.schema.StringWritableField;

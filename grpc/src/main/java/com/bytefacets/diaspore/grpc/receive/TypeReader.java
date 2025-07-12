@@ -1,7 +1,7 @@
 package com.bytefacets.diaspore.grpc.receive;
 
-import com.bytefacets.diaspore.grpc.DataUpdate;
-import com.bytefacets.diaspore.grpc.ResponseType;
+import com.bytefacets.diaspore.grpc.proto.DataUpdate;
+import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.schema.FieldList;
 import java.util.BitSet;
 

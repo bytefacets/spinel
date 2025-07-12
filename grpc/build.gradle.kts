@@ -50,12 +50,6 @@ tasks.named("compileJava") {
         "generate-typed-testFixtures-sources")
 }
 
-// Add generated sources to the main source set
-sourceSets.main {
-    java.srcDir("build/generated/source/proto/main/grpc")
-    java.srcDir("build/generated/source/proto/main/java")
-}
-
 dependencies {
     implementation("com.bytefacets:bytefacets-collections:0.3.0")
     implementation(project(":diaspore"))

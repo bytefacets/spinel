@@ -2,9 +2,9 @@ package com.bytefacets.diaspore.grpc.receive;
 
 import static java.util.Objects.requireNonNull;
 
-import com.bytefacets.diaspore.grpc.DataUpdate;
-import com.bytefacets.diaspore.grpc.Int32Data;
-import com.bytefacets.diaspore.grpc.ResponseType;
+import com.bytefacets.diaspore.grpc.proto.DataUpdate;
+import com.bytefacets.diaspore.grpc.proto.Int32Data;
+import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.schema.CharWritableField;
 import com.bytefacets.diaspore.schema.FieldList;
 import com.bytefacets.diaspore.schema.IntWritableField;
@@ -36,26 +36,28 @@ final class Int32Reader implements TypeReader {
         }
     }
 
+    @SuppressWarnings("MissingSwitchDefault")
     private void readField(final DataUpdate msg, final Int32Data data) {
         final int fieldId = data.getFieldId();
         final SchemaField schemaField = fields.fieldAt(fieldId);
         switch (schemaField.typeId()) {
             case TypeId.Char:
-                {
-                    applyChar(msg, data, (CharWritableField) schemaField.field());
-                    break;
-                }
+                applyChar(msg, data, (CharWritableField) schemaField.field());
+                break;
             case TypeId.Short:
-                {
-                    applyShort(msg, data, (ShortWritableField) schemaField.field());
-                    break;
-                }
+                applyShort(msg, data, (ShortWritableField) schemaField.field());
+                break;
             case TypeId.Int:
-                {
-                    applyInt(msg, data, (IntWritableField) schemaField.field());
-                    break;
-                }
+                applyInt(msg, data, (IntWritableField) schemaField.field());
+                break;
+            default:
+                logUnknownFieldTypeId(schemaField);
+                break;
         }
+    }
+
+    private void logUnknownFieldTypeId(final SchemaField schemaField) {
+        // UPCOMING: logUnknownFieldTypeId
     }
 
     private void applyChar(

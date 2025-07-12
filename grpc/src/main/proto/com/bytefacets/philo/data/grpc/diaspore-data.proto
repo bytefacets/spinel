@@ -1,12 +1,12 @@
 syntax = "proto3";
-package com.bytefacets.diaspore.grpc;
+package com.bytefacets.diaspore.grpc.proto;
 
 option java_generic_services = false;
 option java_multiple_files = true;
-option java_package = "com.bytefacets.diaspore.grpc";
-option java_outer_classname = "PhiloDataProto";
+option java_package = "com.bytefacets.diaspore.grpc.proto";
+option java_outer_classname = "DiasporeProto";
 
-service PhiloService {
+service DiasporeService {
     rpc subscribe (stream SubscriptionRequest) returns (stream SubscriptionResponse) {}
 }
 

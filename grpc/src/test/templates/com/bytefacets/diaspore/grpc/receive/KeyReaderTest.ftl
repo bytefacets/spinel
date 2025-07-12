@@ -19,9 +19,9 @@ import com.bytefacets.diaspore.grpc.send.ObjectEncoderAccess;
 </#if>
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
 import com.bytefacets.collections.types.${type.name}Type;
-import com.bytefacets.diaspore.grpc.${readerType}Data;
-import com.bytefacets.diaspore.grpc.DataUpdate;
-import com.bytefacets.diaspore.grpc.ResponseType;
+import com.bytefacets.diaspore.grpc.proto.${readerType}Data;
+import com.bytefacets.diaspore.grpc.proto.DataUpdate;
+import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.schema.${type.name}WritableField;
 import com.bytefacets.diaspore.schema.FieldChangeListener;
 import com.bytefacets.diaspore.schema.FieldList;
