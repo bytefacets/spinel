@@ -9,7 +9,7 @@ import com.bytefacets.diaspore.transform.OutputProvider;
 import com.google.protobuf.ByteString;
 
 public final class ReceivePackageAccess {
-    public ReceivePackageAccess() {}
+    private ReceivePackageAccess() {}
 
     public static DecoderAccess decoder() {
         return new DecoderAccess(
