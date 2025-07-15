@@ -25,7 +25,7 @@ public final class SubscriptionConfig {
         return new Builder(remoteOutputName);
     }
 
-    public static class Builder {
+    public static final class Builder {
         private final String remoteOutputName;
         private List<String> fields;
 
