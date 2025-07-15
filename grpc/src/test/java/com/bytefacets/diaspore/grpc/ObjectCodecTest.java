@@ -1,11 +1,11 @@
 package com.bytefacets.diaspore.grpc;
 
-import static com.bytefacets.diaspore.grpc.receive.ObjectDecoderAccess.decode;
+import static com.bytefacets.diaspore.grpc.receive.ReceivePackageAccess.decode;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
-import com.bytefacets.diaspore.grpc.send.ObjectEncoderAccess;
+import com.bytefacets.diaspore.grpc.send.SendPackageAccess;
 import com.google.protobuf.ByteString;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ObjectCodecTest {
-    private final ObjectEncoderAccess encoder = new ObjectEncoderAccess();
+    private final SendPackageAccess encoder = new SendPackageAccess();
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
