@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.validation;
 
+import com.bytefacets.diaspore.schema.Metadata;
+
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,6 +27,11 @@ public final class Validation {
 
     public Validation schema(final Map<String, Class<?>> fieldMap) {
         expectation.schema(fieldMap);
+        return this;
+    }
+
+    public Validation metadata(final Map<String, Metadata> metadata) {
+        expectation.metadata(metadata);
         return this;
     }
 

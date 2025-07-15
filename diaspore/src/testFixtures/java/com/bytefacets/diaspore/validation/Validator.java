@@ -3,6 +3,7 @@
 package com.bytefacets.diaspore.validation;
 
 import com.bytefacets.diaspore.RowProvider;
+import com.bytefacets.diaspore.schema.Metadata;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +66,19 @@ class Validator {
         }
     }
 
+    private void validateFieldMetadata(
+            final Map<String, Metadata> observed, final Map<String, Metadata> expected) {
+        for (var expectedField : expected.entrySet()) {
+            final String fieldName = expectedField.getKey();
+            final Metadata expectedMd = expectedField.getValue();
+            final Metadata observedMd = observed.get(fieldName);
+            if (observedMd == null) {
+                missingExpectedFieldMetadata(fieldName, expectedMd);
+            } else if (!observedMd.equals(expectedMd)) {
+                unexpectedFieldMetadata(fieldName, expectedMd, observedMd);
+            }
+        }
+    }
     private void validateSchema(final boolean observed, final boolean expected) {
         if (observed != expected) {
             errors.add(
@@ -115,6 +129,15 @@ class Validator {
 
     private void missingExpectedField(final String name, final Class<?> type) {
         errors.add(String.format("Schema: expected %s field %s", type.getSimpleName(), name));
+    }
+
+    private void unexpectedFieldMetadata(
+            final String name, final Metadata expectedMd, final Metadata observedMd) {
+        errors.add(String.format("Schema: expected %s for field %s but was %s", expectedMd, name, observedMd));
+    }
+
+    private void missingExpectedFieldMetadata(final String name, final Metadata md) {
+        errors.add(String.format("Metadata: expected %s for field %s", md, name));
     }
 
     private Map<String, Diff> diff(

@@ -5,6 +5,7 @@ package com.bytefacets.diaspore.schema;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19,7 +20,7 @@ public final class Metadata {
     public static Metadata metadata(final Set<String> tags, final Map<String, Object> attributes) {
         return new Metadata(
                 tags != null ? Set.copyOf(tags) : Set.of(),
-                attributes != null ? Map.copyOf(attributes) : Map.of());
+                attributes != null ? new HashMap<>(attributes) : Map.of());
     }
 
     public static Metadata metadata(final Set<String> tags) {

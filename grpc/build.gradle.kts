@@ -9,6 +9,7 @@ apply(plugin = "com.bytefacets.template_processor")
 
 val grpcVersion = "1.70.0"
 val protobufVersion = "4.29.3";
+val log4jVersion : String by extra
 
 protobuf {
     protoc {
@@ -62,5 +63,6 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
     implementation("com.google.protobuf:protobuf-java:${protobufVersion}")
 
+    testImplementation("io.grpc:grpc-inprocess:${grpcVersion}")
     testImplementation(testFixtures(project(":diaspore")))
 }

@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
 <#if type.name == "Generic">
-import com.bytefacets.diaspore.grpc.send.ObjectEncoderAccess;
+import com.bytefacets.diaspore.grpc.send.SendPackageAccess;
 </#if>
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
 import com.bytefacets.collections.types.${type.name}Type;
@@ -47,7 +47,7 @@ class ${type.name}ReaderTest {
     private ${type.name}WritableField field1;
     private DataUpdate data;
 <#if type.name == "Generic">
-    private final ObjectEncoderAccess encoder = new ObjectEncoderAccess();
+    private final SendPackageAccess encoder = new SendPackageAccess();
 </#if>
 
     @BeforeEach

@@ -76,6 +76,7 @@ subprojects {
         set("guavaVersion", "31.0.1-jre")
         set("findbugsVersion", "4.7.3")
         set("spotbugsVersion", "4.8.6")
+        set("log4jVersion", "2.17.0")
     }
 
     val spotbugsVersion: String by extra
@@ -83,13 +84,18 @@ subprojects {
     val guavaVersion: String by extra
     val junitVersion = "5.7.0"
     val hamcrestVersion = "2.2"
-    val mockitoVersion = "3.12.4"
+    val mockitoVersion = "5.18.0"
     val junitPioneerVersion = "0.9.0"
+    val slfApiVersion = "2.0.17"
 
     val mockitoAgent = configurations.create("mockitoAgent")
     dependencies {
         spotbugs("com.github.spotbugs:spotbugs:${spotbugsVersion}")
         implementation("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
+        compileOnly("org.slf4j:slf4j-api:${slfApiVersion}") // Or the latest stable version
+
+        // Use the API in your own tests
+        testImplementation("org.slf4j:slf4j-api:${slfApiVersion}")
 
         testImplementation("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
         testImplementation("org.hamcrest:hamcrest:${hamcrestVersion}")
@@ -119,7 +125,7 @@ subprojects {
     tasks.test {
         useJUnitPlatform()
         setForkEvery(1)
-        //jvmArgs("-javaagent:${mockitoAgent.asPath}")
+        jvmArgs("-javaagent:${mockitoAgent.asPath}")
         maxParallelForks = 4
         testLogging {
             showStandardStreams = true
