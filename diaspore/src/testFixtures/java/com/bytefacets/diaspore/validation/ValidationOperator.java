@@ -8,6 +8,7 @@ import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Field;
 import com.bytefacets.diaspore.schema.FieldList;
+import com.bytefacets.diaspore.schema.Metadata;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.SchemaField;
 import com.bytefacets.diaspore.schema.TypeId;
@@ -85,6 +86,7 @@ public final class ValidationOperator {
             this.schema = schema;
             if (schema != null) {
                 currentChangeSet.schema(toMap(schema.fields()));
+                currentChangeSet.metadata(toMetadataMap(schema.fields()));
             } else {
                 currentChangeSet.nullSchema();
                 calculatedActiveRows.clear();
@@ -178,6 +180,23 @@ public final class ValidationOperator {
         for (String name : valueFields) {
             final Field field = fields.field(name).field();
             map.put(name, TypeId.toClass(field.typeId()));
+        }
+        return map;
+    }
+
+    private Map<String, Metadata> toMetadataMap(final FieldList fields) {
+        final Map<String, Metadata> map = new HashMap<>();
+        for (String name : keyFields) {
+            final SchemaField field = fields.field(name);
+            if(field.metadata() != null) {
+                map.put(name, field.metadata());
+            }
+        }
+        for (String name : valueFields) {
+            final SchemaField field = fields.field(name);
+            if(field.metadata() != null) {
+                map.put(name, field.metadata());
+            }
         }
         return map;
     }
