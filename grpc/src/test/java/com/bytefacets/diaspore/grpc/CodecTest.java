@@ -181,8 +181,9 @@ public final class CodecTest {
         wire();
         final var response = mock(SubscriptionResponse.class);
         when(response.getResponseType()).thenReturn(ResponseType.UNRECOGNIZED);
-        when(response.getResponse()).thenReturn(Response.newBuilder().setError(false)
-                .setMessage("this is a test").build());
+        when(response.getResponse())
+                .thenReturn(
+                        Response.newBuilder().setError(false).setMessage("this is a test").build());
         receiver.accept(response);
     }
 
