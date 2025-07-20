@@ -216,6 +216,7 @@ class OutputLoggerTest {
             case INFO -> verify(logger, times(times)).info(messageCaptor.capture());
             case WARN -> verify(logger, times(times)).warn(messageCaptor.capture());
             case ERROR -> verify(logger, times(times)).error(messageCaptor.capture());
+            default -> throw new RuntimeException("Unexpected level: " + level);
         }
     }
 

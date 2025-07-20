@@ -202,7 +202,7 @@ public final class TransformBuilder {
      * @see com.bytefacets.diaspore.join.Join
      */
     public JoinBuilder lookupJoin(final String name) {
-        return JoinBuilder.lookupJoin(newContext(name));
+        return JoinBuilder.lookupJoin(newContext(resolveName("Join", name)));
     }
 
     /**
