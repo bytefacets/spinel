@@ -68,12 +68,7 @@ public final class ${type.name}IndexedStructTableBuilder${classGenerics} {
     private ${type.name}IndexedStructTableBuilder(final Class<S> structType, final TransformContext transformContext) {
         this.structType = Objects.requireNonNull(structType, "structType");
         this.transformContext = Objects.requireNonNull(transformContext, "transform context");
-        StructFieldExtractor.getFieldList(structType)
-                .forEach(
-                        fd -> {
-                            fieldMap.add(fd.name());
-                            typeMap.computeIfAbsent(fd.fieldType(), ArrayList::new).add(fd);
-                        });
+        StructFieldExtractor.consumeFields(structType, this::captureWritableField, this::captureReadOnlyField);
         this.builderSupport = transformContext.createBuilderSupport(this::internalBuild, null);
     }
 

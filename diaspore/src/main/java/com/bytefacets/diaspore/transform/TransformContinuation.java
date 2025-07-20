@@ -9,6 +9,7 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.diaspore.conflation.ChangeConflatorBuilder;
 import com.bytefacets.diaspore.filter.FilterBuilder;
 import com.bytefacets.diaspore.groupby.GroupByBuilder;
+import com.bytefacets.diaspore.printer.OutputLoggerBuilder;
 import com.bytefacets.diaspore.projection.ProjectionBuilder;
 import com.bytefacets.diaspore.prototype.PrototypeBuilder;
 import com.bytefacets.diaspore.union.UnionBuilder;
@@ -88,6 +89,14 @@ public class TransformContinuation {
 
     public UnionBuilder union(final @Nullable String name) {
         return UnionBuilder.union(newContext(resolveName("Union", name)));
+    }
+
+    public OutputLoggerBuilder logger(final String name) {
+        return OutputLoggerBuilder.logger(newContext(resolveName("Logger", name)));
+    }
+
+    public OutputLoggerBuilder logger() {
+        return logger(null);
     }
 
     /**
