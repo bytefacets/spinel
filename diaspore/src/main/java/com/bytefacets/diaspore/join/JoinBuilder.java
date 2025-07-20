@@ -5,12 +5,14 @@ package com.bytefacets.diaspore.join;
 import static com.bytefacets.diaspore.common.DefaultNameSupplier.resolveName;
 import static com.bytefacets.diaspore.join.DynamicJoinInterner.dynamicJoinInterner;
 import static com.bytefacets.diaspore.transform.BuilderSupport.builderSupport;
+import static com.bytefacets.diaspore.transform.TransformContext.continuation;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElseGet;
 
 import com.bytefacets.diaspore.common.NameConflictResolver;
 import com.bytefacets.diaspore.transform.BuilderSupport;
 import com.bytefacets.diaspore.transform.TransformContext;
+import com.bytefacets.diaspore.transform.TransformContinuation;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -47,6 +49,10 @@ public final class JoinBuilder {
 
     public Join getOrCreate() {
         return builderSupport.getOrCreate();
+    }
+
+    public TransformContinuation then() {
+        return continuation(context, builderSupport.transformNode(), () -> getOrCreate().output());
     }
 
     private Join internalBuild() {

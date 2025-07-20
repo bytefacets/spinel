@@ -7,6 +7,8 @@ import static com.bytefacets.diaspore.common.DefaultNameSupplier.resolveName;
 import com.bytefacets.diaspore.conflation.ChangeConflatorBuilder;
 import com.bytefacets.diaspore.filter.FilterBuilder;
 import com.bytefacets.diaspore.groupby.GroupByBuilder;
+import com.bytefacets.diaspore.join.JoinBuilder;
+import com.bytefacets.diaspore.printer.OutputLoggerBuilder;
 import com.bytefacets.diaspore.projection.ProjectionBuilder;
 import com.bytefacets.diaspore.prototype.PrototypeBuilder;
 import com.bytefacets.diaspore.table.ByteIndexedStructTableBuilder;
@@ -194,6 +196,28 @@ public final class TransformBuilder {
     public ChangeConflatorBuilder changeConflator(final String name) {
         return ChangeConflatorBuilder.changeConflator(
                 newContext(resolveName("ChangeConflator", name)));
+    }
+
+    /**
+     * @see com.bytefacets.diaspore.join.Join
+     */
+    public JoinBuilder lookupJoin(final String name) {
+        return JoinBuilder.lookupJoin(newContext(name));
+    }
+
+    /**
+     * @see com.bytefacets.diaspore.join.Join
+     */
+    public JoinBuilder lookupJoin() {
+        return lookupJoin(null);
+    }
+
+    public OutputLoggerBuilder logger(final String name) {
+        return OutputLoggerBuilder.logger(name);
+    }
+
+    public OutputLoggerBuilder logger() {
+        return logger(null);
     }
 
     public void registerTransformNode(final TransformNode<?> node) {
