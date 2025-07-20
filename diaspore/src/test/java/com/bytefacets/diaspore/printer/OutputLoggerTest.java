@@ -138,7 +138,8 @@ class OutputLoggerTest {
 
     @Nested
     class ForwardingTests {
-        final ValidationOperator validation = new ValidationOperator(new String[] {"Key"}, "Value");
+        final ValidationOperator validation =
+                new ValidationOperator(new String[] {"Key"}, "Value1", "Value2");
 
         @BeforeEach
         void setUp() {
@@ -186,8 +187,9 @@ class OutputLoggerTest {
             validation.clearChanges();
             // when
             change(1, 11);
+            table.fireChanges();
             // then
-            validation.expect().changed(Key.key(1), new RowData(Map.of("Value", 11))).validate();
+            validation.expect().changed(Key.key(1), new RowData(Map.of("Value1", 11))).validate();
         }
 
         @Test
