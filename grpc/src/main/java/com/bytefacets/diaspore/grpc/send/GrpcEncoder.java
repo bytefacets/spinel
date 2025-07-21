@@ -49,7 +49,7 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
         this.token = token;
     }
 
-    public static GrpcEncoder grpcEncoder(final int token) {
+    static GrpcEncoder grpcEncoder(final int token) {
         return new GrpcEncoder(token);
     }
 
