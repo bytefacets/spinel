@@ -4,9 +4,9 @@ package com.bytefacets.diaspore.grpc.proto;
 option java_generic_services = false;
 option java_multiple_files = true;
 option java_package = "com.bytefacets.diaspore.grpc.proto";
-option java_outer_classname = "DiasporeProto";
+option java_outer_classname = "DataProto";
 
-service DiasporeService {
+service DataService {
     rpc subscribe (stream SubscriptionRequest) returns (stream SubscriptionResponse) {}
 }
 
