@@ -76,8 +76,7 @@ subprojects {
         set("guavaVersion", "31.0.1-jre")
         set("findbugsVersion", "4.7.3")
         set("spotbugsVersion", "4.8.6")
-        set("logBackVersion", "2.17.0")
-        set("slfApiVersion", "2.17.0")
+        set("slfApiVersion", "2.0.17")
         set("logbackVersion", "1.5.18")
     }
 
@@ -95,7 +94,7 @@ subprojects {
     dependencies {
         spotbugs("com.github.spotbugs:spotbugs:${spotbugsVersion}")
         implementation("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
-        compileOnly("org.slf4j:slf4j-api:${slfApiVersion}") // Or the latest stable version
+        compileOnly("org.slf4j:slf4j-api:${slfApiVersion}")
 
         testImplementation("org.slf4j:slf4j-api:${slfApiVersion}")
         testImplementation("ch.qos.logback:logback-classic:${logbackVersion}")
