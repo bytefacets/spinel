@@ -49,7 +49,7 @@ final class SubscriptionStore {
     }
 
     @VisibleForTesting
-    Subscription get(int token) {
+    Subscription get(final int token) {
         return subscriptions.getOrDefault(token, null);
     }
 }
