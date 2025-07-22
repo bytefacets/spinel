@@ -14,4 +14,8 @@ public final class SendPackageAccess {
     public GrpcSink sink(final int token, final StreamObserver<SubscriptionResponse> stream) {
         return GrpcSink.grpcSink(token, stream);
     }
+
+    public GrpcEncoder encoder(final int token) {
+        return GrpcEncoder.grpcEncoder(token);
+    }
 }
