@@ -40,7 +40,7 @@ public final class OutputLoggerBuilder {
     }
 
     public static OutputLoggerBuilder logger(final @Nullable String name) {
-        return new OutputLoggerBuilder(resolveName("Projection", name));
+        return new OutputLoggerBuilder(resolveName("Logger", name));
     }
 
     public static OutputLoggerBuilder logger(final TransformContext transformContext) {
