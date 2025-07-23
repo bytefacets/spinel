@@ -12,9 +12,11 @@ public final class ReceivePackageAccess {
     private ReceivePackageAccess() {}
 
     public static DecoderAccess decoder() {
-        return new DecoderAccess(
-                GrpcDecoder.grpcDecoder(
-                        new SchemaBuilder(matrixStoreFieldFactory(32, 32, i -> {}))));
+        return new DecoderAccess(grpcDecoder());
+    }
+
+    static GrpcDecoder grpcDecoder() {
+        return GrpcDecoder.grpcDecoder(new SchemaBuilder(matrixStoreFieldFactory(32, 32, i -> {})));
     }
 
     public static Object decode(final ByteString value) {

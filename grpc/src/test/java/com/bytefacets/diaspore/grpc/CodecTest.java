@@ -12,7 +12,7 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import com.bytefacets.diaspore.grpc.receive.ReceivePackageAccess;
 import com.bytefacets.diaspore.grpc.send.GrpcSink;
 import com.bytefacets.diaspore.grpc.send.SendPackageAccess;
-import com.bytefacets.diaspore.printer.OutputPrinter;
+import com.bytefacets.diaspore.printer.OutputLoggerBuilder;
 import com.bytefacets.diaspore.schema.Metadata;
 import com.bytefacets.diaspore.table.IntIndexedTable;
 import com.bytefacets.diaspore.testing.IntTableHandle;
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.Level;
 
 public final class CodecTest {
     private static final boolean print = true;
@@ -199,7 +200,8 @@ public final class CodecTest {
         // client ---------
         receiver = ReceivePackageAccess.decoder();
         if (print) {
-            receiver.output().attachInput(OutputPrinter.printer().input());
+            receiver.output()
+                    .attachInput(OutputLoggerBuilder.logger().logLevel(Level.INFO).build().input());
         }
         // receiver goes to the validator
         receiver.output().attachInput(validation.input());

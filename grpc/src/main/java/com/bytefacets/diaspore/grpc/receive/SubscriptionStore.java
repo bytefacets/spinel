@@ -14,7 +14,7 @@ final class SubscriptionStore {
 
     void resubscribe(final Consumer<SubscriptionRequest> consumer) {
         synchronized (subscriptions) {
-            subscriptions.forEachValue(sub -> consumer.accept(sub.createRequest()));
+            subscriptions.forEachValue(sub -> sub.requestSubscriptionIfNecessary(consumer));
         }
     }
 
@@ -27,12 +27,20 @@ final class SubscriptionStore {
         return sub;
     }
 
+    void resetSubscriptionStatus() {
+        synchronized (subscriptions) {
+            subscriptions.forEachValue(Subscription::markUnsubscribed);
+        }
+    }
+
     void accept(final SubscriptionResponse response) {
         final int token = response.getRefToken();
         synchronized (subscriptions) {
             final Subscription sub = subscriptions.getOrDefault(token, null);
             if (sub != null) {
                 sub.decoder().accept(response);
+            } else {
+                System.out.println("Did not find subscription for token " + token);
             }
         }
     }
