@@ -7,8 +7,9 @@ import com.bytefacets.diaspore.comms.ConnectionHandle;
 import com.bytefacets.diaspore.comms.ConnectionInfo;
 import com.bytefacets.diaspore.comms.receive.ChangeDecoder;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
+import com.bytefacets.diaspore.transform.OutputProvider;
 
-public final class GrpcSource {
+public final class GrpcSource implements OutputProvider {
     private final Subscription subscription;
     private final ConnectionInfo connectionInfo;
     private final ConnectionHandle connectionHandle;
@@ -34,6 +35,7 @@ public final class GrpcSource {
         return subscription.decoder();
     }
 
+    @Override
     public TransformOutput output() {
         return subscription.decoder().output();
     }

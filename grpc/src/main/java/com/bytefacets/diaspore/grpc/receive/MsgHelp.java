@@ -2,6 +2,7 @@ package com.bytefacets.diaspore.grpc.receive;
 
 import com.bytefacets.diaspore.comms.SubscriptionConfig;
 import com.bytefacets.diaspore.grpc.proto.CreateSubscription;
+import com.bytefacets.diaspore.grpc.proto.InitializationRequest;
 import com.bytefacets.diaspore.grpc.proto.RequestType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 
@@ -22,5 +23,13 @@ final class MsgHelp {
             builder.addAllFieldNames(config.fields());
         }
         return builder.build();
+    }
+
+    static SubscriptionRequest init(final int token, final String user) {
+        return SubscriptionRequest.newBuilder()
+                .setRefToken(token)
+                .setRequestType(RequestType.REQUEST_TYPE_INIT)
+                .setInitialization(InitializationRequest.newBuilder().setUser(user).build())
+                .build();
     }
 }

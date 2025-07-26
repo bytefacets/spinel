@@ -4,23 +4,23 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.diaspore.comms.ConnectionInfo;
 import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.netty.channel.EventLoop;
 import java.net.URI;
-import java.util.concurrent.Executor;
 
 public final class GrpcClientBuilder {
     private static final ConnectionInfo EMPTY = new ConnectionInfo("", URI.create("grpc://unset"));
     private final ManagedChannel channel;
-    private final Executor dataExecutor;
+    private final EventLoop dataEventLoop;
     private ConnectionInfo connectionInfo = EMPTY;
 
-    private GrpcClientBuilder(final ManagedChannel channel, final Executor dataExecutor) {
+    private GrpcClientBuilder(final ManagedChannel channel, final EventLoop dataEventLoop) {
         this.channel = requireNonNull(channel, "channel");
-        this.dataExecutor = requireNonNull(dataExecutor, "dataExecutor");
+        this.dataEventLoop = requireNonNull(dataEventLoop, "dataEventLoop");
     }
 
     public static GrpcClientBuilder grpcClient(
-            final ManagedChannel channel, final Executor dataExecutor) {
-        return new GrpcClientBuilder(channel, dataExecutor);
+            final ManagedChannel channel, final EventLoop dataEventLoop) {
+        return new GrpcClientBuilder(channel, dataEventLoop);
     }
 
     public GrpcClientBuilder connectionInfo(final ConnectionInfo connectionInfo) {
@@ -29,6 +29,6 @@ public final class GrpcClientBuilder {
     }
 
     public GrpcClient build() {
-        return new GrpcClient(connectionInfo, channel, dataExecutor);
+        return new GrpcClient(connectionInfo, channel, dataEventLoop);
     }
 }
