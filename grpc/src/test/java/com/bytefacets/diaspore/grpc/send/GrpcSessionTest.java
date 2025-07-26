@@ -14,7 +14,9 @@ import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.comms.send.OutputRegistry;
 import com.bytefacets.diaspore.grpc.proto.CreateSubscription;
+import com.bytefacets.diaspore.grpc.proto.InitializationRequest;
 import com.bytefacets.diaspore.grpc.proto.RequestType;
+import com.bytefacets.diaspore.grpc.proto.Response;
 import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
@@ -145,6 +147,31 @@ class GrpcSessionTest {
                     responseCaptor.getValue().getResponse().getMessage(),
                     equalTo("Output not found: bar"));
         }
+    }
+
+    @Nested
+    class InitializationTests {
+        @Test
+        void shouldRespondToInitializationRequest() {
+            session.requestHandler().onNext(init(1, "anonymous"));
+            verify(observer, times(1)).onNext(responseCaptor.capture());
+            final var expected =
+                    SubscriptionResponse.newBuilder()
+                            .setRefToken(1)
+                            .setResponseType(ResponseType.RESPONSE_TYPE_INIT)
+                            .setResponse(Response.newBuilder().setMessage("hello").build())
+                            .build();
+            assertThat(responseCaptor.getValue(), equalTo(expected));
+        }
+    }
+
+    SubscriptionRequest init(final int token, final String name) {
+        final var init = InitializationRequest.newBuilder().setUser(name).build();
+        return SubscriptionRequest.newBuilder()
+                .setRequestType(RequestType.REQUEST_TYPE_INIT)
+                .setRefToken(token)
+                .setInitialization(init)
+                .build();
     }
 
     SubscriptionRequest subscribeRequest(final String name, final List<String> fields) {

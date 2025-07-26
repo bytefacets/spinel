@@ -10,10 +10,11 @@ import com.bytefacets.diaspore.comms.send.ChangeEncoder;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.transform.InputProvider;
 import io.grpc.stub.StreamObserver;
 import javax.annotation.Nullable;
 
-public final class GrpcSink {
+public final class GrpcSink implements InputProvider {
     private final Input input = new Input();
     private final ChangeEncoder<SubscriptionResponse> encoder;
     private final StreamObserver<SubscriptionResponse> streamOutput;
@@ -31,6 +32,7 @@ public final class GrpcSink {
         this.streamOutput = requireNonNull(streamOutput, "streamOutput");
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }

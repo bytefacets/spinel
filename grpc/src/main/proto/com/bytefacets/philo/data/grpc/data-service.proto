@@ -14,6 +14,7 @@ message SubscriptionRequest {
     int32 ref_token = 1;
     RequestType request_type = 2;
     CreateSubscription subscription = 3;
+    InitializationRequest initialization = 4;
 }
 
 message SubscriptionResponse {
@@ -82,6 +83,7 @@ message FieldDefinition {
 
 enum RequestType {
     REQUEST_TYPE_SUBSCRIBE = 0;
+    REQUEST_TYPE_INIT = 1;
 }
 
 enum ResponseType {
@@ -90,6 +92,7 @@ enum ResponseType {
     RESPONSE_TYPE_ADD = 2;
     RESPONSE_TYPE_CHG = 3;
     RESPONSE_TYPE_REM = 4;
+    RESPONSE_TYPE_INIT = 5;
 }
 
 message Response {
@@ -112,4 +115,8 @@ message DataUpdate {
 message SchemaUpdate {
     string name = 1;
     repeated FieldDefinition fields = 2;
+}
+
+message InitializationRequest {
+    string user = 2;
 }

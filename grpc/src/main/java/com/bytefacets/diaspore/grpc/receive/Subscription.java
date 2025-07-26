@@ -55,4 +55,9 @@ final class Subscription {
     SubscriptionRequest createRequest() {
         return MsgHelp.request(token, MsgHelp.subscription(config));
     }
+
+    @Override
+    public String toString() {
+        return String.format("[token=%d][subscribed=%b]: %s", token, isSubscribed, config);
+    }
 }

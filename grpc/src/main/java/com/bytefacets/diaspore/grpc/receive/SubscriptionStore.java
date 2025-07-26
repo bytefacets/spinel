@@ -1,16 +1,25 @@
 package com.bytefacets.diaspore.grpc.receive;
 
+import static java.util.Objects.requireNonNull;
+
 import com.bytefacets.collections.hash.IntGenericIndexedMap;
+import com.bytefacets.diaspore.comms.ConnectionInfo;
 import com.bytefacets.diaspore.comms.SubscriptionConfig;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class SubscriptionStore {
+    private static final Logger log = LoggerFactory.getLogger(SubscriptionStore.class);
     private final IntGenericIndexedMap<Subscription> subscriptions = new IntGenericIndexedMap<>(16);
+    private final ConnectionInfo connectionInfo;
 
-    SubscriptionStore() {}
+    SubscriptionStore(final ConnectionInfo connectionInfo) {
+        this.connectionInfo = requireNonNull(connectionInfo, "connectionInfo");
+    }
 
     void resubscribe(final Consumer<SubscriptionRequest> consumer) {
         synchronized (subscriptions) {
@@ -40,7 +49,10 @@ final class SubscriptionStore {
             if (sub != null) {
                 sub.decoder().accept(response);
             } else {
-                System.out.println("Did not find subscription for token " + token);
+                log.debug(
+                        "ClientOf[{}] Did not find subscription for token {}",
+                        connectionInfo,
+                        token);
             }
         }
     }

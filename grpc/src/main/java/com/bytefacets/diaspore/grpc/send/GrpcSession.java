@@ -88,8 +88,12 @@ final class GrpcSession {
         // on grpc thread
         @Override
         public void onNext(final SubscriptionRequest request) {
+            log.debug("Received {} ({})", request.getRequestType(), request.getRefToken());
             if (request.getRequestType() == RequestType.REQUEST_TYPE_SUBSCRIBE) {
                 dataExecutor.execute(() -> subscribeOnDataThread(request));
+            } else if (request.getRequestType() == RequestType.REQUEST_TYPE_INIT) {
+                log.info("Initialization received: user={}", request.getInitialization().getUser());
+                outputStream.onNext(init(request.getRefToken()));
             } else {
                 onUnknownRequestType(request);
             }
@@ -111,6 +115,7 @@ final class GrpcSession {
         // on grpc thread
         @Override
         public void onCompleted() {
+            log.info("Completed");
             dataExecutor.execute(() -> onComplete.accept(GrpcSession.this));
         }
     }
@@ -121,6 +126,14 @@ final class GrpcSession {
                 .setRefToken(refToken)
                 .setResponseType(ResponseType.RESPONSE_TYPE_MESSAGE)
                 .setResponse(Response.newBuilder().setError(isError).setMessage(message).build())
+                .build();
+    }
+
+    static SubscriptionResponse init(final int refToken) {
+        return SubscriptionResponse.newBuilder()
+                .setRefToken(refToken)
+                .setResponseType(ResponseType.RESPONSE_TYPE_INIT)
+                .setResponse(Response.newBuilder().setError(false).setMessage("hello").build())
                 .build();
     }
 
