@@ -9,9 +9,10 @@ import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.TypeId;
+import com.bytefacets.diaspore.transform.InputProvider;
 import java.io.PrintStream;
 
-public final class OutputPrinter {
+public final class OutputPrinter implements InputProvider {
     private static final int ROW_ID_WIDTH = 5;
     private final TransformInput input;
 
@@ -27,6 +28,7 @@ public final class OutputPrinter {
         this.input = new Input(out);
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }

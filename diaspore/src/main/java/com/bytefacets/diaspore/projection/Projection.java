@@ -13,10 +13,12 @@ import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.common.StateChange;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.transform.InputProvider;
+import com.bytefacets.diaspore.transform.OutputProvider;
 import java.util.BitSet;
 import javax.annotation.Nullable;
 
-public final class Projection {
+public final class Projection implements InputProvider, OutputProvider {
     private final ProjectionSchemaBuilder schemaBuilder;
     private final OutputManager outputManager;
     private final Input input = new Input();
@@ -26,10 +28,12 @@ public final class Projection {
         this.outputManager = outputManager(delegatedRowProvider(() -> input.source));
     }
 
+    @Override
     public TransformOutput output() {
         return outputManager.output();
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }

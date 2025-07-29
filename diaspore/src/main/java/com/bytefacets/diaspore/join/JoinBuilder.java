@@ -28,6 +28,8 @@ public final class JoinBuilder {
     private String rightSourceRowFieldName;
     private JoinInterner joinInterner;
     private JoinKeyHandling joinKeyHandling = JoinKeyHandling.KeepAll;
+    private String leftSourceNodeName;
+    private String rightSourceNodeName;
 
     private JoinBuilder(final String name, final JoinType type) {
         this.name = name;
@@ -59,17 +61,25 @@ public final class JoinBuilder {
         final JoinChangeTracker tracker = JoinChangeTracker.stateChangeSet();
         final JoinMapper mapper = selectMapper(joinInterner, tracker);
         final NameConflictResolver nameResolver = new NameConflictResolver() {};
-        return new Join(
-                new JoinSchemaBuilder(
-                        name,
-                        leftSourceRowFieldName,
-                        rightSourceRowFieldName,
-                        mapper,
-                        joinInterner,
-                        nameResolver,
-                        joinKeyHandling),
-                tracker,
-                mapper);
+        final var join =
+                new Join(
+                        new JoinSchemaBuilder(
+                                name,
+                                leftSourceRowFieldName,
+                                rightSourceRowFieldName,
+                                mapper,
+                                joinInterner,
+                                nameResolver,
+                                joinKeyHandling),
+                        tracker,
+                        mapper);
+        if (leftSourceNodeName != null) {
+            context.registerEdge(leftSourceNodeName, join::leftInput);
+        }
+        if (rightSourceNodeName != null) {
+            context.registerEdge(rightSourceNodeName, join::rightInput);
+        }
+        return join;
     }
 
     private JoinMapper selectMapper(final JoinInterner interner, final JoinChangeTracker tracker) {
@@ -79,6 +89,18 @@ public final class JoinBuilder {
 
     public JoinBuilder joinOn(final JoinInterner joinInterner) {
         this.joinInterner = joinInterner;
+        return this;
+    }
+
+    public JoinBuilder withLeftSource(final String nodeName) {
+        requireContext(String.format("withLeftFrom(\"%s\")", nodeName));
+        leftSourceNodeName = requireNonNull(nodeName, "nodeName");
+        return this;
+    }
+
+    public JoinBuilder withRightSource(final String nodeName) {
+        requireContext(String.format("withRightFrom(\"%s\")", nodeName));
+        rightSourceNodeName = requireNonNull(nodeName, "nodeName");
         return this;
     }
 
@@ -145,6 +167,14 @@ public final class JoinBuilder {
 
     public static JoinBuilder lookupJoin(final TransformContext context) {
         return new JoinBuilder(context, JoinType.Lookup);
+    }
+
+    private void requireContext(final String name) {
+        if (context == null) {
+            throw new RuntimeException(
+                    String.format(
+                            "Can only use %s when in the context of a TransformBuilder", name));
+        }
     }
 
     enum JoinType {

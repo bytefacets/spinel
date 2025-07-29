@@ -13,8 +13,9 @@ import com.bytefacets.diaspore.facade.StructFacade;
 import com.bytefacets.diaspore.facade.StructFacadeFactory;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.SchemaBindable;
+import com.bytefacets.diaspore.transform.OutputProvider;
 
-public final class StructTable<T> {
+public final class StructTable<T> implements OutputProvider {
     private final OutputManager outputManager;
     private final TableStateChange stateChange;
     private final IntDeque freeList = new IntDeque(4);
@@ -98,6 +99,7 @@ public final class StructTable<T> {
     }
 
     /** The output of this table to which you can attach various inputs to receive updates. */
+    @Override
     public TransformOutput output() {
         return outputManager.output();
     }

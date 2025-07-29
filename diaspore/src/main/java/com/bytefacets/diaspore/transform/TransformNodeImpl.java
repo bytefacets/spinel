@@ -21,6 +21,10 @@ public final class TransformNodeImpl<T> implements TransformNode<T> {
         return new TransformNodeImpl<>(nameSupplier, operatorSupplier);
     }
 
+    public static <T> TransformNode<T> transformNode(final String name, final T operator) {
+        return new TransformNodeImpl<>(() -> name, () -> operator);
+    }
+
     @Override
     public T operator() {
         return operatorSupplier.get();

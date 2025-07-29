@@ -11,8 +11,9 @@ import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.WritableField;
+import com.bytefacets.diaspore.transform.OutputProvider;
 
-public final class Table {
+public final class Table implements OutputProvider {
     private final OutputManager outputManager;
     private final TableStateChange stateChange;
     private final TableRow tableRow;
@@ -77,6 +78,7 @@ public final class Table {
         stateChange.fire(outputManager, freeList::addLast);
     }
 
+    @Override
     public TransformOutput output() {
         return outputManager.output();
     }

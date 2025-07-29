@@ -3,6 +3,7 @@ package com.bytefacets.diaspore.comms;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 public final class SubscriptionConfig {
     private final String remoteOutputName;
@@ -23,6 +24,14 @@ public final class SubscriptionConfig {
 
     public static Builder subscriptionConfig(final String remoteOutputName) {
         return new Builder(remoteOutputName);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SubscriptionConfig.class.getSimpleName() + "[", "]")
+                .add("remoteOutputName='" + remoteOutputName + "'")
+                .add("fields=" + fields)
+                .toString();
     }
 
     public static final class Builder {

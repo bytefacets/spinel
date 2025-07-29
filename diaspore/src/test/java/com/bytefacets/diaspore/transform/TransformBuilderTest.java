@@ -1,65 +1,89 @@
 package com.bytefacets.diaspore.transform;
 
-import static org.mockito.ArgumentMatchers.any;
+import static com.bytefacets.diaspore.filter.FilterBuilder.filter;
+import static com.bytefacets.diaspore.schema.FieldDescriptor.intField;
+import static com.bytefacets.diaspore.table.IntIndexedTableBuilder.intIndexedTable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.bytefacets.diaspore.TransformInput;
-import com.bytefacets.diaspore.groupby.lib.IntGroupFunction;
-import com.bytefacets.diaspore.schema.FieldDescriptor;
-import com.bytefacets.diaspore.schema.IntWritableField;
-import com.bytefacets.diaspore.table.IntIndexedTable;
+import com.bytefacets.diaspore.TransformOutput;
+import com.bytefacets.diaspore.schema.Schema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TransformBuilderTest {
-    private final TransformBuilder transform = TransformBuilder.transform();
-    private TransformContinuation continuation;
+    private final TransformBuilder builder = TransformBuilder.transform();
+    private @Mock OutputProvider outputProvider;
+    private @Mock TransformOutput output;
+    private @Mock InputProvider inputProvider;
     private @Mock TransformInput input;
 
     @BeforeEach
     void setUp() {
-        continuation =
-                transform.intIndexedTable("test").addField(FieldDescriptor.intField("f1")).then();
+        lenient().when(outputProvider.output()).thenReturn(output);
+        lenient().when(inputProvider.input()).thenReturn(input);
     }
 
     @Test
-    void shouldConnectGroupByParent() {
-        continuation
-                .groupBy()
-                .groupFunction(IntGroupFunction.intGroupFunction("f1", 16))
-                .includeCountField("count")
-                .build()
-                .parentOutput()
-                .attachInput(input);
-        validate();
+    void shouldConnectEdgesOnce() {
+        builder.registerEdge(outputProvider, inputProvider);
+        builder.build();
+        builder.build();
+        verify(output, times(1)).attachInput(input);
     }
 
     @Test
-    void shouldConnectGroupByChild() {
-        continuation
-                .groupBy()
-                .groupFunction(IntGroupFunction.intGroupFunction("f1", 16))
-                .includeCountField("count")
-                .build()
-                .parentOutput()
-                .attachInput(input);
-        validate();
+    void shouldMapNodes() {
+        final Object operator = new Object();
+        builder.registerNode("foo", operator);
+        assertThat(builder.lookupNode("foo"), equalTo(operator));
     }
 
-    private void validate() {
-        transform.build();
-        final IntIndexedTable table = transform.lookupNode("test");
-        final int row = table.beginAdd(1);
-        ((IntWritableField) table.writableField("f1")).setValueAt(row, 28);
-        table.endAdd();
-        table.fireChanges();
-        verify(input, times(1)).setSource(any());
-        verify(input, times(1)).schemaUpdated(any());
-        verify(input, times(1)).rowsAdded(any());
+    @Test
+    void shouldLookupOutputProvider() {
+        builder.registerNode("test", outputProvider);
+        assertThat(builder.lookupOutputProvider("test"), equalTo(outputProvider));
+    }
+
+    @Test
+    void shouldThrowWhenOperatorNotFound() {
+        assertThrows(TransformException.class, () -> builder.lookupOutputProvider("x"));
+    }
+
+    @Test
+    void shouldThrowWhenOperatorNotAnOutputProvider() {
+        builder.registerNode("test", new Object());
+        final var ex =
+                assertThrows(TransformException.class, () -> builder.lookupOutputProvider("test"));
+        assertThat(ex.getMessage(), containsString("not an OutputProvider"));
+    }
+
+    @Test
+    void shouldConnectEdgeWhenReady() {
+        final var filter = filter().build();
+        final var table = intIndexedTable().addFields(intField("x")).build();
+        builder.registerEdgeWhenReady(filter, inputProvider);
+        builder.build();
+        // then
+        verifyNoInteractions(input);
+        // when
+        table.output().attachInput(filter.input());
+        // then
+        final ArgumentCaptor<Schema> schemaCaptor = ArgumentCaptor.forClass(Schema.class);
+        verify(input, times(1)).schemaUpdated(schemaCaptor.capture());
+        assertThat(schemaCaptor.getValue().field("x"), notNullValue());
     }
 }

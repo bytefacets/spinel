@@ -19,10 +19,12 @@ import com.bytefacets.diaspore.schema.FieldMapping;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.SchemaBuilder;
 import com.bytefacets.diaspore.schema.SchemaFieldResolver;
+import com.bytefacets.diaspore.transform.InputProvider;
+import com.bytefacets.diaspore.transform.OutputProvider;
 import java.util.BitSet;
 import javax.annotation.Nullable;
 
-public final class Filter {
+public final class Filter implements InputProvider, OutputProvider {
     private final OutputManager outputManager;
     private final Input input;
     private final String name;
