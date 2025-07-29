@@ -3,6 +3,7 @@
 package com.bytefacets.diaspore.transform;
 
 import static com.bytefacets.diaspore.common.DefaultNameSupplier.resolveName;
+import static com.bytefacets.diaspore.transform.TransformNodeImpl.transformNode;
 
 import com.bytefacets.diaspore.conflation.ChangeConflatorBuilder;
 import com.bytefacets.diaspore.filter.FilterBuilder;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 public final class TransformBuilder {
@@ -226,6 +228,16 @@ public final class TransformBuilder {
         return this;
     }
 
+    public TransformBuilder registerNode(final String name, final Object operator) {
+        pendingNodes.put(name, transformNode(name, operator));
+        return this;
+    }
+
+    public TransformBuilder registerNode(final String name, final Supplier<?> operatorSupplier) {
+        pendingNodes.put(name, transformNode(name, operatorSupplier));
+        return this;
+    }
+
     public TransformContinuation createContinuation(
             final TransformNode<?> node, final OutputProvider outputProvider) {
         return new TransformContinuation(this, node, outputProvider);
@@ -262,30 +274,30 @@ public final class TransformBuilder {
 
     @SuppressWarnings("unchecked")
     public <T> T lookupNode(final String name) {
-        if (hasPending()) {
-            build();
-        }
-        return (T) namedOperators.get(name);
+        return (T) lookupOperatorInternal(name);
     }
 
-    OutputProvider lookupOutputProvider(final String name) {
+    Object lookupOperatorInternal(final String name) {
         Object operator = namedOperators.get(name);
         if (operator == null) {
             final TransformNode<?> node = pendingNodes.remove(name);
             if (node != null) {
                 operator = node.operator();
+                namedOperators.put(name, operator);
             }
         }
         if (operator == null) {
-            throw new RuntimeException("Operator not found: " + name);
+            throw TransformException.notFound(name);
         }
+        return operator;
+    }
+
+    OutputProvider lookupOutputProvider(final String name) {
+        final Object operator = lookupOperatorInternal(name);
         if (operator instanceof OutputProvider outputProvider) {
             return outputProvider;
         } else {
-            throw new RuntimeException(
-                    String.format(
-                            "Requested operator is not an OutputProvider: %s is %s",
-                            name, operator.getClass().getName()));
+            throw TransformException.notAnOutputProvider(name, operator);
         }
     }
 
