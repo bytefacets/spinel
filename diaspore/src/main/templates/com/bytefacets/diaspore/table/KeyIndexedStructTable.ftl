@@ -11,6 +11,7 @@ import com.bytefacets.diaspore.facade.StructFacadeFactory;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.SchemaBindable;
 import com.bytefacets.diaspore.schema.WritableField;
+import com.bytefacets.diaspore.transform.OutputProvider;
 
 import static com.bytefacets.diaspore.exception.DuplicateKeyException.duplicateKeyException;
 import static com.bytefacets.diaspore.exception.KeyException.unknownKeyException;
@@ -37,7 +38,7 @@ import static java.util.Objects.requireNonNull;
  * Only facades created by this table can be used in the modification methods because
  * the facades created by the table are bound to the underlying storage.<p/>
  */
-public final class ${type.name}IndexedStructTable${classGenerics} {
+public final class ${type.name}IndexedStructTable${classGenerics} implements OutputProvider {
     private final OutputManager outputManager;
     private final TableStateChange stateChange;
     private final StructFacadeFactory facadeFactory;

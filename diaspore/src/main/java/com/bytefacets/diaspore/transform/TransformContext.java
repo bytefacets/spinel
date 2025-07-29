@@ -44,6 +44,16 @@ public final class TransformContext {
         return support;
     }
 
+    public void registerEdge(
+            final OutputProvider outputProvider, final InputProvider inputProvider) {
+        transform.registerEdge(outputProvider, inputProvider);
+    }
+
+    public void registerEdge(final String outputNodeName, final InputProvider inputProvider) {
+        final OutputProvider outputProvider = transform.lookupOutputProvider(outputNodeName);
+        registerEdge(outputProvider, inputProvider);
+    }
+
     public TransformContinuation createContinuation(
             final TransformNode<?> node, final OutputProvider outputProvider) {
         return transform.createContinuation(node, outputProvider);

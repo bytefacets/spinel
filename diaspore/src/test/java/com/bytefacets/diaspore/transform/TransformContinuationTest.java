@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class TransformBuilderTest {
+class TransformContinuationTest {
     private final TransformBuilder transform = TransformBuilder.transform();
     private TransformContinuation continuation;
     private @Mock TransformInput input;

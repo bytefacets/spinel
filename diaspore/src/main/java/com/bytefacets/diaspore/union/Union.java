@@ -14,9 +14,10 @@ import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.common.StateChange;
 import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.transform.OutputProvider;
 import javax.annotation.Nullable;
 
-public final class Union {
+public final class Union implements OutputProvider {
     private final StateChange stateChange = StateChange.stateChange();
     private final UnionSchemaBuilder schemaBuilder;
     private final UnionRowMapper mapper;
@@ -32,6 +33,7 @@ public final class Union {
         this.dependencyMap = schemaBuilder.dependencyMap();
     }
 
+    @Override
     public TransformOutput output() {
         return outputManager.output();
     }

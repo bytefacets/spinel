@@ -8,6 +8,7 @@ import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.common.OutputManager;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.WritableField;
+import com.bytefacets.diaspore.transform.OutputProvider;
 
 import static com.bytefacets.diaspore.exception.DuplicateKeyException.duplicateKeyException;
 import static com.bytefacets.diaspore.exception.KeyException.unknownKeyException;
@@ -16,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * A table keyed by ${type.javaType}.
  */
-public final class ${type.name}IndexedTable${generics} {
+public final class ${type.name}IndexedTable${generics} implements OutputProvider {
     private final String name;
     private final OutputManager outputManager;
     private final TableStateChange stateChange;

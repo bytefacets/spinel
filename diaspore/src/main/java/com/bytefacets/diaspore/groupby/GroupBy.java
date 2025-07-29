@@ -19,11 +19,13 @@ import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.FieldBitSet;
 import com.bytefacets.diaspore.schema.FieldMapping;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.transform.InputProvider;
+import com.bytefacets.diaspore.transform.OutputProvider;
 import java.util.BitSet;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
-public class GroupBy {
+public final class GroupBy implements InputProvider, OutputProvider {
     private final GroupMapping groupMapping;
     private final GroupBySchemaBuilder schemaBuilder;
     private final ChildSchemaBuilder childSchemaBuilder;
@@ -47,8 +49,15 @@ public class GroupBy {
         this.groupFunction = requireNonNull(groupFunction, "groupFunction");
     }
 
+    @Override
     public TransformInput input() {
         return input;
+    }
+
+    /** The parent output */
+    @Override
+    public TransformOutput output() {
+        return parentOutput.output();
     }
 
     public TransformOutput parentOutput() {

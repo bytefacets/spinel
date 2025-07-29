@@ -33,14 +33,15 @@ import com.bytefacets.diaspore.table.TableBuilder;
 import com.bytefacets.diaspore.union.UnionBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
 public final class TransformBuilder {
-    private final List<TransformNode<?>> nodes = new ArrayList<>();
-    private final List<TransformEdge> edges = new ArrayList<>();
-    private final Map<String, Object> namedNodeMap = new HashMap<>();
+    private final Map<String, TransformNode<?>> pendingNodes = new LinkedHashMap<>();
+    private final List<TransformEdge> pendingEdges = new ArrayList<>();
+    private final Map<String, Object> namedOperators = new HashMap<>();
 
     private TransformBuilder() {}
 
@@ -220,8 +221,9 @@ public final class TransformBuilder {
         return logger(null);
     }
 
-    public void registerTransformNode(final TransformNode<?> node) {
-        nodes.add(node);
+    public TransformBuilder registerTransformNode(final TransformNode<?> node) {
+        pendingNodes.put(node.name(), node);
+        return this;
     }
 
     public TransformContinuation createContinuation(
@@ -231,28 +233,60 @@ public final class TransformBuilder {
 
     public void registerEdge(
             final OutputProvider outputProvider, final InputProvider inputProvider) {
-        edges.add(() -> outputProvider.output().attachInput(inputProvider.input()));
+        pendingEdges.add(() -> outputProvider.output().attachInput(inputProvider.input()));
     }
 
     public void registerEdgeWhenReady(
             final OutputProvider outputProvider, final InputProvider inputProvider) {
-        edges.add(new TransformEdgeWhenReady(outputProvider, inputProvider));
+        pendingEdges.add(new TransformEdgeWhenReady(outputProvider, inputProvider));
     }
 
     public void build() {
-        edges.forEach(TransformEdge::connect);
-        nodes.forEach(node -> namedNodeMap.put(node.name(), node.operator()));
+        while (hasPending()) {
+            final var edgeCopy = List.copyOf(pendingEdges);
+            pendingEdges.clear();
+            edgeCopy.forEach(TransformEdge::connect);
+
+            final var nodeCopy = Map.copyOf(pendingNodes);
+            pendingNodes.clear();
+            nodeCopy.forEach((name, node) -> namedOperators.put(name, node.operator()));
+        }
         // maybe separate this into pending and done so we can do build() multiple times
-        edges.clear();
-        nodes.clear();
+        pendingEdges.clear();
+        pendingNodes.clear();
+    }
+
+    private boolean hasPending() {
+        return !(pendingNodes.isEmpty() && pendingEdges.isEmpty());
     }
 
     @SuppressWarnings("unchecked")
     public <T> T lookupNode(final String name) {
-        if (!nodes.isEmpty() || !edges.isEmpty()) {
+        if (hasPending()) {
             build();
         }
-        return (T) namedNodeMap.get(name);
+        return (T) namedOperators.get(name);
+    }
+
+    OutputProvider lookupOutputProvider(final String name) {
+        Object operator = namedOperators.get(name);
+        if (operator == null) {
+            final TransformNode<?> node = pendingNodes.remove(name);
+            if (node != null) {
+                operator = node.operator();
+            }
+        }
+        if (operator == null) {
+            throw new RuntimeException("Operator not found: " + name);
+        }
+        if (operator instanceof OutputProvider outputProvider) {
+            return outputProvider;
+        } else {
+            throw new RuntimeException(
+                    String.format(
+                            "Requested operator is not an OutputProvider: %s is %s",
+                            name, operator.getClass().getName()));
+        }
     }
 
     private TransformContext newContext(final String name) {

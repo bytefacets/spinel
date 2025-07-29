@@ -16,6 +16,8 @@ import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.FieldBitSet;
 import com.bytefacets.diaspore.schema.FieldMapping;
 import com.bytefacets.diaspore.schema.Schema;
+import com.bytefacets.diaspore.transform.InputProvider;
+import com.bytefacets.diaspore.transform.OutputProvider;
 import javax.annotation.Nullable;
 
 /**
@@ -32,7 +34,7 @@ import javax.annotation.Nullable;
  *   <li>removes: Removed rows cause pending changes to be fired first, and then the removes
  * </ul>
  */
-public final class ChangeConflator {
+public final class ChangeConflator implements InputProvider, OutputProvider {
     private final OutputManager outputManager;
     private final Input input;
     private final TransformOutput output;
@@ -51,10 +53,12 @@ public final class ChangeConflator {
         this.output = outputManager.output();
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }
 
+    @Override
     public TransformOutput output() {
         return output;
     }

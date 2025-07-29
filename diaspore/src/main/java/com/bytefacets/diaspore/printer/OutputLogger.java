@@ -13,12 +13,14 @@ import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.SchemaField;
 import com.bytefacets.diaspore.schema.TypeId;
+import com.bytefacets.diaspore.transform.InputProvider;
+import com.bytefacets.diaspore.transform.OutputProvider;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
-public final class OutputLogger {
+public final class OutputLogger implements InputProvider, OutputProvider {
     private final Input input;
 
     OutputLogger(
@@ -26,10 +28,12 @@ public final class OutputLogger {
         this.input = new Input(logger, logMethod, logLevel);
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }
 
+    @Override
     public TransformOutput output() {
         return input.outputManager.output();
     }
