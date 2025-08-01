@@ -62,9 +62,7 @@ class GrpcSessionTest {
     void shouldCloseOnDataThread() {
         // given subscription is set up
         session.requestHandler().onNext(subscribeRequest("foo", List.of()));
-        verify(dataExecutor, times(1)).execute(runnableCaptor.capture());
-        runnableCaptor.getValue().run();
-        reset(dataExecutor, output);
+        reset(output);
         assertThat(session.activeAdapters(), equalTo(1));
         // when
         session.close();
