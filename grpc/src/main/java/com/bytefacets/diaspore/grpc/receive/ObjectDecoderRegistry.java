@@ -32,7 +32,7 @@ public final class ObjectDecoderRegistry {
     static Object decode(final ByteString encoded) {
         final byte systemTypeId = encoded.byteAt(0);
         final byte userTypeId = encoded.byteAt(1);
-        final ObjectDecoder decoder = registry.get(key(systemTypeId, userTypeId));
+        final ObjectDecoder decoder = registry.getOrDefault(key(systemTypeId, userTypeId), null);
         if (decoder == null) {
             return null;
         } else {
