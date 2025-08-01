@@ -14,9 +14,9 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import io.netty.channel.EventLoop;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,29 +24,31 @@ import org.slf4j.LoggerFactory;
 final class GrpcSession {
     private static final Logger log = LoggerFactory.getLogger(GrpcSession.class);
     private final OutputRegistry registry;
-    private final Executor dataExecutor;
+    private final EventLoop dataEventLoop;
     private final RequestHandler requestHandler = new RequestHandler();
     private final StreamObserver<SubscriptionResponse> outputStream;
     private final Map<String, GrpcSink> activeAdapters = new HashMap<>(4);
     private final Consumer<GrpcSession> onComplete;
+    private final SenderErrorEval errorEval;
 
     static GrpcSession createSession(
             final OutputRegistry registry,
             final ServerCallStreamObserver<SubscriptionResponse> outputStream,
-            final Executor dataExecutor,
+            final EventLoop dataEventLoop,
             final Consumer<GrpcSession> onComplete) {
-        return new GrpcSession(registry, outputStream, dataExecutor, onComplete);
+        return new GrpcSession(registry, outputStream, dataEventLoop, onComplete);
     }
 
     GrpcSession(
             final OutputRegistry registry,
             final ServerCallStreamObserver<SubscriptionResponse> outputStream,
-            final Executor dataExecutor,
+            final EventLoop dataEventLoop,
             final Consumer<GrpcSession> onComplete) {
         this.registry = requireNonNull(registry, "registry");
-        this.dataExecutor = requireNonNull(dataExecutor, "dataExecutor");
+        this.dataEventLoop = requireNonNull(dataEventLoop, "dataEventLoop");
         this.onComplete = requireNonNull(onComplete, "onComplete");
         this.outputStream = requireNonNull(outputStream, "outputStream");
+        this.errorEval = new SenderErrorEval(log);
         outputStream.setOnCancelHandler(this::cancelled);
     }
 
@@ -55,7 +57,7 @@ final class GrpcSession {
     }
 
     void close() {
-        dataExecutor.execute(this::internalClose);
+        dataEventLoop.execute(this::internalClose);
     }
 
     // on data thread
@@ -84,13 +86,16 @@ final class GrpcSession {
         log.info("Client cancelled connection");
     }
 
+    /**
+     * Server should be created with executor event loop corresponding to the data thread, so all
+     * callbacks will be on the data event loop.
+     */
     private class RequestHandler implements StreamObserver<SubscriptionRequest> {
-        // on grpc thread
         @Override
         public void onNext(final SubscriptionRequest request) {
             log.debug("Received {} ({})", request.getRequestType(), request.getRefToken());
             if (request.getRequestType() == RequestType.REQUEST_TYPE_SUBSCRIBE) {
-                dataExecutor.execute(() -> subscribeOnDataThread(request));
+                subscribeOnDataThread(request);
             } else if (request.getRequestType() == RequestType.REQUEST_TYPE_INIT) {
                 log.info("Initialization received: user={}", request.getInitialization().getUser());
                 outputStream.onNext(init(request.getRefToken()));
@@ -99,24 +104,21 @@ final class GrpcSession {
             }
         }
 
-        // on grpc thread
         private void onUnknownRequestType(final SubscriptionRequest request) {
             log.warn("Unknown RequestType received: {}", request.getRequestTypeValue());
             outputStream.onNext(
                     invalidResponseType(request.getRefToken(), request.getRequestTypeValue()));
         }
 
-        // on grpc thread
         @Override
         public void onError(final Throwable throwable) {
-            log.warn("onError", throwable);
+            errorEval.handleException(throwable);
         }
 
-        // on grpc thread
         @Override
         public void onCompleted() {
             log.info("Completed");
-            dataExecutor.execute(() -> onComplete.accept(GrpcSession.this));
+            onComplete.accept(GrpcSession.this);
         }
     }
 

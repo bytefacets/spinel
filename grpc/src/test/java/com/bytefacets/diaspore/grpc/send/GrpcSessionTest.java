@@ -3,7 +3,6 @@ package com.bytefacets.diaspore.grpc.send;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -21,8 +20,8 @@ import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import io.grpc.stub.ServerCallStreamObserver;
+import io.netty.channel.EventLoop;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcSessionTest {
-    private @Mock Executor dataExecutor;
+    private @Mock EventLoop dataExecutor;
     private @Mock OutputRegistry registry;
     private @Mock Consumer<GrpcSession> onComplete;
     private @Mock ServerCallStreamObserver<SubscriptionResponse> observer;
@@ -63,9 +62,7 @@ class GrpcSessionTest {
     void shouldCloseOnDataThread() {
         // given subscription is set up
         session.requestHandler().onNext(subscribeRequest("foo", List.of()));
-        verify(dataExecutor, times(1)).execute(runnableCaptor.capture());
-        runnableCaptor.getValue().run();
-        reset(dataExecutor, output);
+        reset(output);
         assertThat(session.activeAdapters(), equalTo(1));
         // when
         session.close();
@@ -101,40 +98,16 @@ class GrpcSessionTest {
     @Nested
     class CreateSubscriptionTests {
         @Test
-        void shouldSubscribeOnDataThread() {
+        void shouldConnectSourceToSessionOnSubscribe() {
             session.requestHandler().onNext(subscribeRequest("foo", List.of()));
-            assertThat(session.activeAdapters(), equalTo(0));
-            verifyNoInteractions(registry, output); // not yet
 
-            verify(dataExecutor, times(1)).execute(runnableCaptor.capture());
-            runnableCaptor.getValue().run();
             verify(registry, times(1)).lookup("foo");
             verify(output, times(1)).attachInput(any());
             assertThat(session.activeAdapters(), equalTo(1));
         }
 
         @Test
-        void shouldCompleteAndCallbackOnDataThread() {
-            // when
-            session.requestHandler().onCompleted();
-            // then
-            verifyNoInteractions(registry, onComplete); // not yet
-            // when
-            verify(dataExecutor, times(1)).execute(runnableCaptor.capture());
-            runnableCaptor.getValue().run();
-            // then
-            verify(onComplete, times(1)).accept(session);
-        }
-
-        @Test
         void shouldReturnErrorMessageWhenOutputNotFound() {
-            doAnswer(
-                            inv -> {
-                                inv.getArgument(0, Runnable.class).run();
-                                return null;
-                            })
-                    .when(dataExecutor)
-                    .execute(any());
             // when
             session.requestHandler().onNext(subscribeRequest("bar", List.of()));
             // then

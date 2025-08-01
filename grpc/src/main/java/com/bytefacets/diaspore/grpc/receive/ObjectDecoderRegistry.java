@@ -1,14 +1,15 @@
 package com.bytefacets.diaspore.grpc.receive;
 
+import com.bytefacets.collections.hash.ShortGenericIndexedMap;
 import com.bytefacets.collections.types.Pack;
 import com.bytefacets.diaspore.schema.TypeId;
 import com.google.protobuf.ByteString;
-import io.grpc.netty.shaded.io.netty.util.collection.ShortObjectHashMap;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public final class ObjectDecoderRegistry {
-    private static final ShortObjectHashMap<ObjectDecoder> registry = new ShortObjectHashMap<>();
+    private static final ShortGenericIndexedMap<ObjectDecoder> registry =
+            new ShortGenericIndexedMap<>(16);
 
     static {
         registry.put(sysKey(TypeId.Bool), ObjectDecoderRegistry::decodeBool);
@@ -31,7 +32,7 @@ public final class ObjectDecoderRegistry {
     static Object decode(final ByteString encoded) {
         final byte systemTypeId = encoded.byteAt(0);
         final byte userTypeId = encoded.byteAt(1);
-        final ObjectDecoder decoder = registry.get(key(systemTypeId, userTypeId));
+        final ObjectDecoder decoder = registry.getOrDefault(key(systemTypeId, userTypeId), null);
         if (decoder == null) {
             return null;
         } else {

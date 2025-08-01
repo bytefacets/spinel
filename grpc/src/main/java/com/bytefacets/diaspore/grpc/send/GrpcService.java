@@ -9,18 +9,18 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import java.util.concurrent.Executor;
+import io.netty.channel.EventLoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GrpcService extends DataServiceGrpc.DataServiceImplBase {
     private static final Logger log = LoggerFactory.getLogger(GrpcSession.class);
     private final OutputRegistry registry;
-    private final Executor dataExecutor;
+    private final EventLoop dataEventLoop;
 
-    GrpcService(final OutputRegistry registry, final Executor dataExecutor) {
+    GrpcService(final OutputRegistry registry, final EventLoop dataEventLoop) {
         this.registry = requireNonNull(registry, "registry");
-        this.dataExecutor = requireNonNull(dataExecutor, "dataExecutor");
+        this.dataEventLoop = requireNonNull(dataEventLoop, "dataEventLoop");
     }
 
     public OutputRegistry registry() {
@@ -32,7 +32,7 @@ public final class GrpcService extends DataServiceGrpc.DataServiceImplBase {
             final StreamObserver<SubscriptionResponse> responseObserver) {
         final var sessionStream = (ServerCallStreamObserver<SubscriptionResponse>) responseObserver;
         log.info("New session established");
-        return createSession(registry, sessionStream, dataExecutor, this::sessionCompleted)
+        return createSession(registry, sessionStream, dataEventLoop, this::sessionCompleted)
                 .requestHandler();
     }
 

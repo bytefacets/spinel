@@ -73,11 +73,12 @@ subprojects {
     project.version = project.parent?.version!!
 
     extra.apply {
-        set("guavaVersion", "31.0.1-jre")
         set("findbugsVersion", "4.7.3")
-        set("spotbugsVersion", "4.8.6")
-        set("slfApiVersion", "2.0.17")
+        set("guavaVersion", "31.0.1-jre")
         set("logbackVersion", "1.5.18")
+        set("nettyVersion", "4.2.3.Final")
+        set("slfApiVersion", "2.0.17")
+        set("spotbugsVersion", "4.8.6")
     }
 
     val spotbugsVersion: String by extra

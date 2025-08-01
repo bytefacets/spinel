@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.diaspore.comms.ConnectionInfo;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.netty.channel.EventLoop;
+import io.netty.channel.EventLoop;
 import java.net.URI;
 
 public final class GrpcClientBuilder {
