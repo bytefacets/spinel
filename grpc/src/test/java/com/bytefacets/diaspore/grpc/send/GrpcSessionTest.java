@@ -21,8 +21,8 @@ import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import io.grpc.stub.ServerCallStreamObserver;
+import io.netty.channel.EventLoop;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcSessionTest {
-    private @Mock Executor dataExecutor;
+    private @Mock EventLoop dataExecutor;
     private @Mock OutputRegistry registry;
     private @Mock Consumer<GrpcSession> onComplete;
     private @Mock ServerCallStreamObserver<SubscriptionResponse> observer;
