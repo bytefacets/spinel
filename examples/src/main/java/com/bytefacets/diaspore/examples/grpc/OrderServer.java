@@ -111,7 +111,7 @@ final class OrderServer {
     }
 
     /** Little class that creates a batch of orders */
-    private class OrderActivity implements Runnable {
+    private final class OrderActivity implements Runnable {
         private final Order facade;
         private final IntDeque activeOrders = new IntDeque(ACTIVE_ORDER_HI);
         int id = 1;

@@ -80,7 +80,7 @@ final class MarketDataServer {
         outputs.register("market-data", marketData.output());
     }
 
-    private class MarketDataCreator implements Runnable {
+    private final class MarketDataCreator implements Runnable {
         private final MarketData facade;
 
         private MarketDataCreator() {
