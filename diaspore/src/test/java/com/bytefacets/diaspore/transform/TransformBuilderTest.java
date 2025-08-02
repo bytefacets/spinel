@@ -72,6 +72,18 @@ class TransformBuilderTest {
     }
 
     @Test
+    void shouldConnectEdgesCreatedDuringADeferredOperatorBuild() {
+        builder.registerDeferredNode(
+                "foo",
+                () -> {
+                    builder.registerEdge(outputProvider, inputProvider);
+                    return outputProvider;
+                });
+        builder.build();
+        verify(output, times(1)).attachInput(input);
+    }
+
+    @Test
     void shouldConnectEdgeWhenReady() {
         final var filter = filter().build();
         final var table = intIndexedTable().addFields(intField("x")).build();
@@ -85,5 +97,14 @@ class TransformBuilderTest {
         final ArgumentCaptor<Schema> schemaCaptor = ArgumentCaptor.forClass(Schema.class);
         verify(input, times(1)).schemaUpdated(schemaCaptor.capture());
         assertThat(schemaCaptor.getValue().field("x"), notNullValue());
+    }
+
+    @Test
+    void shouldBuildFilter() {
+        final var table = builder.intIndexedTable("table").addField(intField("x")).getOrCreate();
+        final var filter = builder.filter().getOrCreate();
+        builder.registerEdge(table, filter);
+        builder.build();
+        assertThat(filter.output().schema(), notNullValue());
     }
 }
