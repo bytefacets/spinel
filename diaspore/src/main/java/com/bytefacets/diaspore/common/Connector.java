@@ -5,9 +5,7 @@ import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.transform.InputProvider;
 import com.bytefacets.diaspore.transform.OutputProvider;
 
-/**
- * Convenience class for connection operations between operators
- */
+/** Convenience class for connection operations between operators */
 public final class Connector {
     private Connector() {}
 
