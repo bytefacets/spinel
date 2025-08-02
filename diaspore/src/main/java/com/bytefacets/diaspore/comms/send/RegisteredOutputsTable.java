@@ -23,6 +23,13 @@ public final class RegisteredOutputsTable implements OutputProvider, OutputRegis
         table.fireChanges();
     }
 
+    public void register(final String name, final OutputProvider out) {
+        outputMap.put(name, out.output());
+        table.beginAdd(name);
+        table.endAdd();
+        table.fireChanges();
+    }
+
     public boolean contains(final String name) {
         return outputMap.containsKey(name);
     }

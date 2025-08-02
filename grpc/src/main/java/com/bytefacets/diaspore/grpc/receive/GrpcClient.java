@@ -22,6 +22,36 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A client which will connect to a GrpcService.
+ *
+ * <p>An example of building the gRPC ManagedChannel is:
+ *
+ * <pre>
+ * ManagedChannel channel = ManagedChannelBuilder.forTarget("0.0.0.0:15000")
+ *                          .usePlaintext()
+ *                          .enableRetry()
+ *                           .keepAliveTime(5, TimeUnit.MINUTES)
+ *                          .keepAliveTimeout(20, TimeUnit.SECONDS)
+ *                          .build();
+ *
+ * // note the event loop should be single threaded
+ * EventLoop dataEventLoop = new DefaultEventLoop();
+ * GrpcClient client = GrpcClientBuilder.grpcClient(channel, dataEventLoop)
+ *                       .connectionInfo(new ConnectionInfo("some-server", "0.0.0.0:15000"))
+ *                       .build();
+ *
+ * // then set up subscriptions to the server
+ * GrpcSource orders = GrpcSourceBuilder.grpcSource(client, "order-view")
+ *                        .subscription(subscriptionConfig("order-view").build())
+ *                        .getOrCreate();
+ *
+ * // then connect the "orders" GrpcSource to further process the data.
+ *
+ * // then connect the client
+ * mdClient.connect();
+ * </pre>
+ */
 public final class GrpcClient implements Receiver {
     private static final Logger log = LoggerFactory.getLogger(GrpcClient.class);
     private final ConnectionInfo connectionInfo;
@@ -66,9 +96,22 @@ public final class GrpcClient implements Receiver {
         this.subscriptionStore = requireNonNull(subscriptionStore, "subscriptionStore");
         this.logPrefix =
                 String.format(
-                        "ClientOf[name=%s,uri=%s]", connectionInfo.name(), connectionInfo.uri());
+                        "ClientOf[name=%s,endpoint=%s]",
+                        connectionInfo.name(), connectionInfo.endpoint());
         this.errorEval = new ClientErrorEval(log, connectionInfo);
         requestAdapter.trackConnectionStateChange();
+    }
+
+    public void connect() {
+        requestAdapter.connect();
+    }
+
+    public void disconnect() {
+        requestAdapter.disconnect();
+    }
+
+    public boolean isConnected() {
+        return requestAdapter.isConnected();
     }
 
     @Override

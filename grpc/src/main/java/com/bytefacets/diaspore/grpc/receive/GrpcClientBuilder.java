@@ -5,10 +5,9 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.diaspore.comms.ConnectionInfo;
 import io.grpc.ManagedChannel;
 import io.netty.channel.EventLoop;
-import java.net.URI;
 
 public final class GrpcClientBuilder {
-    private static final ConnectionInfo EMPTY = new ConnectionInfo("", URI.create("grpc://unset"));
+    private static final ConnectionInfo EMPTY = new ConnectionInfo("", "");
     private final ManagedChannel channel;
     private final EventLoop dataEventLoop;
     private ConnectionInfo connectionInfo = EMPTY;

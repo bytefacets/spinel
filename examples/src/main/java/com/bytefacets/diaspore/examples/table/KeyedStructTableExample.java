@@ -1,5 +1,8 @@
+// SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
+// SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.examples.table;
 
+import static com.bytefacets.diaspore.common.Connector.connectOutput;
 import static com.bytefacets.diaspore.table.IntIndexedStructTableBuilder.intIndexedStructTable;
 import static java.util.Objects.requireNonNull;
 
@@ -28,7 +31,7 @@ public final class KeyedStructTableExample {
         final IntIndexedStructTable<ReceivedOrder> table = createTable();
         // we're connecting a simple printer here so we can see what's happening
         // but in a real process, we would attach other, more useful things
-        table.output().attachInput(OutputPrinter.printer().input());
+        connectOutput(table).toInput(OutputPrinter.printer());
 
         // create a little class which helps write into the table's fields
         final TableWriter writer = new TableWriter(table);

@@ -42,9 +42,10 @@ tasks.named("compileJava") {
         "generate-typed-test-sources",
         "generate-typed-testFixtures-sources")
 }
+val bytefacetsCollectionsVersion : String by extra
 
 dependencies {
-    implementation("com.bytefacets:bytefacets-collections:0.3.0")
+    implementation("com.bytefacets:bytefacets-collections:${bytefacetsCollectionsVersion}")
     implementation("org.javassist:javassist:3.30.2-GA") // https://mvnrepository.com/artifact/org.javassist/javassist
     testFixturesImplementation("com.bytefacets:bytefacets-collections:0.3.0")
 }

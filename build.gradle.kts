@@ -79,6 +79,7 @@ subprojects {
         set("nettyVersion", "4.2.3.Final")
         set("slfApiVersion", "2.0.17")
         set("spotbugsVersion", "4.8.6")
+        set("bytefacetsCollectionsVersion", "0.3.0")
     }
 
     val spotbugsVersion: String by extra
