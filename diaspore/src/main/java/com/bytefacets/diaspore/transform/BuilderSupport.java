@@ -52,6 +52,6 @@ public final class BuilderSupport<T> {
     }
 
     private TransformNode<T> createNode() {
-        return TransformNodeImpl.transformNode(() -> name, this::getOrCreate);
+        return DeferredTransformNode.deferredTransformNode(() -> name, this::getOrCreate);
     }
 }

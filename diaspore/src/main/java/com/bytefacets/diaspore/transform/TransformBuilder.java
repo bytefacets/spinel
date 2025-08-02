@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.transform;
 
+import static com.bytefacets.diaspore.common.Connector.connectOutputToInput;
 import static com.bytefacets.diaspore.common.DefaultNameSupplier.resolveName;
-import static com.bytefacets.diaspore.transform.TransformNodeImpl.transformNode;
+import static com.bytefacets.diaspore.transform.DeferredTransformNode.deferredTransformNode;
+import static com.bytefacets.diaspore.transform.ExplicitTransformNode.transformNode;
 
 import com.bytefacets.diaspore.conflation.ChangeConflatorBuilder;
 import com.bytefacets.diaspore.filter.FilterBuilder;
@@ -33,17 +35,16 @@ import com.bytefacets.diaspore.table.StringIndexedTableBuilder;
 import com.bytefacets.diaspore.table.TableBuilder;
 import com.bytefacets.diaspore.union.UnionBuilder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 public final class TransformBuilder {
-    private final Map<String, TransformNode<?>> pendingNodes = new LinkedHashMap<>();
+    private final Map<String, TransformNode<?>> nodeMap = new LinkedHashMap<>();
     private final List<TransformEdge> pendingEdges = new ArrayList<>();
-    private final Map<String, Object> namedOperators = new HashMap<>();
 
     private TransformBuilder() {}
 
@@ -224,28 +225,38 @@ public final class TransformBuilder {
     }
 
     public TransformBuilder registerTransformNode(final TransformNode<?> node) {
-        pendingNodes.put(node.name(), node);
+        nodeMap.put(node.name(), node);
         return this;
     }
 
     public TransformBuilder registerNode(final String name, final Object operator) {
-        pendingNodes.put(name, transformNode(name, operator));
+        nodeMap.put(name, transformNode(name, operator));
         return this;
     }
 
-    public TransformBuilder registerNode(final String name, final Supplier<?> operatorSupplier) {
-        pendingNodes.put(name, transformNode(name, operatorSupplier));
+    public TransformBuilder registerDeferredNode(
+            final String name, final Supplier<?> operatorSupplier) {
+        nodeMap.put(name, deferredTransformNode(() -> name, operatorSupplier));
         return this;
     }
 
     public TransformContinuation createContinuation(
             final TransformNode<?> node, final OutputProvider outputProvider) {
+        final var oldNode = nodeMap.get(node.name());
+        if (oldNode != null && !Objects.equals(oldNode, node)) {
+            throw TransformException.duplicate(node.name());
+        }
+        nodeMap.putIfAbsent(node.name(), node);
         return new TransformContinuation(this, node, outputProvider);
+    }
+
+    public TransformContinuation with(final String name, final OutputProvider outputProvider) {
+        return createContinuation(transformNode(name, outputProvider), outputProvider);
     }
 
     public void registerEdge(
             final OutputProvider outputProvider, final InputProvider inputProvider) {
-        pendingEdges.add(() -> outputProvider.output().attachInput(inputProvider.input()));
+        pendingEdges.add(() -> connectOutputToInput(outputProvider, inputProvider));
     }
 
     public void registerEdgeWhenReady(
@@ -254,22 +265,18 @@ public final class TransformBuilder {
     }
 
     public void build() {
+        // touch the operators to resolve them if necessary
+        // during this, it's possible that edges can be added, but expect no nodes
+        nodeMap.values().forEach(TransformNode::operator);
         while (hasPending()) {
             final var edgeCopy = List.copyOf(pendingEdges);
             pendingEdges.clear();
             edgeCopy.forEach(TransformEdge::connect);
-
-            final var nodeCopy = Map.copyOf(pendingNodes);
-            pendingNodes.clear();
-            nodeCopy.forEach((name, node) -> namedOperators.put(name, node.operator()));
         }
-        // maybe separate this into pending and done so we can do build() multiple times
-        pendingEdges.clear();
-        pendingNodes.clear();
     }
 
     private boolean hasPending() {
-        return !(pendingNodes.isEmpty() && pendingEdges.isEmpty());
+        return !pendingEdges.isEmpty();
     }
 
     @SuppressWarnings("unchecked")
@@ -278,18 +285,11 @@ public final class TransformBuilder {
     }
 
     Object lookupOperatorInternal(final String name) {
-        Object operator = namedOperators.get(name);
-        if (operator == null) {
-            final TransformNode<?> node = pendingNodes.remove(name);
-            if (node != null) {
-                operator = node.operator();
-                namedOperators.put(name, operator);
-            }
+        final TransformNode<?> node = nodeMap.get(name);
+        if (node != null) {
+            return node.operator();
         }
-        if (operator == null) {
-            throw TransformException.notFound(name);
-        }
-        return operator;
+        throw TransformException.notFound(name);
     }
 
     OutputProvider lookupOutputProvider(final String name) {

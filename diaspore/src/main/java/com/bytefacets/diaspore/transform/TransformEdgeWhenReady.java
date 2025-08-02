@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.transform;
 
+import static com.bytefacets.diaspore.common.Connector.connectOutputToInput;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.functional.IntIterable;
@@ -21,7 +22,7 @@ class TransformEdgeWhenReady implements TransformEdge {
 
     @Override
     public void connect() {
-        output.output().attachInput(new WhenSchemaReady());
+        connectOutputToInput(output, new WhenSchemaReady());
     }
 
     private class WhenSchemaReady implements TransformInput {
@@ -31,7 +32,7 @@ class TransformEdgeWhenReady implements TransformEdge {
         public void schemaUpdated(@Nullable final Schema schema) {
             if (schema != null && waiting) {
                 waiting = false;
-                output.output().attachInput(input.input());
+                connectOutputToInput(output, input);
                 output.output().detachInput(this);
             }
         }

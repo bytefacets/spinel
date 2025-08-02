@@ -3,7 +3,6 @@
 package com.bytefacets.diaspore.transform;
 
 import static com.bytefacets.diaspore.transform.TransformContinuation.throwIfMissingTransform;
-import static com.bytefacets.diaspore.transform.TransformNodeImpl.transformNode;
 import static java.util.Objects.requireNonNull;
 
 import java.util.function.Supplier;
@@ -37,7 +36,7 @@ public final class TransformContext {
     public <T> BuilderSupport<T> createBuilderSupport(
             final Supplier<T> creator, final InputProvider inputProvider) {
         final var support = BuilderSupport.builderSupport(name, creator);
-        transform.registerTransformNode(transformNode(() -> name, support::getOrCreate));
+        transform.registerTransformNode(support.transformNode());
         if (source != null && inputProvider != null) {
             transform.registerEdge(source, inputProvider);
         }

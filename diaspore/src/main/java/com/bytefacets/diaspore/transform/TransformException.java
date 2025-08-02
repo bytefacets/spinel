@@ -15,4 +15,9 @@ public final class TransformException extends RuntimeException {
                         "Requested operator is not an OutputProvider: %s is %s",
                         name, operator.getClass().getName()));
     }
+
+    static TransformException duplicate(final String name) {
+        return new TransformException(
+                String.format("Different operators registered with the same name: %s", name));
+    }
 }

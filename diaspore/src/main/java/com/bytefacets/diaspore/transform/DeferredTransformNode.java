@@ -6,23 +6,19 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Supplier;
 
-public final class TransformNodeImpl<T> implements TransformNode<T> {
+public final class DeferredTransformNode<T> implements TransformNode<T> {
     private final Supplier<String> nameSupplier;
     private final Supplier<T> operatorSupplier;
 
-    private TransformNodeImpl(
+    private DeferredTransformNode(
             final Supplier<String> nameSupplier, final Supplier<T> operatorSupplier) {
         this.nameSupplier = requireNonNull(nameSupplier, "nameSupplier");
         this.operatorSupplier = requireNonNull(operatorSupplier, "operatorSupplier");
     }
 
-    public static <T> TransformNode<T> transformNode(
+    public static <T> TransformNode<T> deferredTransformNode(
             final Supplier<String> nameSupplier, final Supplier<T> operatorSupplier) {
-        return new TransformNodeImpl<>(nameSupplier, operatorSupplier);
-    }
-
-    public static <T> TransformNode<T> transformNode(final String name, final T operator) {
-        return new TransformNodeImpl<>(() -> name, () -> operator);
+        return new DeferredTransformNode<>(nameSupplier, operatorSupplier);
     }
 
     @Override
