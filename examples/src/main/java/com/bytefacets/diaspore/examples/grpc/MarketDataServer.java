@@ -83,7 +83,7 @@ final class MarketDataServer {
     private class MarketDataCreator implements Runnable {
         private final MarketData facade;
 
-        public MarketDataCreator() {
+        private MarketDataCreator() {
             facade = marketData.createFacade();
         }
 

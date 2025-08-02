@@ -23,6 +23,8 @@ import java.util.logging.Logger;
  * order server, the market data server, and the client.
  */
 final class ClientAndServersOverGrpc {
+    private ClientAndServersOverGrpc() {}
+
     public static void main(final String[] args) throws Exception {
         // System.setProperty("io.grpc.internal.ChannelLogger.level", "FINEST");
         Logger.getGlobal().setLevel(Level.INFO);

@@ -116,7 +116,7 @@ final class OrderServer {
         private final IntDeque activeOrders = new IntDeque(ACTIVE_ORDER_HI);
         int id = 1;
 
-        public OrderActivity() {
+        private OrderActivity() {
             // the table provides a facade to the underlying table storage
             facade = orders.createFacade();
         }
