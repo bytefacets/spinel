@@ -4,11 +4,9 @@ package com.bytefacets.diaspore.comms;
 
 import static java.util.Objects.requireNonNull;
 
-import java.net.URI;
-
-public record ConnectionInfo(String name, URI uri) {
-    public ConnectionInfo(final String name, final URI uri) {
+public record ConnectionInfo(String name, Object endpoint) {
+    public ConnectionInfo(final String name, final Object endpoint) {
         this.name = requireNonNull(name, "name");
-        this.uri = requireNonNull(uri, "uri");
+        this.endpoint = requireNonNull(endpoint, "endpoint");
     }
 }

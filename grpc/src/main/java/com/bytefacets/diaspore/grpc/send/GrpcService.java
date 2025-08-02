@@ -13,6 +13,21 @@ import io.netty.channel.EventLoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A service which can be added to a gRPC Server to expose remote client subscriptions to registered
+ * outputs.
+ *
+ * <p>
+ *
+ * <pre>
+ * RegisteredOutputs registry = new RegisteredOutputs();
+ * // ... register outputs in the registry
+ * EventLoop dataEventLoop = new DefaultEventLoop();
+ * GrpcService service = GrpcServiceBuilder.grpcService(registry, dataEventLoop).build();
+ * Server server = ServerBuilder.forPort(15000).addService(service).executor(eventLoop).build();
+ * server.start();
+ * </pre>
+ */
 public final class GrpcService extends DataServiceGrpc.DataServiceImplBase {
     private static final Logger log = LoggerFactory.getLogger(GrpcSession.class);
     private final OutputRegistry registry;

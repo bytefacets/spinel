@@ -23,7 +23,6 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.send.GrpcEncoder;
 import com.bytefacets.diaspore.grpc.send.SendPackageAccess;
 import com.bytefacets.diaspore.schema.Schema;
-import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class SubscriptionStoreTest {
     private final SendPackageAccess sender = new SendPackageAccess();
     private final SubscriptionStore store =
-            new SubscriptionStore(new ConnectionInfo("", URI.create("direct://test")));
+            new SubscriptionStore(new ConnectionInfo("", "direct://test"));
     private final GrpcDecoder decoder =
             GrpcDecoder.grpcDecoder(new SchemaBuilder(matrixStoreFieldFactory(16, 16, i -> {})));
     private final SubscriptionConfig config =

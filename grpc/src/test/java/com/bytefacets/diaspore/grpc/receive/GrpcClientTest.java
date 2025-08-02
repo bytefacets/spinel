@@ -24,7 +24,6 @@ import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import io.netty.channel.EventLoop;
-import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcClientTest {
-    private final ConnectionInfo cxInfo = new ConnectionInfo("test", URI.create("direct://test"));
+    private final ConnectionInfo cxInfo = new ConnectionInfo("test", "direct://test");
     private final SchemaBuilder schemaBuilder =
             new SchemaBuilder(matrixStoreFieldFactory(16, 16, i -> {}));
     private final SubscriptionStore subscriptionStore = new SubscriptionStore(cxInfo);

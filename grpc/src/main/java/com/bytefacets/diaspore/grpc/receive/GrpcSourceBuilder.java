@@ -12,6 +12,10 @@ import com.bytefacets.diaspore.transform.TransformContext;
 import com.bytefacets.diaspore.transform.TransformContinuation;
 import javax.annotation.Nullable;
 
+/**
+ * A builder for a gRPC source, which is an adapter that uses a GrpcClient to subscribe to an output
+ * from a gRPC server.
+ */
 public final class GrpcSourceBuilder {
     private final BuilderSupport<GrpcSource> builderSupport;
     private final TransformContext transformContext;
