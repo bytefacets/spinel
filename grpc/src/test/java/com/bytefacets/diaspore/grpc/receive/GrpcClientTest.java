@@ -22,6 +22,8 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.netty.channel.EventLoop;
 import java.util.concurrent.TimeUnit;
@@ -115,7 +117,7 @@ class GrpcClientTest {
             assertThat(client.isSessionInitialized(), equalTo(false));
             assertThat(client.isInitializationInProgress(), equalTo(true));
             verify(requestStream, times(1)).onNext(requestCaptor.capture());
-            assertThat(requestCaptor.getValue(), equalTo(MsgHelp.init(1, "anonymous")));
+            assertThat(requestCaptor.getValue(), equalTo(MsgHelp.init(1, "hello")));
         }
 
         @Test
@@ -132,6 +134,15 @@ class GrpcClientTest {
             responseAdapterCaptor.getValue().onNext(initResponse(1));
             assertThat(client.isInitializationInProgress(), equalTo(false));
             assertThat(client.isSessionInitialized(), equalTo(true));
+        }
+
+        @Test
+        void shouldNotSendInitializationIfStateIsNoLongerReady() {
+            lenient()
+                    .when(channel.getState(false))
+                    .thenReturn(ConnectivityState.READY, ConnectivityState.TRANSIENT_FAILURE);
+            client.connection().connect();
+            verifyNoInteractions(requestStream, dataEventLoop);
         }
 
         private SubscriptionResponse initResponse(final int token) {
@@ -179,6 +190,21 @@ class GrpcClientTest {
             // then -- anyLong because of jitter
             verify(dataEventLoop, times(1))
                     .schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+        }
+
+        @Test
+        void shouldDisconnectOnNonRetriableError() {
+            client.connection().connect();
+            verify(serviceStub, times(1)).subscribe(responseAdapterCaptor.capture());
+            reset(dataEventLoop);
+            // when
+            responseAdapterCaptor
+                    .getValue()
+                    .onError(new StatusRuntimeException(Status.UNAUTHENTICATED));
+            // then -- anyLong because of jitter
+            verifyNoInteractions(dataEventLoop);
+            assertThat(client.isConnected(), equalTo(false));
+            assertThat(client.isReconnect(), equalTo(false));
         }
 
         @Test

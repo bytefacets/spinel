@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
+import com.bytefacets.diaspore.comms.send.ConnectedSessionInfo;
 import com.bytefacets.diaspore.comms.send.OutputRegistry;
 import com.bytefacets.diaspore.grpc.proto.CreateSubscription;
 import com.bytefacets.diaspore.grpc.proto.InitializationRequest;
@@ -19,6 +20,7 @@ import com.bytefacets.diaspore.grpc.proto.Response;
 import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
+import com.bytefacets.diaspore.grpc.send.auth.GrpcConnectedSessionInfo;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.netty.channel.EventLoop;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcSessionTest {
+    private static final ConnectedSessionInfo sessionInfo = GrpcConnectedSessionInfo.EMPTY;
     private @Mock EventLoop dataExecutor;
     private @Mock OutputRegistry registry;
     private @Mock Consumer<GrpcSession> onComplete;
@@ -45,7 +48,7 @@ class GrpcSessionTest {
 
     @BeforeEach
     void setUp() {
-        session = new GrpcSession(registry, observer, dataExecutor, onComplete);
+        session = new GrpcSession(sessionInfo, registry, observer, dataExecutor, onComplete);
         lenient().when(registry.lookup("foo")).thenReturn(output);
         lenient()
                 .doAnswer(
@@ -138,8 +141,8 @@ class GrpcSessionTest {
         }
     }
 
-    SubscriptionRequest init(final int token, final String name) {
-        final var init = InitializationRequest.newBuilder().setUser(name).build();
+    SubscriptionRequest init(final int token, final String msg) {
+        final var init = InitializationRequest.newBuilder().setMessage(msg).build();
         return SubscriptionRequest.newBuilder()
                 .setRequestType(RequestType.REQUEST_TYPE_INIT)
                 .setRefToken(token)

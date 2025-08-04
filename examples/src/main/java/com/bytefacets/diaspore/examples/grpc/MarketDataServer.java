@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.examples.grpc;
 
-import com.bytefacets.diaspore.comms.send.OutputRegistry;
+import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
 import com.bytefacets.diaspore.comms.send.RegisteredOutputsTable;
 import com.bytefacets.diaspore.grpc.send.GrpcService;
 import com.bytefacets.diaspore.grpc.send.GrpcServiceBuilder;
@@ -123,8 +123,8 @@ final class MarketDataServer {
         eventLoop.execute(new MarketDataCreator());
     }
 
-    public OutputRegistry registry() {
-        return outputs;
+    public OutputRegistryFactory registry() {
+        return session -> outputs;
     }
 
     interface MarketData {

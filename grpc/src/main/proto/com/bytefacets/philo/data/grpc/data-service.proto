@@ -118,5 +118,5 @@ message SchemaUpdate {
 }
 
 message InitializationRequest {
-    string user = 2;
+    string message = 1;
 }
