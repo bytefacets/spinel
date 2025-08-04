@@ -23,7 +23,6 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
-import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.netty.channel.EventLoop;
@@ -199,7 +198,9 @@ class GrpcClientTest {
             verify(serviceStub, times(1)).subscribe(responseAdapterCaptor.capture());
             reset(dataEventLoop);
             // when
-            responseAdapterCaptor.getValue().onError(new StatusRuntimeException(Status.UNAUTHENTICATED));
+            responseAdapterCaptor
+                    .getValue()
+                    .onError(new StatusRuntimeException(Status.UNAUTHENTICATED));
             // then -- anyLong because of jitter
             verifyNoInteractions(dataEventLoop);
             assertThat(client.isConnected(), equalTo(false));
