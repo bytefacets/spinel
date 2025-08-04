@@ -5,6 +5,7 @@ package com.bytefacets.diaspore.examples.grpc;
 import static com.bytefacets.diaspore.schema.FieldDescriptor.stringField;
 
 import com.bytefacets.collections.queue.IntDeque;
+import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
 import com.bytefacets.diaspore.comms.send.RegisteredOutputsTable;
 import com.bytefacets.diaspore.grpc.send.GrpcService;
 import com.bytefacets.diaspore.grpc.send.GrpcServiceBuilder;
@@ -48,7 +49,8 @@ final class OrderServer {
     static Callable<Void> declareOrderServer(final int port) {
         final OrderServer topologyBuilder = new OrderServer();
         final GrpcService service =
-                GrpcServiceBuilder.grpcService(topologyBuilder.outputs, topologyBuilder.eventLoop)
+                GrpcServiceBuilder.grpcService(
+                                topologyBuilder.registry(), topologyBuilder.eventLoop)
                         .build();
         final Server server =
                 ServerBuilder.forPort(port)
@@ -108,6 +110,10 @@ final class OrderServer {
 
     void start() {
         eventLoop.execute(new OrderActivity());
+    }
+
+    OutputRegistryFactory registry() {
+        return session -> outputs;
     }
 
     /** Little class that creates a batch of orders */
