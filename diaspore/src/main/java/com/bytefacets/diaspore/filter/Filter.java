@@ -40,10 +40,12 @@ public final class Filter implements InputProvider, OutputProvider {
         input.updatePredicate(newPredicate);
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }
 
+    @Override
     public TransformOutput output() {
         return outputManager.output();
     }

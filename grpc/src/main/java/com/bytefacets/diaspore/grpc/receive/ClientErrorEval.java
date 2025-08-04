@@ -3,32 +3,45 @@ package com.bytefacets.diaspore.grpc.receive;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
-import com.bytefacets.diaspore.comms.ConnectionInfo;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 
 final class ClientErrorEval {
-    private final Logger log;
-    private final ConnectionInfo connectionInfo;
-
-    ClientErrorEval(final Logger log, final ConnectionInfo connectionInfo) {
-        this.log = requireNonNull(log, "log");
-        this.connectionInfo = requireNonNull(connectionInfo, "connectionInfo");
+    enum EvalResponse {
+        Retriable,
+        NotRetriable
     }
 
-    void handleException(final Throwable t) {
+    private final Logger log;
+    private final String logPrefix;
+
+    ClientErrorEval(final Logger log, final String logPrefix) {
+        this.log = requireNonNull(log, "log");
+        this.logPrefix = requireNonNull(logPrefix, "logPrefix");
+    }
+
+    EvalResponse handleException(final Throwable t) {
         if (t instanceof StatusRuntimeException statusEx) {
             if (statusEx.getStatus().getCode().equals(Status.Code.UNAVAILABLE)) {
                 handleUnavailable(statusEx);
-                return;
+                return EvalResponse.Retriable;
+            } else if (statusEx.getStatus().getCode().equals(Status.Code.UNAUTHENTICATED)) {
+                handleUnauthenticated(statusEx);
+                return EvalResponse.NotRetriable;
             }
         }
-        log.warn("Error on {}", connectionInfo, t);
+        log.warn("{} Error: ", logPrefix, t);
+        return EvalResponse.Retriable;
     }
 
     private void handleUnavailable(final StatusRuntimeException statusEx) {
         final String message = requireNonNullElse(statusEx.getCause(), statusEx).getMessage();
-        log.warn("Connection unavailable: {} {}", connectionInfo, message);
+        log.warn("{} Connection unavailable: {}", logPrefix, message);
+    }
+
+    private void handleUnauthenticated(final StatusRuntimeException statusEx) {
+        final String message = requireNonNullElse(statusEx.getCause(), statusEx).getMessage();
+        log.warn("{} Unauthenticated: {}", logPrefix, message);
     }
 }

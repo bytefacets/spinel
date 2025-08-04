@@ -4,6 +4,7 @@ import static com.bytefacets.diaspore.grpc.send.GrpcSink.grpcSink;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.diaspore.TransformOutput;
+import com.bytefacets.diaspore.comms.send.ConnectedSessionInfo;
 import com.bytefacets.diaspore.comms.send.OutputRegistry;
 import com.bytefacets.diaspore.grpc.proto.CreateSubscription;
 import com.bytefacets.diaspore.grpc.proto.RequestType;
@@ -30,16 +31,19 @@ final class GrpcSession {
     private final Map<String, GrpcSink> activeAdapters = new HashMap<>(4);
     private final Consumer<GrpcSession> onComplete;
     private final SenderErrorEval errorEval;
+    private final String logPrefix;
 
     static GrpcSession createSession(
+            final ConnectedSessionInfo sessionInfo,
             final OutputRegistry registry,
             final ServerCallStreamObserver<SubscriptionResponse> outputStream,
             final EventLoop dataEventLoop,
             final Consumer<GrpcSession> onComplete) {
-        return new GrpcSession(registry, outputStream, dataEventLoop, onComplete);
+        return new GrpcSession(sessionInfo, registry, outputStream, dataEventLoop, onComplete);
     }
 
     GrpcSession(
+            final ConnectedSessionInfo sessionInfo,
             final OutputRegistry registry,
             final ServerCallStreamObserver<SubscriptionResponse> outputStream,
             final EventLoop dataEventLoop,
@@ -48,7 +52,8 @@ final class GrpcSession {
         this.dataEventLoop = requireNonNull(dataEventLoop, "dataEventLoop");
         this.onComplete = requireNonNull(onComplete, "onComplete");
         this.outputStream = requireNonNull(outputStream, "outputStream");
-        this.errorEval = new SenderErrorEval(log);
+        this.logPrefix = requireNonNull(sessionInfo, "sessionInfo").toString();
+        this.errorEval = new SenderErrorEval(log, logPrefix);
         outputStream.setOnCancelHandler(this::cancelled);
     }
 
@@ -77,7 +82,7 @@ final class GrpcSession {
 
     // on data thread
     private void internalClose() {
-        log.info("Closing session");
+        log.info("{} Closing session", logPrefix);
         activeAdapters.values().forEach(GrpcSink::close);
         activeAdapters.clear();
     }
@@ -93,11 +98,17 @@ final class GrpcSession {
     private class RequestHandler implements StreamObserver<SubscriptionRequest> {
         @Override
         public void onNext(final SubscriptionRequest request) {
-            log.debug("Received {} ({})", request.getRequestType(), request.getRefToken());
+            log.debug(
+                    "{} Received {} ({})",
+                    logPrefix,
+                    request.getRequestType(),
+                    request.getRefToken());
             if (request.getRequestType() == RequestType.REQUEST_TYPE_SUBSCRIBE) {
                 subscribeOnDataThread(request);
             } else if (request.getRequestType() == RequestType.REQUEST_TYPE_INIT) {
-                log.info("Initialization received: user={}", request.getInitialization().getUser());
+                log.info(
+                        "Initialization received: msg={}",
+                        request.getInitialization().getMessage());
                 outputStream.onNext(init(request.getRefToken()));
             } else {
                 onUnknownRequestType(request);
@@ -105,7 +116,10 @@ final class GrpcSession {
         }
 
         private void onUnknownRequestType(final SubscriptionRequest request) {
-            log.warn("Unknown RequestType received: {}", request.getRequestTypeValue());
+            log.warn(
+                    "{} Unknown RequestType received: {}",
+                    logPrefix,
+                    request.getRequestTypeValue());
             outputStream.onNext(
                     invalidResponseType(request.getRefToken(), request.getRequestTypeValue()));
         }
@@ -117,7 +131,7 @@ final class GrpcSession {
 
         @Override
         public void onCompleted() {
-            log.info("Completed");
+            log.info("{} Completed", logPrefix);
             onComplete.accept(GrpcSession.this);
         }
     }

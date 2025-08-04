@@ -25,11 +25,11 @@ final class MsgHelp {
         return builder.build();
     }
 
-    static SubscriptionRequest init(final int token, final String user) {
+    static SubscriptionRequest init(final int token, final String message) {
         return SubscriptionRequest.newBuilder()
                 .setRefToken(token)
                 .setRequestType(RequestType.REQUEST_TYPE_INIT)
-                .setInitialization(InitializationRequest.newBuilder().setUser(user).build())
+                .setInitialization(InitializationRequest.newBuilder().setMessage(message).build())
                 .build();
     }
 }

@@ -8,9 +8,11 @@ import org.slf4j.Logger;
 
 final class SenderErrorEval {
     private final Logger log;
+    private final String logPrefix;
 
-    SenderErrorEval(final Logger log) {
+    SenderErrorEval(final Logger log, final String logPrefix) {
         this.log = requireNonNull(log, "log");
+        this.logPrefix = logPrefix;
     }
 
     void handleException(final Throwable t) {
@@ -20,10 +22,10 @@ final class SenderErrorEval {
                 return;
             }
         }
-        log.warn("Error", t);
+        log.warn("{} Error", logPrefix, t);
     }
 
     private void handleCancelled(final StatusRuntimeException statusEx) {
-        log.warn("Connection dropped by client: {}", statusEx.getMessage());
+        log.warn("{} Connection dropped by client: {}", logPrefix, statusEx.getMessage());
     }
 }

@@ -51,6 +51,8 @@ import org.slf4j.LoggerFactory;
  * // then connect the client
  * mdClient.connect();
  * </pre>
+ *
+ * @see GrpcClientBuilder#build()
  */
 public final class GrpcClient implements Receiver {
     private static final Logger log = LoggerFactory.getLogger(GrpcClient.class);
@@ -71,12 +73,13 @@ public final class GrpcClient implements Receiver {
     GrpcClient(
             final ConnectionInfo connectionInfo,
             final ManagedChannel channel,
+            final DataServiceGrpc.DataServiceStub serviceStub,
             final EventLoop dataEventLoop) {
         this(
                 connectionInfo,
                 channel,
                 dataEventLoop,
-                DataServiceGrpc.newStub(channel).withExecutor(dataEventLoop).withWaitForReady(),
+                serviceStub,
                 GrpcDecoder::grpcDecoder,
                 new SubscriptionStore(connectionInfo));
     }
@@ -98,7 +101,7 @@ public final class GrpcClient implements Receiver {
                 String.format(
                         "ClientOf[name=%s,endpoint=%s]",
                         connectionInfo.name(), connectionInfo.endpoint());
-        this.errorEval = new ClientErrorEval(log, connectionInfo);
+        this.errorEval = new ClientErrorEval(log, logPrefix);
         requestAdapter.trackConnectionStateChange();
     }
 
@@ -202,6 +205,7 @@ public final class GrpcClient implements Receiver {
         private void onNewChannelState(final ConnectivityState newState) {
             if (newState.equals(ConnectivityState.READY) && isClientSubscribed) {
                 backOff.reset();
+                log.debug("onNewChannelState: {}", newState);
                 initializer.startIfNecessary();
             }
         }
@@ -212,7 +216,7 @@ public final class GrpcClient implements Receiver {
                     current,
                     () -> {
                         final ConnectivityState newState = channel.getState(false);
-                        log.info("{} Client state change: {}", logPrefix, newState);
+                        log.info("{} Client state change: {}->{}", logPrefix, current, newState);
                         onNewChannelState(newState);
                         trackConnectionStateChange(); // listen for the next change
                     });
@@ -235,11 +239,16 @@ public final class GrpcClient implements Receiver {
 
         @Override
         public void onError(final Throwable t) {
-            errorEval.handleException(t);
+            final var response = errorEval.handleException(t);
             requestAdapter.cleanUp();
-            final long delay = backOff.nextDelayMillis();
-            log.debug("{} scheduling reconnect in {} millis", logPrefix, delay);
-            dataEventLoop.schedule(requestAdapter::reconnect, delay, TimeUnit.MILLISECONDS);
+            if (response.equals(ClientErrorEval.EvalResponse.Retriable)) {
+                final long delay = backOff.nextDelayMillis();
+                log.debug("{} scheduling reconnect in {} millis", logPrefix, delay);
+                dataEventLoop.schedule(requestAdapter::reconnect, delay, TimeUnit.MILLISECONDS);
+            } else {
+                log.warn("{} Error is not retriable, calling disconnect", logPrefix);
+                disconnect();
+            }
         }
 
         @Override
@@ -265,8 +274,10 @@ public final class GrpcClient implements Receiver {
         @Override
         public void run() {
             if (!sessionInitialized.get()) {
-                sendInitialization();
-                dataEventLoop.schedule(this, 1, TimeUnit.SECONDS);
+                if (channel.getState(false).equals(ConnectivityState.READY)) {
+                    sendInitialization();
+                    dataEventLoop.schedule(this, 1, TimeUnit.SECONDS);
+                }
             }
         }
 
@@ -277,7 +288,7 @@ public final class GrpcClient implements Receiver {
                     logPrefix,
                     channel.getState(false),
                     token);
-            requestAdapter.requester.onNext(MsgHelp.init(token, "anonymous"));
+            requestAdapter.requester.onNext(MsgHelp.init(token, "hello"));
         }
 
         private void receiveResponse(final SubscriptionResponse response) {
@@ -304,6 +315,11 @@ public final class GrpcClient implements Receiver {
     @VisibleForTesting
     boolean isInitializationInProgress() {
         return initializer.initializationInProgress.get();
+    }
+
+    @VisibleForTesting
+    boolean isReconnect() {
+        return this.requestAdapter.reconnect;
     }
 
     @VisibleForTesting
