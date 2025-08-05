@@ -5,6 +5,7 @@ plugins {
 tasks.withType<PublishToMavenRepository>().configureEach { enabled = false }
 tasks.withType<PublishToMavenLocal>().configureEach { enabled = false }
 
+val auth0: String by extra
 val grpcVersion = "1.70.0"
 val slfApiVersion: String by extra
 val logbackVersion: String by extra
@@ -21,6 +22,7 @@ dependencies {
 
     implementation("io.grpc:grpc-protobuf:${grpcVersion}")
     implementation("io.grpc:grpc-stub:${grpcVersion}")
-    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
+    implementation("io.grpc:grpc-netty:${grpcVersion}")
     implementation("io.netty:netty-transport:${nettyVersion}")
+    implementation("com.auth0:java-jwt:${auth0}")
 }
