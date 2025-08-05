@@ -11,6 +11,7 @@ val grpcVersion = "1.70.0"
 val protobufVersion = "4.29.3";
 val log4jVersion : String by extra
 val nettyVersion : String by extra
+val auth0 : String by extra
 
 protobuf {
     protoc {
@@ -56,8 +57,10 @@ dependencies {
     implementation(project(":diaspore"))
     implementation("io.grpc:grpc-protobuf:${grpcVersion}")
     implementation("io.grpc:grpc-stub:${grpcVersion}")
-    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
+//    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
+    implementation("io.grpc:grpc-netty:${grpcVersion}")
     implementation("io.netty:netty-transport:${nettyVersion}")
+    implementation("com.auth0:java-jwt:${auth0}")
 
     // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
     implementation("io.grpc:protoc-gen-grpc-java:${grpcVersion}")

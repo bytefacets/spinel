@@ -5,6 +5,7 @@ package com.bytefacets.diaspore.examples.grpc;
 import static com.bytefacets.diaspore.comms.SubscriptionConfig.subscriptionConfig;
 import static com.bytefacets.diaspore.examples.grpc.MarketDataServer.MD_PORT;
 import static com.bytefacets.diaspore.examples.grpc.OrderServer.ORDER_PORT;
+import static com.bytefacets.diaspore.grpc.receive.auth.JwtCallCredentials.jwtCredentials;
 import static com.bytefacets.diaspore.transform.TransformBuilder.transform;
 
 import com.bytefacets.diaspore.comms.ConnectionInfo;
@@ -46,9 +47,11 @@ final class Client {
                         r -> {
                             return new Thread(r, "client-data-thread");
                         });
+        final var creds = jwtCredentials("bob", "bob-user", "bobs-secret");
         final var orderClient =
                 GrpcClientBuilder.grpcClient(orderChannel, clientDataEventLoop)
                         .connectionInfo(new ConnectionInfo("order-server", "0.0.0.0:" + orderPort))
+                        .withSpecializer(stub -> stub.withCallCredentials(creds))
                         .build();
         final var mdClient =
                 GrpcClientBuilder.grpcClient(mdChannel, clientDataEventLoop)

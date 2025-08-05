@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.examples.grpc;
 
+import static com.bytefacets.diaspore.grpc.send.auth.MultiTenantJwtInterceptor.multiTenantJwt;
 import static com.bytefacets.diaspore.schema.FieldDescriptor.stringField;
 
 import com.bytefacets.collections.queue.IntDeque;
@@ -17,9 +18,11 @@ import com.bytefacets.diaspore.table.TableRow;
 import com.bytefacets.diaspore.transform.TransformBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerInterceptors;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.event.Level;
@@ -52,9 +55,12 @@ final class OrderServer {
                 GrpcServiceBuilder.grpcService(
                                 topologyBuilder.registry(), topologyBuilder.eventLoop)
                         .build();
+        final Map<String, String> tenantSecrets = Map.of("bob", "bobs-secret");
         final Server server =
                 ServerBuilder.forPort(port)
-                        .addService(service)
+                        .addService(
+                                ServerInterceptors.intercept(
+                                        service, multiTenantJwt(tenantSecrets::get)))
                         .executor(topologyBuilder.eventLoop)
                         .build();
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));

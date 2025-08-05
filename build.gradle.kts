@@ -80,6 +80,7 @@ subprojects {
         set("slfApiVersion", "2.0.17")
         set("spotbugsVersion", "4.8.6")
         set("bytefacetsCollectionsVersion", "0.3.0")
+        set("auth0", "4.4.0")
     }
 
     val spotbugsVersion: String by extra
