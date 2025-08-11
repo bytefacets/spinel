@@ -16,9 +16,7 @@ public final class JexlEngineProvider {
 
     private JexlEngineProvider() {}
 
-    /**
-     * Overrides the default engine.
-     */
+    /** Overrides the default engine. */
     public static void setDefaultEngine(final JexlEngine engine) {
         defaultEngine.set(engine);
     }
@@ -30,13 +28,14 @@ public final class JexlEngineProvider {
     /**
      * Provides a basic JexlBuilder which is ready to create an engine that is pretty locked down
      * exception with access to Math and SafeTime static methods.
+     *
      * <ul>
-     *     <li>no loops</li>
-     *     <li>no side-effects</li>
-     *     <li>Jexl RESTRICTED permissions (blocks most of io/runtime/system, etc)</li>
-     *     <li>strict arithmetic (fail on null/invalid types instead of coercing)</li>
-     *     <li>not strict boolean logic (truthy non-booleans)</li>
-     *     <li>not silent - errors are thrown</li>
+     *   <li>no loops
+     *   <li>no side-effects
+     *   <li>Jexl RESTRICTED permissions (blocks most of io/runtime/system, etc)
+     *   <li>strict arithmetic (fail on null/invalid types instead of coercing)
+     *   <li>not strict boolean logic (truthy non-booleans)
+     *   <li>not silent - errors are thrown
      * </ul>
      */
     public static JexlBuilder defaultEngineBuilder() {
