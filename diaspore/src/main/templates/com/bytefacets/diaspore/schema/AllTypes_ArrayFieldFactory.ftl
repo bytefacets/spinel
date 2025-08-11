@@ -26,12 +26,26 @@ public final class ArrayFieldFactory {
         };
     }
 
+    public static Field writableArrayField(final byte typeId,
+                                           final Object initialValues,
+                                           final int fieldId,
+                                           final FieldChangeListener changeListener) {
+        return switch(typeId) {
+<#list types as type>
+            case TypeId.${type.name} ->
+                writable${type.name}ArrayField((${type.arrayType}[]) initialValues, fieldId,
+                                               changeListener, ${type.name}Type.DEFAULT);
+</#list>
+            default -> throw new IllegalArgumentException("Unknown typeId: " + typeId);
+        };
+    }
+
 <#list types as type>
     public static ${type.name}WritableField writable${type.name}ArrayField(
             final int initialSize,
             final int fieldId,
             final FieldChangeListener changeListener) {
-        return new ${type.name}ArrayField(initialSize, fieldId, changeListener, ${type.name}Type.DEFAULT);
+        return writable${type.name}ArrayField(initialSize, fieldId, changeListener, ${type.name}Type.DEFAULT);
     }
 
     public static ${type.name}WritableField writable${type.name}ArrayField(
@@ -39,7 +53,16 @@ public final class ArrayFieldFactory {
             final int fieldId,
             final FieldChangeListener changeListener,
             final ${type.arrayType} initialValue) {
-        return new ${type.name}ArrayField(initialSize, fieldId, changeListener, initialValue);
+        return new ${type.name}ArrayField(${type.name}Array.create(initialSize, initialValue),
+                                          fieldId, changeListener, initialValue);
+    }
+
+    public static ${type.name}WritableField writable${type.name}ArrayField(
+            final ${type.arrayType}[] initialValues,
+            final int fieldId,
+            final FieldChangeListener changeListener,
+            final ${type.arrayType} initialValue) {
+        return new ${type.name}ArrayField(initialValues, fieldId, changeListener, initialValue);
     }
 
 </#list>
@@ -50,11 +73,11 @@ public final class ArrayFieldFactory {
         private final FieldChangeListener listener;
         private final int fieldId;
         private ${type.name}ArrayField(
-                    final int initialSize,
+                    ${type.arrayType}[] initialValues,
                     final int fieldId,
                     final FieldChangeListener listener,
                     ${type.arrayType} initialValue) {
-            this.values = ${type.name}Array.create(initialSize, initialValue);
+            this.values = Objects.requireNonNull(initialValues, "initialValues");
             this.fieldId = fieldId;
             this.listener = Objects.requireNonNull(listener, "listener");
             this.initialValue = initialValue;
