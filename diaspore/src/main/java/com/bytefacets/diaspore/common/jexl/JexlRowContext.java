@@ -87,6 +87,7 @@ public final class JexlRowContext implements SchemaBindable, JexlContext {
     }
 
     private void register(final FieldResolver fieldResolver, final String fieldName) {
+        // hard get since we are expecting to find anything jexl tells
         final Field field = fieldResolver.getField(fieldName);
         // jexl for some reason doesn't like char
         if (field.typeId() == TypeId.Char) {
