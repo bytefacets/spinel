@@ -51,6 +51,7 @@ public final class JexlEngineProvider {
         final JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow(Math.class.getName()); // allow all Math methods
         sandbox.allow(SafeTime.class.getName()); // allow all SafeTime methods
+        sandbox.allow(String.class.getName()); // allow all String methods
 
         // because of the way the namespace static methods are resolved, it appears we need to
         // separately permit the class here (bc within the SandboxUberspect, the getConstructor
