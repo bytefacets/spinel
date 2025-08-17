@@ -12,6 +12,8 @@ import com.bytefacets.diaspore.schema.Metadata;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.schema.SchemaField;
 import com.bytefacets.diaspore.schema.TypeId;
+import com.bytefacets.diaspore.transform.InputProvider;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -21,7 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class ValidationOperator {
+public final class ValidationOperator implements InputProvider {
     private final Map<Integer, KeyedRow> rowToData = new HashMap<>();
     private final String[] keyFields;
     private final Set<String> valueFields = new LinkedHashSet<>();
@@ -56,12 +58,14 @@ public final class ValidationOperator {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
+        clearChanges();
     }
 
     public void validateNoChanges() {
         validate(new ChangeSet());
     }
 
+    @Override
     public TransformInput input() {
         return input;
     }
