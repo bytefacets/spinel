@@ -9,6 +9,7 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,22 +17,32 @@ final class SubscriptionStore {
     private static final Logger log = LoggerFactory.getLogger(SubscriptionStore.class);
     private final IntGenericIndexedMap<Subscription> subscriptions = new IntGenericIndexedMap<>(16);
     private final ConnectionInfo connectionInfo;
+    private IntSupplier tokenSupplier;
 
     SubscriptionStore(final ConnectionInfo connectionInfo) {
         this.connectionInfo = requireNonNull(connectionInfo, "connectionInfo");
     }
 
+    void connect(final IntSupplier tokenSupplier) {
+        this.tokenSupplier = requireNonNull(tokenSupplier, "tokenSupplier");
+    }
+
+    private int token() {
+        return tokenSupplier.getAsInt();
+    }
+
     void resubscribe(final Consumer<SubscriptionRequest> consumer) {
         synchronized (subscriptions) {
-            subscriptions.forEachValue(sub -> sub.requestSubscriptionIfNecessary(consumer));
+            subscriptions.forEachValue(
+                    sub -> sub.requestSubscriptionIfNecessary(token(), consumer));
         }
     }
 
     Subscription createSubscription(
-            final int token, final GrpcDecoder decoder, final SubscriptionConfig config) {
-        final var sub = new Subscription(token, decoder, config);
+            final int subscriptionId, final GrpcDecoder decoder, final SubscriptionConfig config) {
+        final var sub = new Subscription(subscriptionId, decoder, config);
         synchronized (subscriptions) {
-            subscriptions.put(token, sub);
+            subscriptions.put(subscriptionId, sub);
         }
         return sub;
     }
@@ -43,23 +54,23 @@ final class SubscriptionStore {
     }
 
     void accept(final SubscriptionResponse response) {
-        final int token = response.getRefToken();
+        final int subscriptionId = response.getSubscriptionId();
         synchronized (subscriptions) {
-            final Subscription sub = subscriptions.getOrDefault(token, null);
+            final Subscription sub = subscriptions.getOrDefault(subscriptionId, null);
             if (sub != null) {
                 sub.decoder().accept(response);
             } else {
                 log.debug(
-                        "ClientOf[{}] Did not find subscription for token {}",
+                        "ClientOf[{}] Did not find subscription for subscriptionId {}",
                         connectionInfo,
-                        token);
+                        response.getSubscriptionId());
             }
         }
     }
 
-    void remove(final int token) {
+    void remove(final int subscriptionId) {
         synchronized (subscriptions) {
-            subscriptions.remove(token);
+            subscriptions.remove(subscriptionId);
         }
     }
 
@@ -69,7 +80,7 @@ final class SubscriptionStore {
     }
 
     @VisibleForTesting
-    Subscription get(final int token) {
-        return subscriptions.getOrDefault(token, null);
+    Subscription get(final int subscriptionId) {
+        return subscriptions.getOrDefault(subscriptionId, null);
     }
 }

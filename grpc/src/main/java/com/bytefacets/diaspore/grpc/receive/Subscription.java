@@ -9,19 +9,20 @@ import java.util.function.Consumer;
 
 final class Subscription {
     private final Object lock = new Object();
-    private final int token;
+    private final int subscriptionId;
     private final SubscriptionConfig config;
     private final GrpcDecoder decoder;
     private boolean isSubscribed;
 
-    Subscription(final int token, final GrpcDecoder decoder, final SubscriptionConfig config) {
-        this.token = token;
+    Subscription(
+            final int subscriptionId, final GrpcDecoder decoder, final SubscriptionConfig config) {
+        this.subscriptionId = subscriptionId;
         this.decoder = requireNonNull(decoder, "decoder");
         this.config = requireNonNull(config, "config");
     }
 
-    int token() {
-        return token;
+    int subscriptionId() {
+        return subscriptionId;
     }
 
     SubscriptionConfig config() {
@@ -42,22 +43,24 @@ final class Subscription {
         }
     }
 
-    void requestSubscriptionIfNecessary(final Consumer<SubscriptionRequest> consumer) {
+    void requestSubscriptionIfNecessary(
+            final int token, final Consumer<SubscriptionRequest> consumer) {
         synchronized (lock) {
             if (!isSubscribed) {
-                consumer.accept(createRequest());
+                consumer.accept(createRequest(token));
                 isSubscribed = true;
             }
         }
     }
 
     @VisibleForTesting
-    SubscriptionRequest createRequest() {
-        return MsgHelp.request(token, MsgHelp.subscription(config));
+    SubscriptionRequest createRequest(final int token) {
+        return MsgHelp.request(token, subscriptionId, MsgHelp.subscription(config));
     }
 
     @Override
     public String toString() {
-        return String.format("[token=%d][subscribed=%b]: %s", token, isSubscribed, config);
+        return String.format(
+                "[subscription-id=%d][subscribed=%b]: %s", subscriptionId, isSubscribed, config);
     }
 }

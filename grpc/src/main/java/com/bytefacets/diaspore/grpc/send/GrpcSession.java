@@ -29,6 +29,7 @@ final class GrpcSession {
     private final RequestHandler requestHandler = new RequestHandler();
     private final StreamObserver<SubscriptionResponse> outputStream;
     private final Map<String, GrpcSink> activeAdapters = new HashMap<>(4);
+    private int nextToken = 1;
     private final Consumer<GrpcSession> onComplete;
     private final SenderErrorEval errorEval;
     private final String logPrefix;
@@ -65,18 +66,23 @@ final class GrpcSession {
         dataEventLoop.execute(this::internalClose);
     }
 
+    private int nextToken() {
+        return nextToken++;
+    }
+
     // on data thread
     private void subscribeOnDataThread(final SubscriptionRequest request) {
         final CreateSubscription subscription = request.getSubscription();
         final String name = subscription.getName();
         final TransformOutput output = registry.lookup(name);
         if (output != null) {
-            final GrpcSink adapter = grpcSink(request.getRefToken(), outputStream);
+            final GrpcSink adapter =
+                    grpcSink(request.getSubscriptionId(), this::nextToken, outputStream);
             activeAdapters.put(name, adapter);
             // connection to the output must be done on the data thread
             output.attachInput(adapter.input());
         } else {
-            outputStream.onNext(outputNotFound(request.getRefToken(), name));
+            outputStream.onNext(outputNotFound(request.getSubscriptionId(), name));
         }
     }
 

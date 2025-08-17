@@ -72,12 +72,11 @@ class GrpcClientTest {
 
     @Test
     void shouldCreateAndSendSubscriptionWhenInitializeCompleted() {
-        client.markSessionInitialized(true);
         client.connection().connect();
         final var config = SubscriptionConfig.subscriptionConfig("foo").build();
         final var sub = client.createSubscription(schemaBuilder, config);
         assertThat(sub.isSubscribed(), equalTo(true));
-        verify(requestStream, times(1)).onNext(eq(sub.createRequest()));
+        verify(requestStream, times(1)).onNext(eq(sub.createRequest(2)));
     }
 
     @Test

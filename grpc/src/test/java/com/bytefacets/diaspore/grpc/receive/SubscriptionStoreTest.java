@@ -27,7 +27,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,6 +46,12 @@ class SubscriptionStoreTest {
     private final SubscriptionConfig config =
             subscriptionConfig("test").setFields(List.of("a", "b")).build();
     private @Mock Consumer<SubscriptionRequest> consumer;
+    private @Mock IntSupplier tokenSupplier;
+
+    @BeforeEach
+    void setUp() {
+        store.connect(tokenSupplier);
+    }
 
     @Test
     void shouldCreateSubscription() {
@@ -66,7 +74,7 @@ class SubscriptionStoreTest {
         final var subs =
                 IntStream.range(0, 5)
                         .mapToObj(i -> store.createSubscription(i, decoder, config))
-                        .peek(sub -> sub.requestSubscriptionIfNecessary(consumer))
+                        .peek(sub -> sub.requestSubscriptionIfNecessary(0, consumer))
                         .peek(sub -> assertThat(sub.isSubscribed(), equalTo(true)))
                         .toList();
         store.resetSubscriptionStatus();
@@ -79,7 +87,7 @@ class SubscriptionStoreTest {
         final var subs =
                 IntStream.range(10, 15)
                         .mapToObj(i -> store.createSubscription(i, decoder, config))
-                        .peek(sub -> sub.requestSubscriptionIfNecessary(consumer))
+                        .peek(sub -> sub.requestSubscriptionIfNecessary(0, consumer))
                         .peek(sub -> assertThat(sub.isSubscribed(), equalTo(true)))
                         .toList();
         reset(consumer);
@@ -93,15 +101,15 @@ class SubscriptionStoreTest {
         verify(consumer, times(2)).accept(requestCaptor.capture());
         assertThat(
                 requestCaptor.getAllValues().stream()
-                        .map(SubscriptionRequest::getRefToken)
+                        .map(SubscriptionRequest::getSubscriptionId)
                         .toList(),
-                containsInAnyOrder(subs.get(1).token(), subs.get(3).token()));
+                containsInAnyOrder(subs.get(1).subscriptionId(), subs.get(3).subscriptionId()));
     }
 
     @Test
     void shouldRouteResponseToSubscription() {
         // given
-        final GrpcEncoder encoder = sender.encoder(10);
+        final GrpcEncoder encoder = sender.encoder(10, () -> 0);
         final Schema schema =
                 intIndexedTable("table").addFields(intField("a"), intField("b")).build().schema();
         // when
@@ -122,7 +130,7 @@ class SubscriptionStoreTest {
             final GrpcDecoder decoder =
                     GrpcDecoder.grpcDecoder(
                             new SchemaBuilder(matrixStoreFieldFactory(16, 16, x -> {})));
-            expected.add(store.createSubscription(i + 10, decoder, config).createRequest());
+            expected.add(store.createSubscription(i + 10, decoder, config).createRequest(0));
         }
         // when
         store.resubscribe(consumer);
@@ -144,7 +152,7 @@ class SubscriptionStoreTest {
     void shouldNotThrowWhenReceivingResponseForUnknownToken() {
         // given
         final GrpcDecoder mockDecoder = mock(GrpcDecoder.class);
-        final GrpcEncoder encoder = sender.encoder(10);
+        final GrpcEncoder encoder = sender.encoder(10, () -> 0);
         final Schema schema =
                 intIndexedTable("table").addFields(intField("a"), intField("b")).build().schema();
         store.createSubscription(10, mockDecoder, config);
