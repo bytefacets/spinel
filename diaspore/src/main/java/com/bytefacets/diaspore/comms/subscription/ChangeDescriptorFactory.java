@@ -16,7 +16,7 @@ public final class ChangeDescriptorFactory {
         private Target() {}
     }
 
-    ChangeDescriptorFactory() {}
+    private ChangeDescriptorFactory() {}
 
     public static ChangeDescriptor addPredicate(final String expression) {
         return ChangeDescriptor.change(Target.FILTER, Action.ADD, new Object[] {expression});
