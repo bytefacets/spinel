@@ -208,7 +208,7 @@ public final class CodecTest {
 
         // server ---------
         // wire the sender directly to the receiver
-        sendingAdapter = sendPkg.sink(5, new MockNetwork(receiver));
+        sendingAdapter = sendPkg.sink(5, () -> 0, new MockNetwork(receiver));
         // table goes to the sender
         table.output().attachInput(sendingAdapter.input());
     }

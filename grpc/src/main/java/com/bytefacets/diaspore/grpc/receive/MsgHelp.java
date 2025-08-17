@@ -9,9 +9,11 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 final class MsgHelp {
     private MsgHelp() {}
 
-    static SubscriptionRequest request(final int token, final CreateSubscription payload) {
+    static SubscriptionRequest request(
+            final int token, final int subscriptionId, final CreateSubscription payload) {
         return SubscriptionRequest.newBuilder()
                 .setRefToken(token)
+                .setSubscriptionId(subscriptionId)
                 .setRequestType(RequestType.REQUEST_TYPE_SUBSCRIBE)
                 .setSubscription(payload)
                 .build();

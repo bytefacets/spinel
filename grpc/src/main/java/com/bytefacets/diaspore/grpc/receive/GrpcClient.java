@@ -64,11 +64,12 @@ public final class GrpcClient implements Receiver {
     private final SendRequestAdapter requestAdapter = new SendRequestAdapter();
     private final SessionInitializer initializer = new SessionInitializer();
     private final ExponentialBackOff backOff = new ExponentialBackOff();
-    private final AtomicInteger nextToken = new AtomicInteger(1);
+    private final AtomicInteger nextSubscription = new AtomicInteger(1);
     private final Function<SchemaBuilder, GrpcDecoder> decoderSupplier;
     private final SubscriptionStore subscriptionStore;
     private final ClientErrorEval errorEval;
     private final String logPrefix;
+    private int nextToken = 1;
 
     GrpcClient(
             final ConnectionInfo connectionInfo,
@@ -103,6 +104,7 @@ public final class GrpcClient implements Receiver {
                         connectionInfo.name(), connectionInfo.endpoint());
         this.errorEval = new ClientErrorEval(log, logPrefix);
         requestAdapter.trackConnectionStateChange();
+        subscriptionStore.connect(this::nextToken);
     }
 
     public void connect() {
@@ -129,11 +131,11 @@ public final class GrpcClient implements Receiver {
 
     Subscription createSubscription(
             final SchemaBuilder schemaBuilder, final SubscriptionConfig config) {
-        final int token = nextToken.getAndIncrement();
         final GrpcDecoder decoder = decoderSupplier.apply(schemaBuilder);
-        final var sub = subscriptionStore.createSubscription(token, decoder, config);
+        final var subscriptionId = nextSubscription.incrementAndGet();
+        final var sub = subscriptionStore.createSubscription(subscriptionId, decoder, config);
         if (requestAdapter.requester != null) {
-            sub.requestSubscriptionIfNecessary(this::issueSubscriptionRequest);
+            sub.requestSubscriptionIfNecessary(nextToken(), this::issueSubscriptionRequest);
         }
         return sub;
     }
@@ -141,9 +143,10 @@ public final class GrpcClient implements Receiver {
     private void issueSubscriptionRequest(final SubscriptionRequest request) {
         if (requestAdapter.requester != null) {
             log.info(
-                    "{}} Issuing subscription request: token={}, name={}",
+                    "{}} Issuing subscription request: subscriptionId={}, subscription-id={}, name={}",
                     logPrefix,
                     request.getRefToken(),
+                    request.getSubscriptionId(),
                     request.getSubscription().getName());
             requestAdapter.requester.onNext(request);
         } else {
@@ -282,7 +285,7 @@ public final class GrpcClient implements Receiver {
         }
 
         private void sendInitialization() {
-            final int token = nextToken.getAndIncrement();
+            final int token = nextToken();
             log.debug(
                     "{} Requesting initialization: {} ({})",
                     logPrefix,
@@ -305,6 +308,10 @@ public final class GrpcClient implements Receiver {
                 log.warn("{} initialization error response: {}", logPrefix, message);
             }
         }
+    }
+
+    private int nextToken() {
+        return nextToken++;
     }
 
     @VisibleForTesting
