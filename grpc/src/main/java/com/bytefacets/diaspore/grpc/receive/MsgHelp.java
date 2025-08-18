@@ -7,29 +7,29 @@ import com.bytefacets.diaspore.grpc.proto.RequestType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 
 final class MsgHelp {
-    private MsgHelp() {}
+    private int nextToken = 1;
 
-    static SubscriptionRequest request(
-            final int token, final int subscriptionId, final CreateSubscription payload) {
+    SubscriptionRequest request(final int subscriptionId, final CreateSubscription payload) {
         return SubscriptionRequest.newBuilder()
-                .setRefToken(token)
+                .setRefToken(nextToken++)
                 .setSubscriptionId(subscriptionId)
                 .setRequestType(RequestType.REQUEST_TYPE_SUBSCRIBE)
                 .setSubscription(payload)
                 .build();
     }
 
-    static CreateSubscription subscription(final SubscriptionConfig config) {
+    CreateSubscription subscription(final SubscriptionConfig config) {
         final var builder = CreateSubscription.newBuilder().setName(config.remoteOutputName());
         if (config.fields() != null && !config.fields().isEmpty()) {
             builder.addAllFieldNames(config.fields());
         }
+        builder.setDefaultAll(config.defaultAll());
         return builder.build();
     }
 
-    static SubscriptionRequest init(final int token, final String message) {
+    SubscriptionRequest init(final String message) {
         return SubscriptionRequest.newBuilder()
-                .setRefToken(token)
+                .setRefToken(nextToken++)
                 .setRequestType(RequestType.REQUEST_TYPE_INIT)
                 .setInitialization(InitializationRequest.newBuilder().setMessage(message).build())
                 .build();

@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,11 +45,10 @@ class SubscriptionStoreTest {
     private final SubscriptionConfig config =
             subscriptionConfig("test").setFields(List.of("a", "b")).build();
     private @Mock Consumer<SubscriptionRequest> consumer;
-    private @Mock IntSupplier tokenSupplier;
 
     @BeforeEach
     void setUp() {
-        store.connect(tokenSupplier);
+        store.connect(new MsgHelp(), consumer);
     }
 
     @Test
@@ -74,7 +72,7 @@ class SubscriptionStoreTest {
         final var subs =
                 IntStream.range(0, 5)
                         .mapToObj(i -> store.createSubscription(i, decoder, config))
-                        .peek(sub -> sub.requestSubscriptionIfNecessary(0, consumer))
+                        .peek(Subscription::requestSubscriptionIfNecessary)
                         .peek(sub -> assertThat(sub.isSubscribed(), equalTo(true)))
                         .toList();
         store.resetSubscriptionStatus();
@@ -87,7 +85,7 @@ class SubscriptionStoreTest {
         final var subs =
                 IntStream.range(10, 15)
                         .mapToObj(i -> store.createSubscription(i, decoder, config))
-                        .peek(sub -> sub.requestSubscriptionIfNecessary(0, consumer))
+                        .peek(Subscription::requestSubscriptionIfNecessary)
                         .peek(sub -> assertThat(sub.isSubscribed(), equalTo(true)))
                         .toList();
         reset(consumer);
@@ -126,11 +124,13 @@ class SubscriptionStoreTest {
     void shouldResubscribeToAllSubscriptions() {
         // given
         final Set<SubscriptionRequest> expected = new HashSet<>();
+        final MsgHelp msgHelp = new MsgHelp();
         for (int i = 0; i < 5; i++) {
             final GrpcDecoder decoder =
                     GrpcDecoder.grpcDecoder(
                             new SchemaBuilder(matrixStoreFieldFactory(16, 16, x -> {})));
-            expected.add(store.createSubscription(i + 10, decoder, config).createRequest(0));
+            store.createSubscription(i + 10, decoder, config);
+            expected.add(msgHelp.request(i + 10, msgHelp.subscription(config)));
         }
         // when
         store.resubscribe(consumer);

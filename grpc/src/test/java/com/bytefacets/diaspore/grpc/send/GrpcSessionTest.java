@@ -1,5 +1,6 @@
 package com.bytefacets.diaspore.grpc.send;
 
+import static com.bytefacets.diaspore.comms.send.DefaultSubscriptionProvider.defaultSubscriptionProvider;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import com.bytefacets.diaspore.TransformInput;
 import com.bytefacets.diaspore.TransformOutput;
 import com.bytefacets.diaspore.comms.send.ConnectedSessionInfo;
+import com.bytefacets.diaspore.comms.send.DefaultSubscriptionProvider;
 import com.bytefacets.diaspore.comms.send.OutputRegistry;
 import com.bytefacets.diaspore.grpc.proto.CreateSubscription;
 import com.bytefacets.diaspore.grpc.proto.InitializationRequest;
@@ -48,7 +50,11 @@ class GrpcSessionTest {
 
     @BeforeEach
     void setUp() {
-        session = new GrpcSession(sessionInfo, registry, observer, dataExecutor, onComplete);
+        final DefaultSubscriptionProvider subscriptionProvider =
+                defaultSubscriptionProvider(registry);
+        session =
+                new GrpcSession(
+                        sessionInfo, subscriptionProvider, observer, dataExecutor, onComplete);
         lenient().when(registry.lookup("foo")).thenReturn(output);
         lenient()
                 .doAnswer(
@@ -85,6 +91,7 @@ class GrpcSessionTest {
                 .onNext(
                         SubscriptionRequest.newBuilder()
                                 .setRefToken(123)
+                                .setSubscriptionId(77)
                                 .setRequestTypeValue(5)
                                 .build());
         // then
@@ -154,6 +161,7 @@ class GrpcSessionTest {
         final var sub = CreateSubscription.newBuilder().setName(name).addAllFieldNames(fields);
         return SubscriptionRequest.newBuilder()
                 .setRefToken(123)
+                .setSubscriptionId(77)
                 .setRequestType(RequestType.REQUEST_TYPE_SUBSCRIBE)
                 .setSubscription(sub)
                 .build();

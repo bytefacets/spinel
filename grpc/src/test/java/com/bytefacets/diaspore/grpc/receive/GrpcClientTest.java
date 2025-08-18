@@ -76,7 +76,10 @@ class GrpcClientTest {
         final var config = SubscriptionConfig.subscriptionConfig("foo").build();
         final var sub = client.createSubscription(schemaBuilder, config);
         assertThat(sub.isSubscribed(), equalTo(true));
-        verify(requestStream, times(1)).onNext(eq(sub.createRequest(2)));
+        final var msgHelp = new MsgHelp();
+        msgHelp.init(""); // burn off sequence 1
+        final var msg = msgHelp.request(sub.subscriptionId(), msgHelp.subscription(config));
+        verify(requestStream, times(1)).onNext(eq(msg));
     }
 
     @Test
@@ -116,7 +119,7 @@ class GrpcClientTest {
             assertThat(client.isSessionInitialized(), equalTo(false));
             assertThat(client.isInitializationInProgress(), equalTo(true));
             verify(requestStream, times(1)).onNext(requestCaptor.capture());
-            assertThat(requestCaptor.getValue(), equalTo(MsgHelp.init(1, "hello")));
+            assertThat(requestCaptor.getValue(), equalTo(new MsgHelp().init("hello")));
         }
 
         @Test

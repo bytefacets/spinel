@@ -2,25 +2,25 @@ package com.bytefacets.diaspore.grpc.send;
 
 import static java.util.Objects.requireNonNull;
 
-import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
+import com.bytefacets.diaspore.comms.send.SubscriptionProvider;
 import io.netty.channel.EventLoop;
 
 public final class GrpcServiceBuilder {
-    private final OutputRegistryFactory outputRegistryFactory;
+    private final SubscriptionProvider subscriptionProvider;
     private final EventLoop dataEventLoop;
 
     private GrpcServiceBuilder(
-            final OutputRegistryFactory outputRegistryFactory, final EventLoop dataEventLoop) {
-        this.outputRegistryFactory = requireNonNull(outputRegistryFactory, "outputRegistryFactory");
-        this.dataEventLoop = requireNonNull(dataEventLoop, "dataEventLoop");
+            final SubscriptionProvider subscriptionProvider, final EventLoop dataEventLoop) {
+        this.subscriptionProvider = requireNonNull(subscriptionProvider, "subscriptionProvider");
+        this.dataEventLoop = requireNonNull(dataEventLoop, "subscriptionProvider");
     }
 
     public static GrpcServiceBuilder grpcService(
-            final OutputRegistryFactory outputRegistryFactory, final EventLoop dataEventLoop) {
-        return new GrpcServiceBuilder(outputRegistryFactory, dataEventLoop);
+            final SubscriptionProvider subscriptionProvider, final EventLoop dataEventLoop) {
+        return new GrpcServiceBuilder(subscriptionProvider, dataEventLoop);
     }
 
     public GrpcService build() {
-        return new GrpcService(outputRegistryFactory, dataEventLoop);
+        return new GrpcService(subscriptionProvider, dataEventLoop);
     }
 }

@@ -65,11 +65,11 @@ public final class GrpcClient implements Receiver {
     private final SessionInitializer initializer = new SessionInitializer();
     private final ExponentialBackOff backOff = new ExponentialBackOff();
     private final AtomicInteger nextSubscription = new AtomicInteger(1);
+    private final MsgHelp msgHelp = new MsgHelp();
     private final Function<SchemaBuilder, GrpcDecoder> decoderSupplier;
     private final SubscriptionStore subscriptionStore;
     private final ClientErrorEval errorEval;
     private final String logPrefix;
-    private int nextToken = 1;
 
     GrpcClient(
             final ConnectionInfo connectionInfo,
@@ -104,7 +104,7 @@ public final class GrpcClient implements Receiver {
                         connectionInfo.name(), connectionInfo.endpoint());
         this.errorEval = new ClientErrorEval(log, logPrefix);
         requestAdapter.trackConnectionStateChange();
-        subscriptionStore.connect(this::nextToken);
+        subscriptionStore.connect(msgHelp, this::issueSubscriptionRequest);
     }
 
     public void connect() {
@@ -135,7 +135,7 @@ public final class GrpcClient implements Receiver {
         final var subscriptionId = nextSubscription.incrementAndGet();
         final var sub = subscriptionStore.createSubscription(subscriptionId, decoder, config);
         if (requestAdapter.requester != null) {
-            sub.requestSubscriptionIfNecessary(nextToken(), this::issueSubscriptionRequest);
+            sub.requestSubscriptionIfNecessary();
         }
         return sub;
     }
@@ -285,13 +285,13 @@ public final class GrpcClient implements Receiver {
         }
 
         private void sendInitialization() {
-            final int token = nextToken();
+            final SubscriptionRequest initMsg = msgHelp.init("hello");
             log.debug(
                     "{} Requesting initialization: {} ({})",
                     logPrefix,
                     channel.getState(false),
-                    token);
-            requestAdapter.requester.onNext(MsgHelp.init(token, "hello"));
+                    initMsg.getRefToken());
+            requestAdapter.requester.onNext(initMsg);
         }
 
         private void receiveResponse(final SubscriptionResponse response) {
@@ -308,10 +308,6 @@ public final class GrpcClient implements Receiver {
                 log.warn("{} initialization error response: {}", logPrefix, message);
             }
         }
-    }
-
-    private int nextToken() {
-        return nextToken++;
     }
 
     @VisibleForTesting

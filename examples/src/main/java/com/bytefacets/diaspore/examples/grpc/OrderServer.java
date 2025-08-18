@@ -6,7 +6,7 @@ import static com.bytefacets.diaspore.grpc.send.auth.MultiTenantJwtInterceptor.m
 import static com.bytefacets.diaspore.schema.FieldDescriptor.stringField;
 
 import com.bytefacets.collections.queue.IntDeque;
-import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
+import com.bytefacets.diaspore.comms.send.DefaultSubscriptionProvider;
 import com.bytefacets.diaspore.comms.send.RegisteredOutputsTable;
 import com.bytefacets.diaspore.grpc.send.GrpcService;
 import com.bytefacets.diaspore.grpc.send.GrpcServiceBuilder;
@@ -51,9 +51,10 @@ final class OrderServer {
 
     static Callable<Void> declareOrderServer(final int port) {
         final OrderServer topologyBuilder = new OrderServer();
+        final DefaultSubscriptionProvider subscriptionProvider =
+                DefaultSubscriptionProvider.defaultSubscriptionProvider(topologyBuilder.outputs);
         final GrpcService service =
-                GrpcServiceBuilder.grpcService(
-                                topologyBuilder.registry(), topologyBuilder.eventLoop)
+                GrpcServiceBuilder.grpcService(subscriptionProvider, topologyBuilder.eventLoop)
                         .build();
         final Map<String, String> tenantSecrets = Map.of("bob", "bobs-secret");
         final Server server =
@@ -116,10 +117,6 @@ final class OrderServer {
 
     void start() {
         eventLoop.execute(new OrderActivity());
-    }
-
-    OutputRegistryFactory registry() {
-        return session -> outputs;
     }
 
     /** Little class that creates a batch of orders */
