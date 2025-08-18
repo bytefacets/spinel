@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 import com.bytefacets.diaspore.comms.send.ConnectedSessionInfo;
-import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
 import com.bytefacets.diaspore.comms.send.SubscriptionProvider;
 import com.bytefacets.diaspore.grpc.proto.DataServiceGrpc;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
@@ -59,12 +58,10 @@ public final class GrpcService extends DataServiceGrpc.DataServiceImplBase {
     }
 
     /**
-     * Extracts the ConnectedSessionInfo from the "connected-session" Context.key, calls the
-     * OutputRegistryFactory to get an OutputRegistry for the session, and instantiates a
+     * Extracts the ConnectedSessionInfo from the "connected-session" Context.key and instantiates a
      * GrpcSession.
      *
      * @see GrpcService#CONNECTED_SESSION_KEY
-     * @see OutputRegistryFactory
      * @see ConnectedSessionInfo
      */
     @Override

@@ -80,7 +80,7 @@ final class GrpcSession {
 
     private void createSubscription(final SubscriptionRequest request) {
         final CreateSubscription subscriptionRequest = request.getSubscription();
-        SubscriptionConfig config = toConfig(subscriptionRequest);
+        final SubscriptionConfig config = toConfig(subscriptionRequest);
         try {
             final SubscriptionContainer subscriptionContainer =
                     subscriptionProvider.getSubscription(sessionInfo, config);
@@ -253,7 +253,7 @@ final class GrpcSession {
 
     private record SubscriptionResources(
             SubscriptionContainer subscriptionContainer, GrpcSink sink) {
-        ModificationResponse apply(ChangeDescriptor descriptor) {
+        ModificationResponse apply(final ChangeDescriptor descriptor) {
             return subscriptionContainer.apply(descriptor);
         }
 
