@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.examples.grpc;
 
-import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
+import static com.bytefacets.diaspore.comms.send.DefaultSubscriptionProvider.defaultSubscriptionProvider;
+
+import com.bytefacets.diaspore.comms.send.DefaultSubscriptionProvider;
 import com.bytefacets.diaspore.comms.send.RegisteredOutputsTable;
 import com.bytefacets.diaspore.grpc.send.GrpcService;
 import com.bytefacets.diaspore.grpc.send.GrpcServiceBuilder;
@@ -43,9 +45,10 @@ final class MarketDataServer {
 
     static Callable<Void> declareMarketDataServer(final int port, final LongSupplier rate) {
         final MarketDataServer topologyBuilder = new MarketDataServer(rate);
+        final DefaultSubscriptionProvider subscriptionProvider =
+                defaultSubscriptionProvider(topologyBuilder.outputs);
         final GrpcService service =
-                GrpcServiceBuilder.grpcService(
-                                topologyBuilder.registry(), topologyBuilder.eventLoop())
+                GrpcServiceBuilder.grpcService(subscriptionProvider, topologyBuilder.eventLoop())
                         .build();
         final Server server =
                 ServerBuilder.forPort(port)
@@ -121,10 +124,6 @@ final class MarketDataServer {
 
     void start() {
         eventLoop.execute(new MarketDataCreator());
-    }
-
-    public OutputRegistryFactory registry() {
-        return session -> outputs;
     }
 
     interface MarketData {

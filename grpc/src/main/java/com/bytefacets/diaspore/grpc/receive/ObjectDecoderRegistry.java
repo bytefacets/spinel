@@ -29,7 +29,7 @@ public final class ObjectDecoderRegistry {
         registry.put(key(TypeId.Generic, userTypeId), decoder);
     }
 
-    static Object decode(final ByteString encoded) {
+    public static Object decode(final ByteString encoded) {
         final byte systemTypeId = encoded.byteAt(0);
         final byte userTypeId = encoded.byteAt(1);
         final ObjectDecoder decoder = registry.getOrDefault(key(systemTypeId, userTypeId), null);

@@ -5,8 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 import com.bytefacets.diaspore.comms.send.ConnectedSessionInfo;
-import com.bytefacets.diaspore.comms.send.OutputRegistry;
-import com.bytefacets.diaspore.comms.send.OutputRegistryFactory;
+import com.bytefacets.diaspore.comms.send.SubscriptionProvider;
 import com.bytefacets.diaspore.grpc.proto.DataServiceGrpc;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
@@ -50,21 +49,19 @@ public final class GrpcService extends DataServiceGrpc.DataServiceImplBase {
             Context.key("connected-session");
 
     private static final ConnectedSessionInfo EMPTY = GrpcConnectedSessionInfo.EMPTY;
-    private final OutputRegistryFactory outputRegistryFactory;
+    private final SubscriptionProvider subscriptionProvider;
     private final EventLoop dataEventLoop;
 
-    GrpcService(final OutputRegistryFactory outputRegistryFactory, final EventLoop dataEventLoop) {
-        this.outputRegistryFactory = requireNonNull(outputRegistryFactory, "outputRegistryFactory");
+    GrpcService(final SubscriptionProvider subscriptionProvider, final EventLoop dataEventLoop) {
+        this.subscriptionProvider = requireNonNull(subscriptionProvider, "subscriptionProvider");
         this.dataEventLoop = requireNonNull(dataEventLoop, "dataEventLoop");
     }
 
     /**
-     * Extracts the ConnectedSessionInfo from the "connected-session" Context.key, calls the
-     * OutputRegistryFactory to get an OutputRegistry for the session, and instantiates a
+     * Extracts the ConnectedSessionInfo from the "connected-session" Context.key and instantiates a
      * GrpcSession.
      *
      * @see GrpcService#CONNECTED_SESSION_KEY
-     * @see OutputRegistryFactory
      * @see ConnectedSessionInfo
      */
     @Override
@@ -74,9 +71,12 @@ public final class GrpcService extends DataServiceGrpc.DataServiceImplBase {
                 requireNonNullElse(CONNECTED_SESSION_KEY.get(), EMPTY);
         final var sessionStream = (ServerCallStreamObserver<SubscriptionResponse>) responseObserver;
         log.info("New session established: {}", sessionInfo);
-        final OutputRegistry registry = outputRegistryFactory.createOutputRegistry(sessionInfo);
         return createSession(
-                        sessionInfo, registry, sessionStream, dataEventLoop, this::sessionCompleted)
+                        sessionInfo,
+                        subscriptionProvider,
+                        sessionStream,
+                        dataEventLoop,
+                        this::sessionCompleted)
                 .requestHandler();
     }
 

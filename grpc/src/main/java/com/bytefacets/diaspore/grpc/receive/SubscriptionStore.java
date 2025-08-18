@@ -9,7 +9,6 @@ import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,30 +16,27 @@ final class SubscriptionStore {
     private static final Logger log = LoggerFactory.getLogger(SubscriptionStore.class);
     private final IntGenericIndexedMap<Subscription> subscriptions = new IntGenericIndexedMap<>(16);
     private final ConnectionInfo connectionInfo;
-    private IntSupplier tokenSupplier;
+    private Consumer<SubscriptionRequest> messageSink;
+    private MsgHelp msgHelp;
 
     SubscriptionStore(final ConnectionInfo connectionInfo) {
         this.connectionInfo = requireNonNull(connectionInfo, "connectionInfo");
     }
 
-    void connect(final IntSupplier tokenSupplier) {
-        this.tokenSupplier = requireNonNull(tokenSupplier, "tokenSupplier");
-    }
-
-    private int token() {
-        return tokenSupplier.getAsInt();
+    void connect(final MsgHelp msgHelp, final Consumer<SubscriptionRequest> messageSink) {
+        this.msgHelp = requireNonNull(msgHelp, "msgHelp");
+        this.messageSink = requireNonNull(messageSink, "messageSink");
     }
 
     void resubscribe(final Consumer<SubscriptionRequest> consumer) {
         synchronized (subscriptions) {
-            subscriptions.forEachValue(
-                    sub -> sub.requestSubscriptionIfNecessary(token(), consumer));
+            subscriptions.forEachValue(Subscription::requestSubscriptionIfNecessary);
         }
     }
 
     Subscription createSubscription(
             final int subscriptionId, final GrpcDecoder decoder, final SubscriptionConfig config) {
-        final var sub = new Subscription(subscriptionId, decoder, config);
+        final var sub = new Subscription(subscriptionId, decoder, config, msgHelp, messageSink);
         synchronized (subscriptions) {
             subscriptions.put(subscriptionId, sub);
         }
@@ -60,7 +56,7 @@ final class SubscriptionStore {
             if (sub != null) {
                 sub.decoder().accept(response);
             } else {
-                log.debug(
+                log.warn(
                         "ClientOf[{}] Did not find subscription for subscriptionId {}",
                         connectionInfo,
                         response.getSubscriptionId());

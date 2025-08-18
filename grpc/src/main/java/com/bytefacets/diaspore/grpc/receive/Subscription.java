@@ -12,13 +12,21 @@ final class Subscription {
     private final int subscriptionId;
     private final SubscriptionConfig config;
     private final GrpcDecoder decoder;
+    private final Consumer<SubscriptionRequest> messageSink;
+    private final MsgHelp msgHelp;
     private boolean isSubscribed;
 
     Subscription(
-            final int subscriptionId, final GrpcDecoder decoder, final SubscriptionConfig config) {
+            final int subscriptionId,
+            final GrpcDecoder decoder,
+            final SubscriptionConfig config,
+            final MsgHelp msgHelp,
+            final Consumer<SubscriptionRequest> messageSink) {
         this.subscriptionId = subscriptionId;
         this.decoder = requireNonNull(decoder, "decoder");
         this.config = requireNonNull(config, "config");
+        this.msgHelp = requireNonNull(msgHelp, "msgHelp");
+        this.messageSink = requireNonNull(messageSink, "messageSink");
     }
 
     int subscriptionId() {
@@ -43,19 +51,18 @@ final class Subscription {
         }
     }
 
-    void requestSubscriptionIfNecessary(
-            final int token, final Consumer<SubscriptionRequest> consumer) {
+    void requestSubscriptionIfNecessary() {
         synchronized (lock) {
             if (!isSubscribed) {
-                consumer.accept(createRequest(token));
+                messageSink.accept(createRequest());
                 isSubscribed = true;
             }
         }
     }
 
     @VisibleForTesting
-    SubscriptionRequest createRequest(final int token) {
-        return MsgHelp.request(token, subscriptionId, MsgHelp.subscription(config));
+    SubscriptionRequest createRequest() {
+        return msgHelp.request(subscriptionId, msgHelp.subscription(config));
     }
 
     @Override
