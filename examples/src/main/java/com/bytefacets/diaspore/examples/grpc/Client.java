@@ -8,14 +8,12 @@ import static com.bytefacets.diaspore.examples.grpc.OrderServer.ORDER_PORT;
 import static com.bytefacets.diaspore.grpc.receive.auth.JwtCallCredentials.jwtCredentials;
 import static com.bytefacets.diaspore.transform.TransformBuilder.transform;
 
-import com.bytefacets.diaspore.common.Connector;
 import com.bytefacets.diaspore.comms.ConnectionInfo;
 import com.bytefacets.diaspore.grpc.receive.GrpcClient;
 import com.bytefacets.diaspore.grpc.receive.GrpcClientBuilder;
 import com.bytefacets.diaspore.grpc.receive.GrpcSource;
 import com.bytefacets.diaspore.grpc.receive.GrpcSourceBuilder;
 import com.bytefacets.diaspore.join.JoinKeyHandling;
-import com.bytefacets.diaspore.printer.OutputPrinter;
 import com.bytefacets.diaspore.transform.TransformBuilder;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -84,7 +82,8 @@ final class Client {
 
     void build() {
         // get the order-view output from the orders server using the orderClient
-        orders = GrpcSourceBuilder.grpcSource(orderClient, "order-view")
+        orders =
+                GrpcSourceBuilder.grpcSource(orderClient, "order-view")
                         .subscription(subscriptionConfig("order-view").defaultAll().build())
                         .getOrCreate();
         // get the market-data output from the market data server using the mdClient
