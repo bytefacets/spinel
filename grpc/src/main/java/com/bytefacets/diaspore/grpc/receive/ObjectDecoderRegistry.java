@@ -25,7 +25,7 @@ public final class ObjectDecoderRegistry {
 
     private ObjectDecoderRegistry() {}
 
-    public void register(final byte userTypeId, final ObjectDecoder decoder) {
+    public static void register(final byte userTypeId, final ObjectDecoder decoder) {
         registry.put(key(TypeId.Generic, userTypeId), decoder);
     }
 

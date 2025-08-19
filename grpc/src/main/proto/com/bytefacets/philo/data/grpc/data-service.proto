@@ -11,21 +11,21 @@ service DataService {
 }
 
 message SubscriptionRequest {
-    int32 ref_token = 1;
-    RequestType request_type = 2;
-    CreateSubscription subscription = 3;
-    InitializationRequest initialization = 4;
-    int32 subscription_id = 5;
+    int32 msg_token = 1;
+    int32 subscription_id = 2;
+    RequestType request_type = 3;
+    CreateSubscription subscription = 4;
+    InitializationRequest initialization = 5;
     ModifySubscription modification = 6;
 }
 
 message SubscriptionResponse {
-    int32 ref_token = 1;
-    Response response = 2;
+    int32 ref_msg_token = 1;
+    int32 subscription_id = 2;
     ResponseType response_type = 3;
-    SchemaUpdate schema = 4;
-    DataUpdate data = 5;
-    int32 subscription_id = 6;
+    Response response = 4;
+    SchemaUpdate schema = 5;
+    DataUpdate data = 6;
 }
 
 message CreateSubscription {

@@ -2,4 +2,10 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.comms.subscription;
 
-public interface ModificationRequest {}
+public interface ModificationRequest {
+    String target();
+
+    String action();
+
+    Object[] arguments();
+}

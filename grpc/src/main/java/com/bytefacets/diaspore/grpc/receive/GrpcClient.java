@@ -145,7 +145,7 @@ public final class GrpcClient implements Receiver {
             log.info(
                     "{}} Issuing subscription request: subscriptionId={}, subscription-id={}, name={}",
                     logPrefix,
-                    request.getRefToken(),
+                    request.getMsgToken(),
                     request.getSubscriptionId(),
                     request.getSubscription().getName());
             requestAdapter.requester.onNext(request);
@@ -290,7 +290,7 @@ public final class GrpcClient implements Receiver {
                     "{} Requesting initialization: {} ({})",
                     logPrefix,
                     channel.getState(false),
-                    initMsg.getRefToken());
+                    initMsg.getMsgToken());
             requestAdapter.requester.onNext(initMsg);
         }
 

@@ -107,7 +107,7 @@ class SubscriptionStoreTest {
     @Test
     void shouldRouteResponseToSubscription() {
         // given
-        final GrpcEncoder encoder = sender.encoder(10, () -> 0);
+        final GrpcEncoder encoder = sender.encoder(10);
         final Schema schema =
                 intIndexedTable("table").addFields(intField("a"), intField("b")).build().schema();
         // when
@@ -152,7 +152,7 @@ class SubscriptionStoreTest {
     void shouldNotThrowWhenReceivingResponseForUnknownToken() {
         // given
         final GrpcDecoder mockDecoder = mock(GrpcDecoder.class);
-        final GrpcEncoder encoder = sender.encoder(10, () -> 0);
+        final GrpcEncoder encoder = sender.encoder(10);
         final Schema schema =
                 intIndexedTable("table").addFields(intField("a"), intField("b")).build().schema();
         store.createSubscription(10, mockDecoder, config);
