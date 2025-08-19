@@ -1,0 +1,18 @@
+// SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
+// SPDX-License-Identifier: MIT
+package com.bytefacets.spinel.grpc.send;
+
+/**
+ * @see ObjectEncoderRegistry#register(Class, ObjectEncoder)
+ */
+public interface ObjectEncoder {
+    /**
+     * Extension point for implementation to encode the `value` into the ByteBuffer returned by the
+     * BufferSupplier.
+     *
+     * @param bufferSupplier given a type and length, it will return you an appropriately sized and
+     *     positioned ByteBuffer
+     * @param value the value to encode
+     */
+    void encode(BufferSupplier bufferSupplier, Object value);
+}
