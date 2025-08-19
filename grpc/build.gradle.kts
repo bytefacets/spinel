@@ -54,7 +54,7 @@ tasks.named("compileJava") {
 
 dependencies {
     implementation("com.bytefacets:bytefacets-collections:0.3.0")
-    implementation(project(":diaspore"))
+    implementation(project(":spinel"))
     implementation("io.grpc:grpc-protobuf:${grpcVersion}")
     implementation("io.grpc:grpc-stub:${grpcVersion}")
 //    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
@@ -69,5 +69,5 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:${protobufVersion}")
 
     testImplementation("io.grpc:grpc-inprocess:${grpcVersion}")
-    testImplementation(testFixtures(project(":diaspore")))
+    testImplementation(testFixtures(project(":spinel")))
 }

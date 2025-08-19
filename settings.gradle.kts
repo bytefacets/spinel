@@ -17,6 +17,6 @@ pluginManagement {
     }
 }
 
-include("diaspore")
+include("spinel")
 include("examples")
 include("grpc")
