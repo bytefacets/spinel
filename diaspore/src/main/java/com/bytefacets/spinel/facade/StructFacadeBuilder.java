@@ -31,7 +31,7 @@ final class StructFacadeBuilder implements ClassBuilder {
     @Override
     public void initClassPool(final ClassPool classPool) {
         this.pool = requireNonNull(classPool, "classPool");
-        pool.importPackage("com.bytefacets.diaspore.schema");
+        pool.importPackage("com.bytefacets.spinel.schema");
         addToClasspath(pool, FieldResolver.class, StructFacade.class);
     }
 
