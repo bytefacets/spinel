@@ -8,7 +8,7 @@
     </Match>
 
     <Match>
-        <Package name="com.bytefacets.diaspore.grpc.proto.*" />
+        <Package name="com.bytefacets.spinel.grpc.proto.*" />
     </Match>
 
     <!-- Disable check -->
