@@ -27,7 +27,8 @@ import java.util.function.Supplier;
  * </pre>
  *
  * @see com.bytefacets.spinel.grpc.proto.DataServiceGrpc.DataServiceStub
- * @see com.bytefacets.spinel.grpc.receive.GrpcClientBuilder#withSpecializer(java.util.function.Function)
+ * @see
+ *     com.bytefacets.spinel.grpc.receive.GrpcClientBuilder#withSpecializer(java.util.function.Function)
  */
 public final class JwtCallCredentials extends CallCredentials {
     static final Metadata.Key<String> AUTH_KEY =

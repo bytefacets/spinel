@@ -13,8 +13,8 @@ import com.bytefacets.spinel.transform.TransformContinuation;
 
 /**
  * Builder for a {@link ChangeConflator}. To be called directly from {@link #changeConflator()} or
- * {@link #changeConflator(String)}, or from a {@link com.bytefacets.spinel.transform.TransformBuilder} or {@link
- * TransformContinuation}.
+ * {@link #changeConflator(String)}, or from a {@link
+ * com.bytefacets.spinel.transform.TransformBuilder} or {@link TransformContinuation}.
  */
 public final class ChangeConflatorBuilder {
     private final BuilderSupport<ChangeConflator> builderSupport;
