@@ -13,7 +13,7 @@ val nettyVersion: String by extra
 val bytefacetsCollectionsVersion: String by extra
 
 dependencies {
-    implementation(project(":diaspore"))
+    implementation(project(":spinel"))
     implementation(project(":grpc"))
     implementation("com.bytefacets:bytefacets-collections:${bytefacetsCollectionsVersion}")
 
