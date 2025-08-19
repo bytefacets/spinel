@@ -11,7 +11,7 @@ final class MsgHelp {
 
     SubscriptionRequest request(final int subscriptionId, final CreateSubscription payload) {
         return SubscriptionRequest.newBuilder()
-                .setRefToken(nextToken++)
+                .setMsgToken(nextToken++)
                 .setSubscriptionId(subscriptionId)
                 .setRequestType(RequestType.REQUEST_TYPE_SUBSCRIBE)
                 .setSubscription(payload)
@@ -29,7 +29,7 @@ final class MsgHelp {
 
     SubscriptionRequest init(final String message) {
         return SubscriptionRequest.newBuilder()
-                .setRefToken(nextToken++)
+                .setMsgToken(nextToken++)
                 .setRequestType(RequestType.REQUEST_TYPE_INIT)
                 .setInitialization(InitializationRequest.newBuilder().setMessage(message).build())
                 .build();

@@ -1,7 +1,5 @@
 package com.bytefacets.diaspore.grpc.send;
 
-import static java.util.Objects.requireNonNull;
-
 import com.bytefacets.collections.arrays.ByteArray;
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.collections.vector.IntVector;
@@ -37,7 +35,6 @@ import com.bytefacets.diaspore.schema.StringField;
 import com.bytefacets.diaspore.schema.TypeId;
 import com.google.protobuf.ByteString;
 import java.util.BitSet;
-import java.util.function.IntSupplier;
 
 public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
     private final ObjectEncoderImpl objectEncoder = new ObjectEncoderImpl();
@@ -45,21 +42,15 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
     private final FieldBitSet allFieldsChanges = FieldBitSet.fieldBitSet(allFields);
     private final IntVector rowIdBuffer = new IntVector(64);
     private final int subscriptionId;
-    private final IntSupplier tokenSupplier;
     private byte[] byteArray = new byte[64];
     private Schema schema;
 
-    private GrpcEncoder(final int subscriptionId, final IntSupplier tokenSupplier) {
+    private GrpcEncoder(final int subscriptionId) {
         this.subscriptionId = subscriptionId;
-        this.tokenSupplier = requireNonNull(tokenSupplier, "tokenSupplier");
     }
 
-    static GrpcEncoder grpcEncoder(final int subscriptionId, final IntSupplier tokenSupplier) {
-        return new GrpcEncoder(subscriptionId, tokenSupplier);
-    }
-
-    private int token() {
-        return tokenSupplier.getAsInt();
+    static GrpcEncoder grpcEncoder(final int subscriptionId) {
+        return new GrpcEncoder(subscriptionId);
     }
 
     @Override
@@ -76,7 +67,7 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
             schema.forEachField(f -> builder.addFields(fieldDefinition(f)));
         }
         return update.setSubscriptionId(subscriptionId)
-                .setRefToken(token())
+                .setRefMsgToken(-1)
                 .setSchema(builder.build())
                 .build();
     }
@@ -89,7 +80,7 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
         captureRows(rows, builder);
         captureData(builder, rowIdBuffer, allFieldsChanges);
         return update.setSubscriptionId(subscriptionId)
-                .setRefToken(token())
+                .setRefMsgToken(-1)
                 .setData(builder.build())
                 .build();
     }
@@ -103,7 +94,7 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
         captureRows(rows, builder);
         captureData(builder, rowIdBuffer, fieldSet);
         return update.setSubscriptionId(subscriptionId)
-                .setRefToken(token())
+                .setRefMsgToken(-1)
                 .setData(builder.build())
                 .build();
     }
@@ -115,7 +106,7 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
         final var builder = DataUpdate.newBuilder();
         captureRows(rows, builder);
         return update.setSubscriptionId(subscriptionId)
-                .setRefToken(token())
+                .setRefMsgToken(-1)
                 .setData(builder.build())
                 .build();
     }

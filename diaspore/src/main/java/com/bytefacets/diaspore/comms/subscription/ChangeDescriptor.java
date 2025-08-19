@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
+// SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.comms.subscription;
 
 import java.util.Arrays;
@@ -20,14 +22,17 @@ public final class ChangeDescriptor implements ModificationRequest {
         this.arguments = arguments;
     }
 
+    @Override
     public String target() {
         return target;
     }
 
+    @Override
     public String action() {
         return action;
     }
 
+    @Override
     public Object[] arguments() {
         return arguments;
     }

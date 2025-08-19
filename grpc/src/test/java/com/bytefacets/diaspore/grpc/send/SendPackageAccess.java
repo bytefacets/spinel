@@ -16,10 +16,10 @@ public final class SendPackageAccess {
             final int subscriptionId,
             final IntSupplier tokenSupplier,
             final StreamObserver<SubscriptionResponse> stream) {
-        return GrpcSink.grpcSink(subscriptionId, tokenSupplier, stream);
+        return GrpcSink.grpcSink(subscriptionId, stream);
     }
 
-    public GrpcEncoder encoder(final int subscriptionId, final IntSupplier tokenSupplier) {
-        return GrpcEncoder.grpcEncoder(subscriptionId, tokenSupplier);
+    public GrpcEncoder encoder(final int subscriptionId) {
+        return GrpcEncoder.grpcEncoder(subscriptionId);
     }
 }

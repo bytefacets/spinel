@@ -12,7 +12,6 @@ import com.bytefacets.diaspore.schema.ChangedFieldSet;
 import com.bytefacets.diaspore.schema.Schema;
 import com.bytefacets.diaspore.transform.InputProvider;
 import io.grpc.stub.StreamObserver;
-import java.util.function.IntSupplier;
 import javax.annotation.Nullable;
 
 public final class GrpcSink implements InputProvider {
@@ -22,10 +21,8 @@ public final class GrpcSink implements InputProvider {
     private TransformOutput source;
 
     static GrpcSink grpcSink(
-            final int subscriptionId,
-            final IntSupplier tokenSupplier,
-            final StreamObserver<SubscriptionResponse> streamOutput) {
-        return new GrpcSink(grpcEncoder(subscriptionId, tokenSupplier), streamOutput);
+            final int subscriptionId, final StreamObserver<SubscriptionResponse> streamOutput) {
+        return new GrpcSink(grpcEncoder(subscriptionId), streamOutput);
     }
 
     private GrpcSink(

@@ -90,7 +90,7 @@ class GrpcSessionTest {
         session.requestHandler()
                 .onNext(
                         SubscriptionRequest.newBuilder()
-                                .setRefToken(123)
+                                .setMsgToken(123)
                                 .setSubscriptionId(77)
                                 .setRequestTypeValue(5)
                                 .build());
@@ -140,7 +140,7 @@ class GrpcSessionTest {
             verify(observer, times(1)).onNext(responseCaptor.capture());
             final var expected =
                     SubscriptionResponse.newBuilder()
-                            .setRefToken(1)
+                            .setRefMsgToken(1)
                             .setResponseType(ResponseType.RESPONSE_TYPE_INIT)
                             .setResponse(Response.newBuilder().setMessage("hello").build())
                             .build();
@@ -152,7 +152,7 @@ class GrpcSessionTest {
         final var init = InitializationRequest.newBuilder().setMessage(msg).build();
         return SubscriptionRequest.newBuilder()
                 .setRequestType(RequestType.REQUEST_TYPE_INIT)
-                .setRefToken(token)
+                .setMsgToken(token)
                 .setInitialization(init)
                 .build();
     }
@@ -160,7 +160,7 @@ class GrpcSessionTest {
     SubscriptionRequest subscribeRequest(final String name, final List<String> fields) {
         final var sub = CreateSubscription.newBuilder().setName(name).addAllFieldNames(fields);
         return SubscriptionRequest.newBuilder()
-                .setRefToken(123)
+                .setMsgToken(123)
                 .setSubscriptionId(77)
                 .setRequestType(RequestType.REQUEST_TYPE_SUBSCRIBE)
                 .setSubscription(sub)

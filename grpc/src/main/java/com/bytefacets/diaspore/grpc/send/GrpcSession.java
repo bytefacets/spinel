@@ -1,6 +1,5 @@
 package com.bytefacets.diaspore.grpc.send;
 
-import static com.bytefacets.diaspore.comms.subscription.ChangeDescriptor.change;
 import static com.bytefacets.diaspore.grpc.send.GrpcSink.grpcSink;
 import static java.util.Objects.requireNonNull;
 
@@ -11,15 +10,13 @@ import com.bytefacets.diaspore.comms.send.ConnectedSessionInfo;
 import com.bytefacets.diaspore.comms.send.ModificationResponse;
 import com.bytefacets.diaspore.comms.send.SubscriptionContainer;
 import com.bytefacets.diaspore.comms.send.SubscriptionProvider;
-import com.bytefacets.diaspore.comms.subscription.ChangeDescriptor;
+import com.bytefacets.diaspore.comms.subscription.ModificationRequest;
 import com.bytefacets.diaspore.grpc.proto.CreateSubscription;
-import com.bytefacets.diaspore.grpc.proto.ModifySubscription;
 import com.bytefacets.diaspore.grpc.proto.RequestType;
 import com.bytefacets.diaspore.grpc.proto.Response;
 import com.bytefacets.diaspore.grpc.proto.ResponseType;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionRequest;
 import com.bytefacets.diaspore.grpc.proto.SubscriptionResponse;
-import com.bytefacets.diaspore.grpc.receive.ObjectDecoderRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
@@ -39,6 +36,7 @@ final class GrpcSession {
     private final StreamObserver<SubscriptionResponse> outputStream;
     private final IntGenericIndexedMap<SubscriptionResources> subscriptions =
             new IntGenericIndexedMap<>(4);
+    private final MsgHelp msgHelp = new MsgHelp();
     private final Consumer<GrpcSession> onComplete;
     private final SenderErrorEval errorEval;
     private final String logPrefix;
@@ -86,7 +84,7 @@ final class GrpcSession {
                     subscriptionProvider.getSubscription(sessionInfo, config);
             if (subscriptionContainer != null) {
                 final int subscriptionId = request.getSubscriptionId();
-                final GrpcSink adapter = grpcSink(subscriptionId, this::nextToken, outputStream);
+                final GrpcSink adapter = grpcSink(subscriptionId, outputStream);
                 final var resources = new SubscriptionResources(subscriptionContainer, adapter);
                 subscriptions.put(subscriptionId, resources);
                 // connection to the output must be done on the data thread
@@ -100,13 +98,12 @@ final class GrpcSession {
     }
 
     private void modifySubscription(final SubscriptionRequest request) {
-        final ModifySubscription modificationRequest = request.getModification();
         final var subscriptionContainer =
                 subscriptions.getOrDefault(request.getSubscriptionId(), null);
         try {
             if (subscriptionContainer != null) {
-                final ChangeDescriptor descriptor = toChangeDescriptor(modificationRequest);
-                final ModificationResponse response = subscriptionContainer.apply(descriptor);
+                final ModificationRequest modification = msgHelp.readModification(request);
+                final ModificationResponse response = subscriptionContainer.apply(modification);
                 outputStream.onNext(
                         messageResponse(request, !response.success(), response.message()));
             } else {
@@ -139,7 +136,7 @@ final class GrpcSession {
                     "{} Received {} ({})",
                     logPrefix,
                     request.getRequestType(),
-                    request.getRefToken());
+                    request.getMsgToken());
             if (request.getRequestType() == RequestType.REQUEST_TYPE_SUBSCRIBE) {
                 createSubscription(request);
             } else if (request.getRequestType() == RequestType.REQUEST_TYPE_MODIFY) {
@@ -148,7 +145,7 @@ final class GrpcSession {
                 log.info(
                         "Initialization received: msg={}",
                         request.getInitialization().getMessage());
-                outputStream.onNext(init(request.getRefToken()));
+                outputStream.onNext(init(request.getMsgToken()));
             } else {
                 onUnknownRequestType(request);
             }
@@ -177,7 +174,7 @@ final class GrpcSession {
     private static SubscriptionResponse messageResponse(
             final SubscriptionRequest req, final boolean isError, final String message) {
         return SubscriptionResponse.newBuilder()
-                .setRefToken(req.getRefToken())
+                .setRefMsgToken(req.getMsgToken())
                 .setSubscriptionId(req.getSubscriptionId())
                 .setResponseType(ResponseType.RESPONSE_TYPE_MESSAGE)
                 .setResponse(Response.newBuilder().setError(isError).setMessage(message).build())
@@ -186,7 +183,7 @@ final class GrpcSession {
 
     static SubscriptionResponse init(final int refToken) {
         return SubscriptionResponse.newBuilder()
-                .setRefToken(refToken)
+                .setRefMsgToken(refToken)
                 .setResponseType(ResponseType.RESPONSE_TYPE_INIT)
                 .setResponse(Response.newBuilder().setError(false).setMessage("hello").build())
                 .build();
@@ -242,18 +239,9 @@ final class GrpcSession {
         return builder.build();
     }
 
-    private static ChangeDescriptor toChangeDescriptor(
-            final ModifySubscription modificationRequest) {
-        final Object[] args = new Object[modificationRequest.getArgumentsCount()];
-        for (int i = 0, len = modificationRequest.getArgumentsCount(); i < len; i++) {
-            args[i] = ObjectDecoderRegistry.decode(modificationRequest.getArguments(i));
-        }
-        return change(modificationRequest.getTarget(), modificationRequest.getAction(), args);
-    }
-
     private record SubscriptionResources(
             SubscriptionContainer subscriptionContainer, GrpcSink sink) {
-        ModificationResponse apply(final ChangeDescriptor descriptor) {
+        ModificationResponse apply(final ModificationRequest descriptor) {
             return subscriptionContainer.apply(descriptor);
         }
 
