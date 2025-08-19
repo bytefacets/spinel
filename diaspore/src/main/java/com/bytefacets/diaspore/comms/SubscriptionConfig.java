@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
+// SPDX-License-Identifier: MIT
 package com.bytefacets.diaspore.comms;
 
 import static java.util.Objects.requireNonNull;
