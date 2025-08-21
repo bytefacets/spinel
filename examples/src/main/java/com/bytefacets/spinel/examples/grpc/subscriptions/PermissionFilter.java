@@ -289,20 +289,19 @@ final class PermissionFilter {
             if (schema == null) {
                 return; // no schema from the server yet
             }
-            output.rowProvider()
-                    .forEach(
-                            row -> {
-                                sb.setLength(0);
-                                schema.forEachField(
-                                        schemaField -> {
-                                            final var value =
-                                                    schemaField.field().objectValueAt(row);
-                                            sb.append(
-                                                    String.format(
-                                                            "[%s=%s]", schemaField.name(), value));
-                                        });
-                                clientLog.info("Dumping Row[{}]: {}", row, sb);
+            output.rowProvider().forEach(this::printRow);
+        }
+
+        @SuppressWarnings("DataFlowIssue")
+        private void printRow(int row) {
+            sb.setLength(0);
+            output.schema()
+                    .forEachField(
+                            schemaField -> {
+                                final var value = schemaField.field().objectValueAt(row);
+                                sb.append(String.format("[%s=%s]", schemaField.name(), value));
                             });
+            clientLog.info("Dumping Row[{}]: {}", row, sb);
         }
     }
 }
