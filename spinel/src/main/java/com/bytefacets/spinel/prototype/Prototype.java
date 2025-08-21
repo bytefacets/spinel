@@ -27,6 +27,17 @@ import java.util.BitSet;
 import java.util.List;
 import javax.annotation.Nullable;
 
+/**
+ * A Prototype operator is a trade-off: declare a schema locally which is kind of bad, in exchange
+ * for schema stability from upstream. One would typically connect this to the output of something
+ * like GrpcSource which is doing the heavy work of consuming the subscription. But if you want a
+ * consumer, like a JavaFX UI or something, to have a stable schema, you can use the prototype as a
+ * shim.
+ *
+ * <p>Another positive with the Prototype is that it can perform some level of type-casting using
+ * {@link com.bytefacets.spinel.schema.Cast}, so if the server sends a short, but you said the field
+ * was an int locally, the Prototype will manage that discrepancy for you.
+ */
 public final class Prototype implements InputProvider, OutputProvider {
     private final Input input;
     private final OutputManager outputManager;

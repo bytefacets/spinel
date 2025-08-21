@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.examples.grpc.subscriptions;
+package com.bytefacets.spinel.examples.subscriptions;
 
 import static com.bytefacets.spinel.grpc.receive.auth.JwtCallCredentials.jwtCredentials;
 import static com.bytefacets.spinel.grpc.send.auth.MultiTenantJwtInterceptor.multiTenantJwt;
@@ -20,6 +20,7 @@ import com.bytefacets.spinel.comms.send.RegisteredOutputsTable;
 import com.bytefacets.spinel.comms.send.SubscriptionContainer;
 import com.bytefacets.spinel.comms.send.SubscriptionFactory;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
+import com.bytefacets.spinel.examples.Util;
 import com.bytefacets.spinel.filter.Filter;
 import com.bytefacets.spinel.filter.FilterBuilder;
 import com.bytefacets.spinel.filter.lib.StringPredicate;
@@ -30,7 +31,6 @@ import com.bytefacets.spinel.grpc.receive.GrpcSourceBuilder;
 import com.bytefacets.spinel.grpc.send.GrpcService;
 import com.bytefacets.spinel.grpc.send.GrpcServiceBuilder;
 import com.bytefacets.spinel.printer.OutputLoggerBuilder;
-import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.table.IntIndexedStructTable;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -81,6 +81,7 @@ final class PermissionFilter {
     public static void main(final String[] args) throws Exception {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.getLogger("io.grpc").setLevel(ch.qos.logback.classic.Level.INFO);
+        context.getLogger("io.netty").setLevel(ch.qos.logback.classic.Level.INFO);
         declareServer();
         declareClient();
         Thread.currentThread().join();
@@ -109,7 +110,8 @@ final class PermissionFilter {
         Connector.connectInputToOutput(
                 OutputLoggerBuilder.logger("client-orders").logLevel(Level.INFO).build(), orders);
         // every 5 seconds dump the entire contents of our local view of the output
-        eventLoop.scheduleAtFixedRate(new Dumper(orders.output()), 1, 5, TimeUnit.SECONDS);
+        eventLoop.scheduleAtFixedRate(
+                Util.dumper("ClientDump", orders.output()), 1, 5, TimeUnit.SECONDS);
         orderClient.connect();
     }
 
@@ -272,36 +274,4 @@ final class PermissionFilter {
         double getPrice();     Order setPrice(double value);
     }
     // formatting:on
-
-    // we'll use this to periodically dump the client's table, to show the contents
-    private static final class Dumper implements Runnable {
-        private static final Logger clientLog = LoggerFactory.getLogger("ClientDump");
-        private final TransformOutput output;
-        private final StringBuilder sb = new StringBuilder();
-
-        private Dumper(final TransformOutput output) {
-            this.output = output;
-        }
-
-        @Override
-        public void run() {
-            final Schema schema = output.schema();
-            if (schema == null) {
-                return; // no schema from the server yet
-            }
-            output.rowProvider().forEach(this::printRow);
-        }
-
-        @SuppressWarnings("DataFlowIssue")
-        private void printRow(final int row) {
-            sb.setLength(0);
-            output.schema()
-                    .forEachField(
-                            schemaField -> {
-                                final var value = schemaField.field().objectValueAt(row);
-                                sb.append(String.format("[%s=%s]", schemaField.name(), value));
-                            });
-            clientLog.info("Dumping Row[{}]: {}", row, sb);
-        }
-    }
 }

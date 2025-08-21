@@ -1,0 +1,85 @@
+[main] INFO server-orders -- e0          SCH Order: 4 fields [0,Account,String][1,Price,Double][2,Qty,Int][3,OrderId,Int]
+[main] INFO server-orders -- e0          ADD r0     : [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[main] INFO server-orders -- e0          ADD r1     : [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[main] INFO server-orders -- e0          ADD r2     : [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[main] INFO server-orders -- e0          ADD r3     : [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[main] INFO server-orders -- e0          ADD r4     : [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[main] INFO client-orders -- e0          SCH client-orders-prototype: 4 fields [0,Account,String][1,Price,Double][2,Qty,Int][3,OrderId,Int]
+[client-data-thread] INFO OrdersDumper -- Schema not available
+[client-data-thread] INFO PrototypeDumper -- Schema available, but no rows
+[client-data-thread] INFO OrdersDumper -- Schema not available
+[client-data-thread] INFO PrototypeDumper -- Schema available, but no rows
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Initiating client subscription
+[grpc-default-executor-0] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Client state change: IDLE->CONNECTING
+[grpc-default-executor-0] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Client state change: CONNECTING->READY
+[grpc-default-executor-0] DEBUG com.bytefacets.spinel.grpc.receive.GrpcClient -- onNewChannelState: READY
+[grpc-default-executor-0] DEBUG com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Requesting initialization: READY (1)
+[server-data-thread] INFO com.bytefacets.spinel.grpc.send.GrpcService -- New session established: anon/anon@
+[server-data-thread] DEBUG com.bytefacets.spinel.grpc.send.GrpcSession -- anon/anon@ Received REQUEST_TYPE_INIT (1)
+[server-data-thread] INFO com.bytefacets.spinel.grpc.send.GrpcSession -- Initialization received: msg=hello
+[client-data-thread] DEBUG com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Initialization response: hello
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Resubscribing 1 outputs if necessary
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001]} Issuing subscription request: subscriptionId=2, subscription-id=2, name=orders
+[server-data-thread] DEBUG com.bytefacets.spinel.grpc.send.GrpcSession -- anon/anon@ Received REQUEST_TYPE_SUBSCRIBE (2)
+[client-data-thread] INFO client-orders -- e1          ADD r0     : [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO client-orders -- e1          ADD r1     : [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO client-orders -- e1          ADD r2     : [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO client-orders -- e1          ADD r3     : [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO client-orders -- e1          ADD r4     : [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[0]: [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[1]: [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[0]: [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[1]: [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[0]: [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[1]: [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[0]: [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[1]: [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Discontinuing client subscription
+[server-data-thread] INFO com.bytefacets.spinel.grpc.send.GrpcSession -- anon/anon@ Completed
+[server-data-thread] INFO com.bytefacets.spinel.grpc.send.GrpcSession -- anon/anon@ Closing session
+[client-data-thread] INFO client-orders -- e2          REM r0     :
+[client-data-thread] INFO client-orders -- e2          REM r1     :
+[client-data-thread] INFO client-orders -- e2          REM r2     :
+[client-data-thread] INFO client-orders -- e2          REM r3     :
+[client-data-thread] INFO client-orders -- e2          REM r4     :
+[client-data-thread] INFO OrdersDumper -- Schema not available
+[client-data-thread] INFO PrototypeDumper -- Schema available, but no rows
+[client-data-thread] INFO OrdersDumper -- Schema not available
+[client-data-thread] INFO PrototypeDumper -- Schema available, but no rows
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Initiating client subscription
+[client-data-thread] DEBUG com.bytefacets.spinel.grpc.receive.GrpcClient -- onNewChannelState: READY
+[client-data-thread] DEBUG com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Requesting initialization: READY (3)
+[server-data-thread] INFO com.bytefacets.spinel.grpc.send.GrpcService -- New session established: anon/anon@
+[server-data-thread] DEBUG com.bytefacets.spinel.grpc.send.GrpcSession -- anon/anon@ Received REQUEST_TYPE_INIT (3)
+[server-data-thread] INFO com.bytefacets.spinel.grpc.send.GrpcSession -- Initialization received: msg=hello
+[client-data-thread] DEBUG com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Initialization response: hello
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Resubscribing 1 outputs if necessary
+[client-data-thread] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001]} Issuing subscription request: subscriptionId=4, subscription-id=2, name=orders
+[server-data-thread] DEBUG com.bytefacets.spinel.grpc.send.GrpcSession -- anon/anon@ Received REQUEST_TYPE_SUBSCRIBE (4)
+[client-data-thread] INFO client-orders -- e3          ADD r0     : [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO client-orders -- e3          ADD r1     : [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO client-orders -- e3          ADD r2     : [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO client-orders -- e3          ADD r3     : [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO client-orders -- e3          ADD r4     : [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[0]: [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[1]: [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO OrdersDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[0]: [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[1]: [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
+[client-data-thread] INFO PrototypeDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
