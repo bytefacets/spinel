@@ -1,4 +1,4 @@
-rootProject.name = "diaspore"
+rootProject.name = "spinel"
 
 pluginManagement {
     repositories {

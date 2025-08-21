@@ -9,9 +9,10 @@ apply(plugin = "com.bytefacets.template_processor")
 
 val grpcVersion = "1.70.0"
 val protobufVersion = "4.29.3";
+val auth0 : String by extra
+val bytefacetsCollectionsVersion : String by extra
 val log4jVersion : String by extra
 val nettyVersion : String by extra
-val auth0 : String by extra
 
 protobuf {
     protoc {
@@ -53,7 +54,7 @@ tasks.named("compileJava") {
 }
 
 dependencies {
-    implementation("com.bytefacets:bytefacets-collections:0.3.0")
+    implementation("com.bytefacets:bytefacets-collections:${bytefacetsCollectionsVersion}")
     implementation(project(":spinel"))
     implementation("io.grpc:grpc-protobuf:${grpcVersion}")
     implementation("io.grpc:grpc-stub:${grpcVersion}")

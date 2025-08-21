@@ -44,6 +44,15 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
                 sessionInfo, subscriptionConfig, output, modificationHandler);
     }
 
+    public static DefaultSubscriptionContainer defaultSubscriptionContainer(
+            final CommonSubscriptionContext context) {
+        return new DefaultSubscriptionContainer(
+                context.sessionInfo(),
+                context.subscriptionConfig(),
+                context.output(),
+                context.modificationHandler());
+    }
+
     private DefaultSubscriptionContainer(
             final ConnectedSessionInfo sessionInfo,
             final SubscriptionConfig subscriptionConfig,

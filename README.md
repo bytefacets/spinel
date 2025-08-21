@@ -1,8 +1,8 @@
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-lightgrey?logo=github)](https://github.com/sponsors/bytefacets)
 
-# ByteFacets Diaspore
+# ByteFacets Spinel
 
-Diaspore is a framework for event-driven data processing especially for tabular data, either
+Spinel is a framework for event-driven data processing especially for tabular data, either
 embedded within a process or among multiple processes. Data is typically organized in rows 
 and pushed through transformations that are set up by the author. Using various 
 IPC and integration operators, data can be pushed to connected subscribers in different
