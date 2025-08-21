@@ -293,7 +293,7 @@ final class PermissionFilter {
         }
 
         @SuppressWarnings("DataFlowIssue")
-        private void printRow(int row) {
+        private void printRow(final int row) {
             sb.setLength(0);
             output.schema()
                     .forEachField(
