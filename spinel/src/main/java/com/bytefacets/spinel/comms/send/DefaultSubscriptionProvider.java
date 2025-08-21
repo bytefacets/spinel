@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.comms.send;
 
-import static com.bytefacets.spinel.comms.send.DefaultSubscriptionContainer.defaultSubscriptionContainer;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.TransformOutput;
@@ -18,6 +17,7 @@ import javax.annotation.Nullable;
 public final class DefaultSubscriptionProvider implements SubscriptionProvider {
     private final OutputRegistry registry;
     private final Supplier<ModificationHandlerRegistry> modificationHandlerSupplier;
+    private final SubscriptionFactory subscriptionFactory;
 
     public static DefaultSubscriptionProvider defaultSubscriptionProvider(
             final OutputRegistry registry) {
@@ -28,13 +28,34 @@ public final class DefaultSubscriptionProvider implements SubscriptionProvider {
     public static DefaultSubscriptionProvider defaultSubscriptionProvider(
             final OutputRegistry registry,
             final Supplier<ModificationHandlerRegistry> modificationHandlerSupplier) {
-        return new DefaultSubscriptionProvider(registry, modificationHandlerSupplier);
+        return new DefaultSubscriptionProvider(
+                registry,
+                modificationHandlerSupplier,
+                DefaultSubscriptionContainer::defaultSubscriptionContainer);
+    }
+
+    public static DefaultSubscriptionProvider defaultSubscriptionProvider(
+            final OutputRegistry registry,
+            final SubscriptionFactory subscriptionFactory,
+            final Supplier<ModificationHandlerRegistry> modificationHandlerSupplier) {
+        return new DefaultSubscriptionProvider(
+                registry, modificationHandlerSupplier, subscriptionFactory);
+    }
+
+    public static DefaultSubscriptionProvider defaultSubscriptionProvider(
+            final OutputRegistry registry, final SubscriptionFactory subscriptionFactory) {
+        return new DefaultSubscriptionProvider(
+                registry,
+                ModificationHandlerRegistry::modificationHandlerRegistry,
+                subscriptionFactory);
     }
 
     DefaultSubscriptionProvider(
             final OutputRegistry registry,
-            final Supplier<ModificationHandlerRegistry> modificationHandler) {
+            final Supplier<ModificationHandlerRegistry> modificationHandler,
+            final SubscriptionFactory subscriptionFactory) {
         this.registry = requireNonNull(registry, "registry");
+        this.subscriptionFactory = requireNonNull(subscriptionFactory, "subscriptionFactory");
         this.modificationHandlerSupplier =
                 requireNonNull(modificationHandler, "modificationHandler");
     }
@@ -46,7 +67,14 @@ public final class DefaultSubscriptionProvider implements SubscriptionProvider {
         if (output == null) {
             return null;
         }
-        return defaultSubscriptionContainer(
-                sessionInfo, config, output, modificationHandlerSupplier.get());
+        return subscriptionFactory.create(
+                new Context(sessionInfo, config, output, modificationHandlerSupplier.get()));
     }
+
+    private record Context(
+            ConnectedSessionInfo sessionInfo,
+            SubscriptionConfig subscriptionConfig,
+            TransformOutput output,
+            ModificationHandlerRegistry modificationHandler)
+            implements CommonSubscriptionContext {}
 }

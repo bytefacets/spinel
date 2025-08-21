@@ -24,7 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Enables JWT Authentication on a gRPC server.
+ * Enables JWT Authentication on a gRPC server. The interceptor will lookup the secret for the JWT
+ * issuer and use the subject as the user.
  *
  * <p>
  *
@@ -39,6 +40,9 @@ import org.slf4j.LoggerFactory;
  *                         .executor(topologyBuilder.eventLoop)
  *                         .build();
  * </pre>
+ *
+ * @see com.bytefacets.spinel.grpc.receive.auth.JwtCallCredentials JwtCallCredentials for the client
+ *     of this
  */
 public final class MultiTenantJwtInterceptor implements ServerInterceptor {
     private static final Logger log = LoggerFactory.getLogger(MultiTenantJwtInterceptor.class);
@@ -47,6 +51,12 @@ public final class MultiTenantJwtInterceptor implements ServerInterceptor {
             Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
     private final Function<String, String> tenantSecretProvider; // tenant ID -> secret
 
+    /**
+     * Creates an interceptor which can be used to statically provide secrets for jwt issuers. Note
+     * that using this method, the interceptor will create an immutable copy of the map. In other
+     * words, the map is fixed for the life of the process. If you need something more dynamic, use
+     * {@link #multiTenantJwt(Function)}.
+     */
     public static MultiTenantJwtInterceptor multiTenantJwt(
             final Map<String, String> tenantSecrets) {
         Preconditions.checkArgument(!tenantSecrets.isEmpty(), "tenantSecrets cannot be empty");
@@ -54,6 +64,7 @@ public final class MultiTenantJwtInterceptor implements ServerInterceptor {
         return new MultiTenantJwtInterceptor(copy::get);
     }
 
+    /** Creates an interceptor which can be used to dynamically provide secrets for jwt issuers. */
     public static MultiTenantJwtInterceptor multiTenantJwt(
             final Function<String, String> tenantSecretProvider) {
         return new MultiTenantJwtInterceptor(tenantSecretProvider);

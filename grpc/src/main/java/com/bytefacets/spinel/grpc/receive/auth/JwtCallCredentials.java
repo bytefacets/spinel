@@ -26,15 +26,26 @@ import java.util.function.Supplier;
  *                       .build();
  * </pre>
  *
+ * Note that the {@link com.bytefacets.spinel.grpc.send.auth.MultiTenantJwtInterceptor
+ * MultiTenantJwtInterceptor} authenticates the issuer/secret pair, and uses the subject as the
+ * user.
+ *
  * @see com.bytefacets.spinel.grpc.proto.DataServiceGrpc.DataServiceStub
  * @see
  *     com.bytefacets.spinel.grpc.receive.GrpcClientBuilder#withSpecializer(java.util.function.Function)
+ * @see com.bytefacets.spinel.grpc.send.auth.MultiTenantJwtInterceptor MultiTenantJwtInterceptor for
+ *     the server side of this
  */
 public final class JwtCallCredentials extends CallCredentials {
     static final Metadata.Key<String> AUTH_KEY =
             Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
     private final Supplier<String> tokenGenerator;
 
+    /**
+     * Note that the {@link com.bytefacets.spinel.grpc.send.auth.MultiTenantJwtInterceptor
+     * MultiTenantJwtInterceptor} authenticates the issuer/secret pair, and uses the subject as the
+     * user.
+     */
     public static JwtCallCredentials jwtCredentials(
             final String issuer, final String subject, final String secret) {
         return new JwtCallCredentials(() -> generateToken(issuer, subject, secret));
