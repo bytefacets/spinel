@@ -113,6 +113,7 @@ subprojects {
         testImplementation("org.junit-pioneer:junit-pioneer:${junitPioneerVersion}")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
         testCompileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}") // for the module-info resolution
+        testCompileOnly("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
         mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") {
             isTransitive = false
         }
