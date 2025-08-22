@@ -15,7 +15,7 @@ import com.bytefacets.spinel.schema.FieldMapping;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.OutputProvider;
 import java.util.BitSet;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class Join implements OutputProvider {
     private final JoinChangeTracker changeTracker;

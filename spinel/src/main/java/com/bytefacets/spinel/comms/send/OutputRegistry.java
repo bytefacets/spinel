@@ -3,7 +3,7 @@
 package com.bytefacets.spinel.comms.send;
 
 import com.bytefacets.spinel.TransformOutput;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface OutputRegistry {
     @Nullable

@@ -10,7 +10,7 @@ import com.bytefacets.spinel.schema.FieldList;
 import com.bytefacets.spinel.schema.FieldMapping;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 class UnionSchemaBuilder {
     private final String name;

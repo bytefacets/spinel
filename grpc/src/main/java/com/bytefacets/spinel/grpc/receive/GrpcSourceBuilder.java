@@ -12,7 +12,7 @@ import com.bytefacets.spinel.comms.SubscriptionConfig;
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
 import com.bytefacets.spinel.transform.TransformContinuation;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * A builder for a gRPC source, which is an adapter that uses a GrpcClient to subscribe to an output

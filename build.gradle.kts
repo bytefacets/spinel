@@ -24,6 +24,7 @@ allprojects {
 
     java {
         withSourcesJar()
+        modularity.inferModulePath.set(true)
 
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -92,11 +93,13 @@ subprojects {
     val hamcrestVersion = "2.2"
     val mockitoVersion = "5.18.0"
     val junitPioneerVersion = "0.9.0"
+    val jakartaAnnotationVersion = "2.1.1"
 
     val mockitoAgent = configurations.create("mockitoAgent")
     dependencies {
         spotbugs("com.github.spotbugs:spotbugs:${spotbugsVersion}")
-        implementation("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
+        compileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}") // for the module-info resolution
+        compileOnly("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
         compileOnly("org.slf4j:slf4j-api:${slfApiVersion}")
 
         testImplementation("org.slf4j:slf4j-api:${slfApiVersion}")
@@ -109,6 +112,7 @@ subprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
         testImplementation("org.junit-pioneer:junit-pioneer:${junitPioneerVersion}")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+        testCompileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}") // for the module-info resolution
         mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") {
             isTransitive = false
         }

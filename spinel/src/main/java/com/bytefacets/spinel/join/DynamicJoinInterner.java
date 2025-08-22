@@ -37,7 +37,7 @@ public final class DynamicJoinInterner implements JoinInterner {
         this.leftNames = requireNonNull(leftNames, "leftNames");
         this.rightNames = requireNonNull(rightNames, "rightNames");
         this.initialCapacity = initialCapacity;
-        this.setProvider = new InternSetProvider();
+        this.setProvider = InternSetProvider.internSetProvider();
     }
 
     @Override

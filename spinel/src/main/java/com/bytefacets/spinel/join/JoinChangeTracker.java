@@ -9,7 +9,7 @@ import com.bytefacets.collections.hash.IntIndexedSet;
 import com.bytefacets.spinel.common.InputNotifier;
 import com.bytefacets.spinel.schema.FieldBitSet;
 import java.util.BitSet;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 final class JoinChangeTracker implements JoinListener {
     private final BitSet changedFields;

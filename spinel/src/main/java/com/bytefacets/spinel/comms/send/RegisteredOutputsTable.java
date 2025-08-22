@@ -9,7 +9,7 @@ import com.bytefacets.spinel.transform.OutputProvider;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class RegisteredOutputsTable implements OutputProvider, OutputRegistry {
     private final StringIndexedTable table =

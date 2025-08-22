@@ -19,7 +19,7 @@ import com.bytefacets.spinel.schema.RowMapper;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
 import java.util.BitSet;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 final class JoinSchemaBuilder {
     private final String name;

@@ -13,13 +13,13 @@ import com.bytefacets.spinel.schema.MatrixStoreFieldFactory;
 import com.bytefacets.spinel.schema.Metadata;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nullable;
 
 final class SchemaBuilder {
     private final MatrixStoreFieldFactory fieldFactory;

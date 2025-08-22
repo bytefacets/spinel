@@ -18,7 +18,7 @@ import com.bytefacets.spinel.schema.FieldMapping;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * An operator which conflates changes. The behavior on different event types is:

@@ -6,7 +6,7 @@ import static com.bytefacets.spinel.exception.FieldNotFoundException.fieldNotFou
 import static java.util.Objects.requireNonNull;
 
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class Schema {
     private final String name;

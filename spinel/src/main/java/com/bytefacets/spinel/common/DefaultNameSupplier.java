@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * Utility class used in Transform building to auto-assign names when operators are not given one by

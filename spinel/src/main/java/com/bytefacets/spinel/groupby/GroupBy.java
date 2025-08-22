@@ -23,7 +23,7 @@ import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
 import java.util.BitSet;
 import java.util.Collection;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class GroupBy implements InputProvider, OutputProvider {
     private final GroupMapping groupMapping;

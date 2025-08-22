@@ -10,7 +10,7 @@ import com.bytefacets.spinel.schema.FieldResolver;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
 import java.util.BitSet;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 final class GroupFunctionBinding {
     private final BitSet inboundFieldReferences = new BitSet();

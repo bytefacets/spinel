@@ -25,7 +25,7 @@ import com.bytefacets.spinel.transform.OutputProvider;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * A Prototype operator is a trade-off: declare a schema locally which is kind of bad, in exchange

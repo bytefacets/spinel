@@ -11,7 +11,7 @@ import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.Cast;
 import com.bytefacets.spinel.schema.TypeId;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import static java.util.Objects.requireNonNull;
 

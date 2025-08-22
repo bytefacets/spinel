@@ -16,6 +16,12 @@ public final class InternSetProvider {
     private byte typeId = -1;
     private boolean isTuple = false;
 
+    public static InternSetProvider internSetProvider() {
+        return new InternSetProvider();
+    }
+
+    private InternSetProvider() {}
+
     public void reset() {
         set = null;
         typeId = -1;

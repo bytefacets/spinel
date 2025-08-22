@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class TransformBuilder {
     private final Map<String, TransformNode<?>> nodeMap = new LinkedHashMap<>();

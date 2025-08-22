@@ -10,7 +10,7 @@ import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /** A utility class for capturing a schema from an output when it is set or unset. */
 public final class SchemaCaptureInput implements TransformInput {

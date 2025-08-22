@@ -16,7 +16,7 @@ import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
 import java.util.BitSet;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class Projection implements InputProvider, OutputProvider {
     private final ProjectionSchemaBuilder schemaBuilder;

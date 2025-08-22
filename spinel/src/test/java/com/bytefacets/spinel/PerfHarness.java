@@ -11,7 +11,7 @@ import com.bytefacets.spinel.transform.TransformBuilder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class PerfHarness {
     private final int warmUp;

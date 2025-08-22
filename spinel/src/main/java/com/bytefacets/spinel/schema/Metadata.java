@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class Metadata {
     public static final Metadata EMPTY = new Metadata(Set.of(), Map.of());

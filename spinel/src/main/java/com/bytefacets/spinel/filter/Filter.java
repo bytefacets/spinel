@@ -22,8 +22,32 @@ import com.bytefacets.spinel.schema.SchemaFieldResolver;
 import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
 import java.util.BitSet;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
+/**
+ * A Filter operator uses a RowPredicate to test whether a row should be forwarded to its output.
+ * <p/>
+ * RowPredicates typically are not shareable. When a RowPredicate references a field, the
+ * predicate will pull a reference to the field into its state, and use it to access the
+ * field's values for the row it's testing. The filter does not access any fields itself: the
+ * only field access happens IN the RowPredicate.
+ * <p/>
+ * The Filter will only test rows using the RowPredicate during an ADD or on a CHANGE that
+ * indicates the field might be dirty (via the ChangedFieldSet). In other words, if upstream,
+ * the field is not marked as dirty, and it's referenced in a Filter, the Filter will not test it
+ * when processing the change.
+ * <p/>
+ * The RowPredicate can be updated in the Filter. When it's updated, all active rows are
+ * re-evaluated and if the test for the row changes, a row ADD or REMOVE will be forwarded to
+ * the output accordingly.
+ * <p/>
+ * If there is no RowPredicate, the Filter can be built to either always forward rows, or to never
+ * forward rows. Once a RowPredicate is set however, all the active rows will be re-evaluated
+ * according to the RowPredicate.
+ *
+ * @see RowPredicate
+ * @see FilterBuilder
+ */
 public final class Filter implements InputProvider, OutputProvider {
     private final OutputManager outputManager;
     private final Input input;

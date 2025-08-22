@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
 import java.util.Map;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class FieldList {
     private final StringGenericIndexedMap<SchemaField> nameToField;

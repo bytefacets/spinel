@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * Creates a DefaultSubscriptionContainer for each subscription.

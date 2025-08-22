@@ -3,7 +3,7 @@
 package com.bytefacets.spinel.schema;
 
 import java.util.Objects;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface FieldResolver {
     @Nullable

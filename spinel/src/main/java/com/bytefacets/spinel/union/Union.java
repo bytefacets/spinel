@@ -15,7 +15,7 @@ import com.bytefacets.spinel.common.StateChange;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.OutputProvider;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class Union implements OutputProvider {
     private final StateChange stateChange = StateChange.stateChange();
