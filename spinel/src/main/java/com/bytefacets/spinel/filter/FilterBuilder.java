@@ -46,11 +46,17 @@ public final class FilterBuilder {
         return new FilterBuilder(transformContext);
     }
 
+    /**
+     * The initial predicate for the Filter. This is optional, and you can change the Filter's
+     * RowPredicate while it's running. If you do not set this, the default behavior of a Filter
+     * with no RowPredicate is governed by {@link #passesWhenNoPredicate}.
+     */
     public FilterBuilder initialPredicate(final RowPredicate predicate) {
         this.initialPredicate = predicate;
         return this;
     }
 
+    /** Initial size of the set managing the active rows. Default is 64. */
     public FilterBuilder initialSize(final int initialSize) {
         if (initialSize <= 0) {
             throw new IllegalArgumentException("initialSize must be > 0, but was " + initialSize);
@@ -59,6 +65,10 @@ public final class FilterBuilder {
         return this;
     }
 
+    /**
+     * Whether a row is forwarded by the Filter when there is no RowPredicate set. The default is
+     * false, meaning "rows do not pass when there is no predicate."
+     */
     public FilterBuilder passesWhenNoPredicate(final boolean passesWhenNoPredicate) {
         this.passesWhenNoPredicate = passesWhenNoPredicate;
         return this;

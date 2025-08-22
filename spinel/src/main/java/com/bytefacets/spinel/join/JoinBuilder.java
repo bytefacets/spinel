@@ -13,8 +13,8 @@ import com.bytefacets.spinel.common.NameConflictResolver;
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
 import com.bytefacets.spinel.transform.TransformContinuation;
+import jakarta.annotation.Nullable;
 import java.util.List;
-import javax.annotation.Nullable;
 
 public final class JoinBuilder {
     private final String name;

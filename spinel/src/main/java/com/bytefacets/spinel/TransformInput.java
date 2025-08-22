@@ -5,7 +5,7 @@ package com.bytefacets.spinel;
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface TransformInput {
     default void setSource(@Nullable TransformOutput output) {}

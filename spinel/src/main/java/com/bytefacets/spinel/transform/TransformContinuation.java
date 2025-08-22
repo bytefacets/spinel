@@ -13,7 +13,7 @@ import com.bytefacets.spinel.printer.OutputLoggerBuilder;
 import com.bytefacets.spinel.projection.ProjectionBuilder;
 import com.bytefacets.spinel.prototype.PrototypeBuilder;
 import com.bytefacets.spinel.union.UnionBuilder;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public class TransformContinuation {
     private final TransformBuilder owner;

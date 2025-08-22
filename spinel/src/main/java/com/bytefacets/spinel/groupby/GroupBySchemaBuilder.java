@@ -18,12 +18,12 @@ import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.schema.MatrixStoreFieldFactory;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 final class GroupBySchemaBuilder {
     private final DependencyMap dependencyMap;

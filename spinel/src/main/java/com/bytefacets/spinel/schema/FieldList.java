@@ -7,8 +7,8 @@ import static com.bytefacets.spinel.schema.SchemaField.schemaField;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
+import jakarta.annotation.Nullable;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 public final class FieldList {
     private final StringGenericIndexedMap<SchemaField> nameToField;

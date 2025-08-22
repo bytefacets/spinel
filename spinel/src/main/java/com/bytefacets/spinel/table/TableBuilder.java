@@ -17,6 +17,7 @@ import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformBuilder;
 import com.bytefacets.spinel.transform.TransformContinuation;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 
 public final class TableBuilder {
     private final Set<String> names = new HashSet<>();

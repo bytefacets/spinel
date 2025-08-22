@@ -7,6 +7,8 @@ import com.bytefacets.spinel.schema.FieldResolver;
 public final class ConstantRowInterner implements RowInterner {
     public static final ConstantRowInterner Instance = new ConstantRowInterner();
 
+    private ConstantRowInterner() {}
+
     @Override
     public int intern(final int row) {
         return 0;

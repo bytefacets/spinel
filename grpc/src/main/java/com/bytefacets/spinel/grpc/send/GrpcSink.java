@@ -14,7 +14,7 @@ import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.InputProvider;
 import io.grpc.stub.StreamObserver;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class GrpcSink implements InputProvider {
     private final Input input = new Input();

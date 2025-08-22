@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.interner;
 
+import static com.bytefacets.spinel.interner.InternSetProvider.internSetProvider;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.schema.Field;
@@ -16,7 +17,7 @@ public final class DynamicRowInterner implements RowInterner {
 
     public static DynamicRowInterner dynamicRowInterner(
             final List<String> fieldNames, final int initialCapacity) {
-        return new DynamicRowInterner(fieldNames, initialCapacity, new InternSetProvider());
+        return new DynamicRowInterner(fieldNames, initialCapacity, internSetProvider());
     }
 
     DynamicRowInterner(

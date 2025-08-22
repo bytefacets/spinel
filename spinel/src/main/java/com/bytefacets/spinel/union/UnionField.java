@@ -3,7 +3,7 @@
 package com.bytefacets.spinel.union;
 
 import com.bytefacets.spinel.schema.Field;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface UnionField extends Field {
     void setField(int index, @Nullable Field field);

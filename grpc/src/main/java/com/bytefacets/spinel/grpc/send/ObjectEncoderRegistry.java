@@ -3,10 +3,10 @@
 package com.bytefacets.spinel.grpc.send;
 
 import com.bytefacets.spinel.schema.TypeId;
+import jakarta.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 public final class ObjectEncoderRegistry {
     private static final Map<Class<?>, ObjectEncoder> DEFAULT_REGISTRY = new HashMap<>();

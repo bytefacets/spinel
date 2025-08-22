@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.schema;
 
+import jakarta.annotation.Nullable;
 import java.util.Objects;
-import javax.annotation.Nullable;
 
 public interface FieldResolver {
     @Nullable

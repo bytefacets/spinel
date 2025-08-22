@@ -6,7 +6,7 @@ import com.bytefacets.collections.arrays.GenericArray;
 import com.bytefacets.collections.functional.IntConsumer;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.FieldMapping;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 class DependencyMap {
     private FieldMapping[] sourceFieldMappings = new FieldMapping[2];

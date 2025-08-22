@@ -20,7 +20,7 @@ import com.bytefacets.spinel.transform.TransformContext;
 import com.bytefacets.spinel.transform.TransformContinuation;
 import com.bytefacets.spinel.transform.BuilderSupport;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

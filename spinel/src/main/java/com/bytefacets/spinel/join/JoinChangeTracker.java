@@ -8,8 +8,8 @@ import com.bytefacets.collections.functional.IntConsumer;
 import com.bytefacets.collections.hash.IntIndexedSet;
 import com.bytefacets.spinel.common.InputNotifier;
 import com.bytefacets.spinel.schema.FieldBitSet;
+import jakarta.annotation.Nullable;
 import java.util.BitSet;
-import javax.annotation.Nullable;
 
 final class JoinChangeTracker implements JoinListener {
     private final BitSet changedFields;

@@ -6,10 +6,10 @@ import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.table.StringIndexedTable;
 import com.bytefacets.spinel.table.StringIndexedTableBuilder;
 import com.bytefacets.spinel.transform.OutputProvider;
+import jakarta.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
 public final class RegisteredOutputsTable implements OutputProvider, OutputRegistry {
     private final StringIndexedTable table =

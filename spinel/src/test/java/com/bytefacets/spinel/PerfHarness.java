@@ -9,9 +9,9 @@ import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.TransformBuilder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.annotation.Nullable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import javax.annotation.Nullable;
 
 public final class PerfHarness {
     private final int warmUp;

@@ -3,7 +3,7 @@
 package com.bytefacets.spinel;
 
 import com.bytefacets.spinel.schema.Schema;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface TransformOutput {
     void attachInput(TransformInput input);

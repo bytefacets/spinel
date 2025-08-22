@@ -11,7 +11,7 @@ import com.bytefacets.spinel.schema.FieldMapping;
 import com.bytefacets.spinel.schema.IntField;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 final class ChildSchemaBuilder {
     private final String name;

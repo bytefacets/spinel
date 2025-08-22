@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public final class UnionBuilder {
     private final BuilderSupport<Union> builderSupport;

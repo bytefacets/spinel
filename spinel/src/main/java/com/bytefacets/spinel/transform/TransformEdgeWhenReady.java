@@ -9,7 +9,7 @@ import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.spinel.TransformInput;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 class TransformEdgeWhenReady implements TransformEdge {
     private final OutputProvider output;
