@@ -15,9 +15,9 @@ import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.FieldList;
 import com.bytefacets.spinel.schema.IntField;
 import com.bytefacets.spinel.schema.Schema;
+import jakarta.annotation.Nullable;
 import java.util.BitSet;
 import java.util.Map;
-import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
 class OutputManagerTest {

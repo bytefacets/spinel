@@ -5,8 +5,8 @@ package com.bytefacets.spinel.common;
 import com.bytefacets.collections.functional.IntConsumer;
 import com.bytefacets.collections.vector.IntVector;
 import com.bytefacets.spinel.schema.FieldBitSet;
-import java.util.BitSet;
 import jakarta.annotation.Nullable;
+import java.util.BitSet;
 
 /**
  * A state manager for simple row changes. This class does not attempt to guard against rows

@@ -5,8 +5,8 @@ package com.bytefacets.spinel.schema;
 import static com.bytefacets.spinel.exception.FieldNotFoundException.fieldNotFound;
 import static java.util.Objects.requireNonNull;
 
-import java.util.function.Consumer;
 import jakarta.annotation.Nullable;
+import java.util.function.Consumer;
 
 public final class Schema {
     private final String name;

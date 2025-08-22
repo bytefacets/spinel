@@ -21,9 +21,9 @@ import com.bytefacets.spinel.schema.FieldMapping;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
+import jakarta.annotation.Nullable;
 import java.util.BitSet;
 import java.util.Collection;
-import jakarta.annotation.Nullable;
 
 public final class GroupBy implements InputProvider, OutputProvider {
     private final GroupMapping groupMapping;

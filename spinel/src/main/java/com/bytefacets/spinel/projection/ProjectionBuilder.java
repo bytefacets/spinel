@@ -13,13 +13,13 @@ import com.bytefacets.spinel.schema.SchemaField;
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
 import com.bytefacets.spinel.transform.TransformContinuation;
+import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import jakarta.annotation.Nullable;
 
 public final class ProjectionBuilder {
     private final BuilderSupport<Projection> builderSupport;

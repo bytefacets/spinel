@@ -10,9 +10,9 @@ import com.bytefacets.spinel.TransformInput;
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.annotation.Nullable;
 
 /**
  * Operators use the OutputManager to standardize management of notifications to the inputs

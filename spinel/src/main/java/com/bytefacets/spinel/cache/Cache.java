@@ -22,12 +22,12 @@ import com.bytefacets.spinel.schema.Metadata;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
 import com.bytefacets.spinel.schema.WritableField;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import jakarta.annotation.Nullable;
 
 public final class Cache {
     private final MatrixStoreFieldFactory matrixStoreFactory;

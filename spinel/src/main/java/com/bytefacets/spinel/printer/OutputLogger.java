@@ -15,8 +15,8 @@ import com.bytefacets.spinel.schema.SchemaField;
 import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
-import java.util.function.BiConsumer;
 import jakarta.annotation.Nullable;
+import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 

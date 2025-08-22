@@ -7,8 +7,8 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.collections.functional.IntConsumer;
 import com.bytefacets.collections.hash.IntIndexedSet;
 import com.bytefacets.spinel.schema.FieldBitSet;
-import java.util.BitSet;
 import jakarta.annotation.Nullable;
+import java.util.BitSet;
 
 /**
  * Manages row changes for an operator, but is a little more sophisticated than {@link StateChange}.

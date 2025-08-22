@@ -34,13 +34,13 @@ import com.bytefacets.spinel.table.StringIndexedStructTableBuilder;
 import com.bytefacets.spinel.table.StringIndexedTableBuilder;
 import com.bytefacets.spinel.table.TableBuilder;
 import com.bytefacets.spinel.union.UnionBuilder;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import jakarta.annotation.Nullable;
 
 public final class TransformBuilder {
     private final Map<String, TransformNode<?>> nodeMap = new LinkedHashMap<>();

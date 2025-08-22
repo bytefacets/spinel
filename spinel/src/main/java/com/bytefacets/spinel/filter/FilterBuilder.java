@@ -56,9 +56,7 @@ public final class FilterBuilder {
         return this;
     }
 
-    /**
-     * Initial size of the set managing the active rows. Default is 64.
-     */
+    /** Initial size of the set managing the active rows. Default is 64. */
     public FilterBuilder initialSize(final int initialSize) {
         if (initialSize <= 0) {
             throw new IllegalArgumentException("initialSize must be > 0, but was " + initialSize);
@@ -68,8 +66,8 @@ public final class FilterBuilder {
     }
 
     /**
-     * Whether a row is forwarded by the Filter when there is no RowPredicate set. The default
-     * is false, meaning "rows do not pass when there is no predicate."
+     * Whether a row is forwarded by the Filter when there is no RowPredicate set. The default is
+     * false, meaning "rows do not pass when there is no predicate."
      */
     public FilterBuilder passesWhenNoPredicate(final boolean passesWhenNoPredicate) {
         this.passesWhenNoPredicate = passesWhenNoPredicate;

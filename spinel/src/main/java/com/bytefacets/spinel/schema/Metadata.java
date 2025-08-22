@@ -4,13 +4,13 @@ package com.bytefacets.spinel.schema;
 
 import static java.util.Objects.requireNonNull;
 
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import jakarta.annotation.Nullable;
 
 public final class Metadata {
     public static final Metadata EMPTY = new Metadata(Set.of(), Map.of());
