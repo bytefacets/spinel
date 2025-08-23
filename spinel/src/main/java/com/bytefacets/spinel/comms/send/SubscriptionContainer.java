@@ -6,7 +6,9 @@ import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 import com.bytefacets.spinel.transform.OutputProvider;
 
 public interface SubscriptionContainer extends OutputProvider {
-    ModificationResponse apply(ModificationRequest update);
+    ModificationResponse add(ModificationRequest update);
+
+    ModificationResponse remove(ModificationRequest update);
 
     void terminateSubscription();
 }

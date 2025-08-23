@@ -7,6 +7,7 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.collections.hash.IntGenericIndexedMap;
 import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
+import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
@@ -37,8 +38,18 @@ final class SubscriptionStore {
     }
 
     Subscription createSubscription(
-            final int subscriptionId, final GrpcDecoder decoder, final SubscriptionConfig config) {
-        final var sub = new Subscription(subscriptionId, decoder, config, msgHelp, messageSink);
+            final int subscriptionId,
+            final GrpcDecoder decoder,
+            final SubscriptionConfig config,
+            final SubscriptionListener subscriptionListener) {
+        final var sub =
+                new Subscription(
+                        subscriptionId,
+                        decoder,
+                        config,
+                        msgHelp,
+                        messageSink,
+                        subscriptionListener);
         synchronized (subscriptions) {
             subscriptions.put(subscriptionId, sub);
         }
@@ -56,7 +67,7 @@ final class SubscriptionStore {
         synchronized (subscriptions) {
             final Subscription sub = subscriptions.getOrDefault(subscriptionId, null);
             if (sub != null) {
-                sub.decoder().accept(response);
+                sub.accept(response);
             } else {
                 log.warn(
                         "ClientOf[{}] Did not find subscription for subscriptionId {}",

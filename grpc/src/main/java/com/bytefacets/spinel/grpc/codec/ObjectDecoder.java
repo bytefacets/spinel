@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.grpc.receive;
+package com.bytefacets.spinel.grpc.codec;
 
 import java.nio.ByteBuffer;
 
 /**
- * @see com.bytefacets.spinel.grpc.send.ObjectEncoder
+ * @see ObjectEncoder
  * @see ObjectDecoderRegistry#register(byte, ObjectDecoder)
  */
 public interface ObjectDecoder {

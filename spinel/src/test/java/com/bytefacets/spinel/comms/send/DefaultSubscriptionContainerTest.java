@@ -3,6 +3,7 @@
 package com.bytefacets.spinel.comms.send;
 
 import static com.bytefacets.spinel.comms.send.DefaultSubscriptionContainer.defaultSubscriptionContainer;
+import static com.bytefacets.spinel.comms.subscription.ModificationRequestFactory.applyFilterExpression;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.common.Connector;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptorFactory;
 import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.schema.IntWritableField;
 import com.bytefacets.spinel.table.IntIndexedTable;
@@ -114,7 +114,7 @@ class DefaultSubscriptionContainerTest {
                     SubscriptionConfig.subscriptionConfig("foo").defaultNone().build(),
                     table.output());
             validation.clearChanges();
-            container.apply(ChangeDescriptorFactory.addPredicate("key >= 2 && key < 5"));
+            container.add(applyFilterExpression("key >= 2 && key < 5"));
             final Validation expect = validation.expect();
             IntStream.range(2, 5).forEach(i -> expect.added(Key.key(i), rowData(i)));
             expect.validate();

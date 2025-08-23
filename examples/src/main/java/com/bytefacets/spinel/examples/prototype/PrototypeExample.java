@@ -58,10 +58,7 @@ final class PrototypeExample {
         Thread.currentThread().join();
     }
 
-    /**
-     * Create a client, with authentication for the user and configure a subscription to the
-     * "orders" output on the server.
-     */
+    /** Create a client and configure a subscription to the "orders" output on the server. */
     private static void declareClient() {
         final ManagedChannel orderChannel = clientChannel("0.0.0.0:" + orderPort);
         final var eventLoop = newEventLoop("client-data-thread");

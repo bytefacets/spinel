@@ -5,6 +5,7 @@ package com.bytefacets.spinel.grpc.receive;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
+import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.grpc.proto.FieldDefinition;
 import com.bytefacets.spinel.grpc.proto.SchemaUpdate;
 import com.bytefacets.spinel.schema.FieldDescriptor;

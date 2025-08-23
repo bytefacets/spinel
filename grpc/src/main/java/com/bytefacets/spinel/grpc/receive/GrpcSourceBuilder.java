@@ -9,6 +9,7 @@ import static com.bytefacets.spinel.transform.TransformContext.continuation;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.comms.SubscriptionConfig;
+import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
 import com.bytefacets.spinel.transform.TransformContinuation;
@@ -25,6 +26,7 @@ public final class GrpcSourceBuilder {
     private int initialSize = 256;
     private final GrpcClient client;
     private SubscriptionConfig subscription;
+    private SubscriptionListener subscriptionListener;
 
     private GrpcSourceBuilder(final GrpcClient client, final String name) {
         this.client = requireNonNull(client, "client");
@@ -52,6 +54,11 @@ public final class GrpcSourceBuilder {
         return new GrpcSourceBuilder(client, transformContext);
     }
 
+    public GrpcSourceBuilder withListener(final SubscriptionListener listener) {
+        this.subscriptionListener = listener;
+        return this;
+    }
+
     public GrpcSource getOrCreate() {
         return builderSupport.getOrCreate();
     }
@@ -68,7 +75,8 @@ public final class GrpcSourceBuilder {
     private GrpcSource internalBuild() {
         final var factory = matrixStoreFieldFactory(initialSize, chunkSize, i -> {});
         final Subscription subscription =
-                client.createSubscription(new SchemaBuilder(factory), this.subscription);
+                client.createSubscription(
+                        new SchemaBuilder(factory), this.subscription, this.subscriptionListener);
         return new GrpcSource(client.connectionInfo(), client.connection(), subscription);
     }
 

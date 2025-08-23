@@ -4,6 +4,7 @@ package com.bytefacets.spinel.comms.send;
 
 import static com.bytefacets.spinel.common.Connector.connectOutputToInput;
 import static com.bytefacets.spinel.comms.send.FilterExpressionManager.filterExpressionManager;
+import static com.bytefacets.spinel.comms.subscription.ModificationRequestFactory.applyFilterExpression;
 import static com.bytefacets.spinel.filter.FilterBuilder.filter;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
@@ -11,9 +12,9 @@ import static com.bytefacets.spinel.validation.Key.key;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThrows;
 
 import com.bytefacets.spinel.common.jexl.JexlEngineProvider;
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptorFactory;
 import com.bytefacets.spinel.filter.Filter;
 import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.schema.IntWritableField;
@@ -22,6 +23,7 @@ import com.bytefacets.spinel.validation.RowData;
 import com.bytefacets.spinel.validation.ValidationOperator;
 import java.util.Map;
 import java.util.stream.IntStream;
+import org.apache.commons.jexl3.JexlException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -66,7 +68,7 @@ class FilterExpressionManagerTest {
 
     @Test
     void shouldAddExpressionToFilter() {
-        manager.apply(ChangeDescriptorFactory.addPredicate("key >= 2 && key < 5"));
+        manager.add(applyFilterExpression("key >= 2 && key < 5"));
         validation
                 .expect()
                 .added(key(2), rowData(2))
@@ -77,32 +79,43 @@ class FilterExpressionManagerTest {
 
     @Test
     void shouldCombineExpressionAsOrInFilter() {
-        manager.apply(ChangeDescriptorFactory.addPredicate("key >= 2 && key < 5"));
+        manager.add(applyFilterExpression("key >= 2 && key < 5"));
         validation.clearChanges(); // already tested in shouldAddExpressionToFilter
-        manager.apply(ChangeDescriptorFactory.addPredicate("a == 70"));
+        manager.add(applyFilterExpression("a == 70"));
         validation.expect().added(key(7), rowData(7)).validate();
     }
 
     @Test
     void shouldRemoveExpressionToFilter() {
-        manager.apply(ChangeDescriptorFactory.addPredicate("a == 70"));
-        manager.apply(ChangeDescriptorFactory.addPredicate("key >= 2 && key < 5"));
+        manager.add(applyFilterExpression("a == 70"));
+        manager.add(applyFilterExpression("key >= 2 && key < 5"));
         validation.clearChanges(); // already tested
-        manager.apply(ChangeDescriptorFactory.removePredicate("a == 70"));
+        manager.remove(applyFilterExpression("a == 70"));
         validation.expect().removed(key(7)).validate();
     }
 
     @Test
     void shouldManageExpressionsByReferenceCount() {
-        manager.apply(ChangeDescriptorFactory.addPredicate("a == 70"));
+        manager.add(applyFilterExpression("a == 70"));
         validation.expect().added(key(7), rowData(7)).validate();
-        manager.apply(ChangeDescriptorFactory.addPredicate("a == 70"));
+        manager.add(applyFilterExpression("a == 70"));
         validation.expect().validate(); // nothing
 
-        manager.apply(ChangeDescriptorFactory.removePredicate("a == 70"));
+        manager.remove(applyFilterExpression("a == 70"));
         validation.expect().validate(); // nothing
-        manager.apply(ChangeDescriptorFactory.removePredicate("a == 70"));
+        manager.remove(applyFilterExpression("a == 70"));
         validation.expect().removed(key(7)).validate();
+    }
+
+    /**
+     * Because of the way the expression set is managed, we need to make sure the collection is
+     * cleaned up if the predicate cannot be parsed by the jexl engine.
+     */
+    @Test
+    void shouldAccommodateRepeatedFailedExpressions() {
+        assertThrows(JexlException.class, () -> manager.add(applyFilterExpression("a sju97")));
+        assertThrows(JexlException.class, () -> manager.add(applyFilterExpression("a sju97")));
+        assertThat(manager.expressionCount(), equalTo(0));
     }
 
     @Nested
@@ -110,23 +123,20 @@ class FilterExpressionManagerTest {
 
         @Test
         void shouldReplyWithSuccessWhenAdding() {
-            final ModificationResponse response =
-                    manager.apply(ChangeDescriptorFactory.addPredicate("a == 70"));
+            final ModificationResponse response = manager.add(applyFilterExpression("a == 70"));
             assertThat(response.success(), equalTo(true));
         }
 
         @Test
         void shouldReplyWithSuccessWhenRemoving() {
-            manager.apply(ChangeDescriptorFactory.addPredicate("a == 70"));
-            final ModificationResponse response =
-                    manager.apply(ChangeDescriptorFactory.removePredicate("a == 70"));
+            manager.add(applyFilterExpression("a == 70"));
+            final ModificationResponse response = manager.remove(applyFilterExpression("a == 70"));
             assertThat(response.success(), equalTo(true));
         }
 
         @Test
         void shouldReplyWithFailureNotFoundWhenRemovingUnknownExpression() {
-            final ModificationResponse response =
-                    manager.apply(ChangeDescriptorFactory.removePredicate("a == 70"));
+            final ModificationResponse response = manager.remove(applyFilterExpression("a == 70"));
             assertThat(response.success(), equalTo(false));
             assertThat(response.message(), containsString("Expression not found"));
             assertThat(response.message(), containsString("a == 70"));

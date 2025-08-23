@@ -6,6 +6,7 @@ import com.bytefacets.collections.arrays.ByteArray;
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.collections.vector.IntVector;
 import com.bytefacets.spinel.comms.send.ChangeEncoder;
+import com.bytefacets.spinel.grpc.codec.ObjectEncoderImpl;
 import com.bytefacets.spinel.grpc.proto.BoolData;
 import com.bytefacets.spinel.grpc.proto.ByteData;
 import com.bytefacets.spinel.grpc.proto.DataUpdate;
@@ -39,7 +40,7 @@ import com.google.protobuf.ByteString;
 import java.util.BitSet;
 
 public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
-    private final ObjectEncoderImpl objectEncoder = new ObjectEncoderImpl();
+    private final ObjectEncoderImpl objectEncoder = ObjectEncoderImpl.encoder();
     private final BitSet allFields = new BitSet();
     private final FieldBitSet allFieldsChanges = FieldBitSet.fieldBitSet(allFields);
     private final IntVector rowIdBuffer = new IntVector(64);

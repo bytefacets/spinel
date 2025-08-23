@@ -10,5 +10,7 @@ import com.bytefacets.spinel.comms.subscription.ModificationRequest;
  * projection.
  */
 public interface ModificationHandler {
-    ModificationResponse apply(ModificationRequest descriptor);
+    ModificationResponse add(ModificationRequest descriptor);
+
+    ModificationResponse remove(ModificationRequest descriptor);
 }

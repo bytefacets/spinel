@@ -9,8 +9,6 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.collections.arrays.GenericArray;
 import com.bytefacets.collections.functional.GenericConsumer;
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptor;
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptorFactory;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 import com.bytefacets.spinel.filter.Filter;
 import com.bytefacets.spinel.filter.RowPredicate;
@@ -25,6 +23,12 @@ import org.slf4j.LoggerFactory;
  */
 public final class FilterExpressionManager implements ModificationHandler {
     private static final Logger log = LoggerFactory.getLogger(FilterExpressionManager.class);
+    private static final ModificationResponse NOT_UNDERSTOOD =
+            new ModificationResponse(
+                    false,
+                    "Modification not understood by "
+                            + FilterExpressionManager.class.getSimpleName(),
+                    null);
     private final StringGenericIndexedMap<PredicateHolder> expressionPredicates =
             new StringGenericIndexedMap<>(4);
     private final Filter filter;
@@ -45,14 +49,31 @@ public final class FilterExpressionManager implements ModificationHandler {
     }
 
     @Override
-    public ModificationResponse apply(final ModificationRequest modificationRequest) {
-        final ChangeDescriptor changeDescriptor = (ChangeDescriptor) modificationRequest;
-        final String expression = changeDescriptor.arguments()[0].toString();
-        return switch (changeDescriptor.action()) {
-            case ChangeDescriptorFactory.Action.ADD -> add(expression);
-            case ChangeDescriptorFactory.Action.REMOVE -> remove(expression);
-            default -> notUnderstood(changeDescriptor.action());
-        };
+    public ModificationResponse add(final ModificationRequest modificationRequest) {
+        final String expression = toExpression(modificationRequest);
+        if (expression != null) {
+            return add(expression);
+        } else {
+            return NOT_UNDERSTOOD;
+        }
+    }
+
+    @Override
+    public ModificationResponse remove(final ModificationRequest modificationRequest) {
+        final String expression = toExpression(modificationRequest);
+        if (expression != null) {
+            return remove(expression);
+        } else {
+            return NOT_UNDERSTOOD;
+        }
+    }
+
+    private String toExpression(final ModificationRequest modificationRequest) {
+        final Object[] args = modificationRequest.arguments();
+        if (args != null && args.length >= 1) {
+            return args[0].toString();
+        }
+        return null;
     }
 
     private ModificationResponse add(final String expression) {
@@ -61,11 +82,22 @@ public final class FilterExpressionManager implements ModificationHandler {
         final int sizeAfter = expressionPredicates.size();
         if (sizeBefore != sizeAfter) {
             log.debug("{} Adding expression: {}", logPrefix, expression);
-            final RowPredicate predicate = jexlPredicate(jexlEngine, expression);
-            expressionPredicates.putValueAt(entry, new PredicateHolder(predicate));
+            try {
+                final RowPredicate predicate = jexlPredicate(jexlEngine, expression);
+                expressionPredicates.putValueAt(entry, new PredicateHolder(predicate));
+            } catch (RuntimeException ex) {
+                log.warn("{} Failed adding expression: {}", logPrefix, expression, ex);
+                expressionPredicates.removeAt(entry); // cleanup, we couldn't add it
+                throw ex;
+            }
             return rebuildFinalPredicate();
         } else {
             final int newCount = expressionPredicates.getValueAt(entry).increment();
+            log.debug(
+                    "{} Increasing reference count to {} on expression: {}",
+                    logPrefix,
+                    newCount,
+                    expression);
             updatedRefCount(expression, newCount);
             return ModificationResponse.SUCCESS;
         }
@@ -81,6 +113,11 @@ public final class FilterExpressionManager implements ModificationHandler {
                 expressionPredicates.removeAt(entry);
                 return rebuildFinalPredicate();
             } else {
+                log.debug(
+                        "{} Reducing reference count to {} on expression: {}",
+                        logPrefix,
+                        newCount,
+                        expression);
                 updatedRefCount(expression, newCount);
             }
             return ModificationResponse.SUCCESS;
@@ -145,11 +182,12 @@ public final class FilterExpressionManager implements ModificationHandler {
         }
     }
 
-    private static ModificationResponse notUnderstood(final String action) {
-        return new ModificationResponse(false, "Modification not understood: " + action, null);
-    }
-
     private static ModificationResponse expressionNotFound(final String expression) {
         return new ModificationResponse(false, "Expression not found: " + expression, null);
+    }
+
+    // VisibleForTesting
+    int expressionCount() {
+        return expressionPredicates.size();
     }
 }

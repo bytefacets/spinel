@@ -6,6 +6,7 @@ import static com.bytefacets.spinel.schema.MatrixStoreFieldFactory.matrixStoreFi
 
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.comms.receive.ChangeDecoder;
+import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
 import com.bytefacets.spinel.transform.OutputProvider;
 import com.google.protobuf.ByteString;

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
+import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.send.GrpcEncoder;
 import com.bytefacets.spinel.grpc.send.SendPackageAccess;
@@ -47,6 +48,7 @@ class SubscriptionStoreTest {
     private final SubscriptionConfig config =
             subscriptionConfig("test").setFields(List.of("a", "b")).build();
     private @Mock Consumer<SubscriptionRequest> consumer;
+    private @Mock SubscriptionListener listener;
 
     @BeforeEach
     void setUp() {
@@ -55,14 +57,14 @@ class SubscriptionStoreTest {
 
     @Test
     void shouldCreateSubscription() {
-        final Subscription sub = store.createSubscription(10, decoder, config);
+        final Subscription sub = store.createSubscription(10, decoder, config, listener);
         assertThat(sub.config(), sameInstance(config));
         assertThat(store.get(10), sameInstance(sub));
     }
 
     @Test
     void shouldRemoveSubscription() {
-        store.createSubscription(10, decoder, config);
+        store.createSubscription(10, decoder, config, listener);
         assertThat(store.numSubscriptions(), equalTo(1));
         store.remove(10);
         assertThat(store.numSubscriptions(), equalTo(0));
@@ -73,7 +75,7 @@ class SubscriptionStoreTest {
     void shouldResetAllSubscriptionStatuses() {
         final var subs =
                 IntStream.range(0, 5)
-                        .mapToObj(i -> store.createSubscription(i, decoder, config))
+                        .mapToObj(i -> store.createSubscription(i, decoder, config, listener))
                         .peek(Subscription::requestSubscriptionIfNecessary)
                         .peek(sub -> assertThat(sub.isSubscribed(), equalTo(true)))
                         .toList();
@@ -86,7 +88,7 @@ class SubscriptionStoreTest {
     void shouldResubscribeToOnlyThoseSubscriptionsThatAreUnsubscribed() {
         final var subs =
                 IntStream.range(10, 15)
-                        .mapToObj(i -> store.createSubscription(i, decoder, config))
+                        .mapToObj(i -> store.createSubscription(i, decoder, config, listener))
                         .peek(Subscription::requestSubscriptionIfNecessary)
                         .peek(sub -> assertThat(sub.isSubscribed(), equalTo(true)))
                         .toList();
@@ -113,7 +115,7 @@ class SubscriptionStoreTest {
         final Schema schema =
                 intIndexedTable("table").addFields(intField("a"), intField("b")).build().schema();
         // when
-        store.createSubscription(10, decoder, config);
+        store.createSubscription(10, decoder, config, listener);
         store.accept(encoder.encodeSchema(schema));
         // then
         final Schema receivedSchema = decoder.output().schema();
@@ -131,7 +133,7 @@ class SubscriptionStoreTest {
             final GrpcDecoder decoder =
                     GrpcDecoder.grpcDecoder(
                             new SchemaBuilder(matrixStoreFieldFactory(16, 16, x -> {})));
-            store.createSubscription(i + 10, decoder, config);
+            store.createSubscription(i + 10, decoder, config, listener);
             expected.add(msgHelp.request(i + 10, msgHelp.subscription(config)));
         }
         // when
@@ -157,7 +159,7 @@ class SubscriptionStoreTest {
         final GrpcEncoder encoder = sender.encoder(10);
         final Schema schema =
                 intIndexedTable("table").addFields(intField("a"), intField("b")).build().schema();
-        store.createSubscription(10, mockDecoder, config);
+        store.createSubscription(10, mockDecoder, config, listener);
         // when
         store.remove(10);
         store.accept(encoder.encodeSchema(schema));

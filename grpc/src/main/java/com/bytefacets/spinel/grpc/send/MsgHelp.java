@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.grpc.send;
 
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptor;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
+import com.bytefacets.spinel.comms.subscription.ModificationRequestFactory;
+import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.grpc.proto.ModifySubscription;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
-import com.bytefacets.spinel.grpc.receive.ObjectDecoderRegistry;
 
 final class MsgHelp {
     private static final Object[] EMPTY_ARGS = new Object[0];
@@ -24,9 +24,9 @@ final class MsgHelp {
             for (int i = 0; i < argCount; i++) {
                 args[i] = ObjectDecoderRegistry.decode(modification.getArguments(i));
             }
-            return ChangeDescriptor.change(target, action, args);
+            return ModificationRequestFactory.request(target, action, args);
         } else {
-            return ChangeDescriptor.change(target, action, EMPTY_ARGS);
+            return ModificationRequestFactory.request(target, action, EMPTY_ARGS);
         }
     }
 }
