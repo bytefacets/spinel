@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
+import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.grpc.proto.DataServiceGrpc;
 import com.bytefacets.spinel.grpc.proto.Response;
 import com.bytefacets.spinel.grpc.proto.ResponseType;
@@ -53,6 +54,7 @@ class GrpcClientTest {
     private @Mock Function<SchemaBuilder, GrpcDecoder> decoderSupplier;
     private @Mock GrpcDecoder decoder;
     private @Mock StreamObserver<SubscriptionRequest> requestStream;
+    private @Mock SubscriptionListener subscriptionListener;
     private @Captor ArgumentCaptor<SubscriptionRequest> requestCaptor;
     private @Captor ArgumentCaptor<StreamObserver<SubscriptionResponse>> responseAdapterCaptor;
     private GrpcClient client;
@@ -76,7 +78,7 @@ class GrpcClientTest {
     void shouldCreateAndSendSubscriptionWhenInitializeCompleted() {
         client.connection().connect();
         final var config = SubscriptionConfig.subscriptionConfig("foo").build();
-        final var sub = client.createSubscription(schemaBuilder, config);
+        final var sub = client.createSubscription(schemaBuilder, config, this.subscriptionListener);
         assertThat(sub.isSubscribed(), equalTo(true));
         final var msgHelp = new MsgHelp();
         msgHelp.init(""); // burn off sequence 1
@@ -87,7 +89,7 @@ class GrpcClientTest {
     @Test
     void shouldCreateAndNotSendSubscriptionWhenNotConnected() {
         final var config = SubscriptionConfig.subscriptionConfig("foo").build();
-        final var sub = client.createSubscription(schemaBuilder, config);
+        final var sub = client.createSubscription(schemaBuilder, config, subscriptionListener);
         assertThat(sub.isSubscribed(), equalTo(false));
         verifyNoInteractions(requestStream);
     }
@@ -166,7 +168,7 @@ class GrpcClientTest {
         void shouldUnsubscribeWhenDisconnecting() {
             client.connection().connect();
             final var config = SubscriptionConfig.subscriptionConfig("foo").build();
-            final var sub = client.createSubscription(schemaBuilder, config);
+            final var sub = client.createSubscription(schemaBuilder, config, subscriptionListener);
             reset(requestStream);
             // when
             client.connection().disconnect();

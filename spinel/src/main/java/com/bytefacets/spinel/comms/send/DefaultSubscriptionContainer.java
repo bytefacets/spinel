@@ -12,8 +12,8 @@ import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.common.Connector;
 import com.bytefacets.spinel.common.jexl.JexlEngineProvider;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptorFactory;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
+import com.bytefacets.spinel.comms.subscription.ModificationRequestFactory;
 import com.bytefacets.spinel.filter.Filter;
 import com.bytefacets.spinel.projection.Projection;
 
@@ -28,8 +28,6 @@ import com.bytefacets.spinel.projection.Projection;
  * @see FilterExpressionManager
  */
 public final class DefaultSubscriptionContainer implements SubscriptionContainer {
-    private final ConnectedSessionInfo sessionInfo;
-    private final Filter filter;
     private final TransformOutput source;
     private final TransformInput input;
     private final TransformOutput output;
@@ -59,17 +57,17 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
             final TransformOutput output,
             final ModificationHandlerRegistry modificationHandler) {
         requireNonNull(subscriptionConfig, "subscriptionConfig");
-        this.sessionInfo = requireNonNull(sessionInfo, "sessionInfo");
+        requireNonNull(sessionInfo, "sessionInfo");
         this.source = requireNonNull(output, "output");
         this.modificationHandler = requireNonNull(modificationHandler, "modificationHandler");
 
-        this.filter = createFilter(subscriptionConfig);
+        final Filter filter = createFilter(subscriptionConfig);
         this.input = filter.input();
         Connector.connectOutputToInput(source, filter);
 
         // register filter management
         modificationHandler.register(
-                ChangeDescriptorFactory.Target.FILTER,
+                ModificationRequestFactory.Target.FILTER,
                 filterExpressionManager(
                         filter, JexlEngineProvider.defaultJexlEngine(), sessionInfo.toString()));
 
@@ -91,8 +89,13 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
     }
 
     @Override
-    public ModificationResponse apply(final ModificationRequest modificationRequest) {
-        return modificationHandler.apply(modificationRequest);
+    public ModificationResponse add(final ModificationRequest modificationRequest) {
+        return modificationHandler.add(modificationRequest);
+    }
+
+    @Override
+    public ModificationResponse remove(final ModificationRequest modificationRequest) {
+        return modificationHandler.remove(modificationRequest);
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.bytefacets.spinel.comms.send.SubscriptionContainer;
 import com.bytefacets.spinel.comms.send.SubscriptionProvider;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 import com.bytefacets.spinel.grpc.proto.CreateSubscription;
+import com.bytefacets.spinel.grpc.proto.ModificationAddRemove;
 import com.bytefacets.spinel.grpc.proto.RequestType;
 import com.bytefacets.spinel.grpc.proto.Response;
 import com.bytefacets.spinel.grpc.proto.ResponseType;
@@ -42,7 +43,6 @@ final class GrpcSession {
     private final Consumer<GrpcSession> onComplete;
     private final SenderErrorEval errorEval;
     private final String logPrefix;
-    private int nextToken = 1;
 
     static GrpcSession createSession(
             final ConnectedSessionInfo sessionInfo,
@@ -105,7 +105,9 @@ final class GrpcSession {
         try {
             if (subscriptionContainer != null) {
                 final ModificationRequest modification = msgHelp.readModification(request);
-                final ModificationResponse response = subscriptionContainer.apply(modification);
+                final ModificationResponse response =
+                        subscriptionContainer.apply(
+                                request.getModification().getAddRemove(), modification);
                 outputStream.onNext(
                         messageResponse(request, !response.success(), response.message()));
             } else {
@@ -191,10 +193,6 @@ final class GrpcSession {
                 .build();
     }
 
-    private int nextToken() {
-        return nextToken++;
-    }
-
     @VisibleForTesting
     int activeAdapters() {
         return subscriptions.size();
@@ -243,8 +241,14 @@ final class GrpcSession {
 
     private record SubscriptionResources(
             SubscriptionContainer subscriptionContainer, GrpcSink sink) {
-        ModificationResponse apply(final ModificationRequest descriptor) {
-            return subscriptionContainer.apply(descriptor);
+        ModificationResponse apply(
+                final ModificationAddRemove addRemove, final ModificationRequest descriptor) {
+            if (addRemove.equals(ModificationAddRemove.ADD)) {
+                return subscriptionContainer.add(descriptor);
+            } else if (addRemove.equals(ModificationAddRemove.REMOVE)) {
+                return subscriptionContainer.remove(descriptor);
+            }
+            return ModificationResponse.MODIFICATION_NOT_UNDERSTOOD;
         }
 
         void close() {

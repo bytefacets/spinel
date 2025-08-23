@@ -4,6 +4,7 @@ package com.bytefacets.spinel.grpc.receive;
 
 import static java.util.Objects.requireNonNull;
 
+import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.grpc.proto.DataUpdate;
 import com.bytefacets.spinel.grpc.proto.GenericData;
 import com.bytefacets.spinel.grpc.proto.ResponseType;

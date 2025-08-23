@@ -1,17 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.grpc.send;
+package com.bytefacets.spinel.grpc.codec;
 
+import com.bytefacets.spinel.grpc.send.BufferSupplier;
 import com.bytefacets.spinel.schema.TypeId;
 import com.google.protobuf.ByteString;
 import java.nio.ByteBuffer;
 
-final class ObjectEncoderImpl {
+public final class ObjectEncoderImpl {
     private static final int HEADER_SIZE = 2;
     private final InternalBufferSupplier bufferSupplier = new InternalBufferSupplier();
     private ByteBuffer buffer = ByteBuffer.allocate(64);
 
-    ByteString encode(final Object value) {
+    public static ObjectEncoderImpl encoder() {
+        return new ObjectEncoderImpl();
+    }
+
+    private ObjectEncoderImpl() {}
+
+    public ByteString encode(final Object value) {
         final ObjectEncoder encoder = ObjectEncoderRegistry.lookup(value);
         if (encoder != null) {
             buffer.clear();

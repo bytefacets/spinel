@@ -5,7 +5,7 @@ package com.bytefacets.spinel.grpc.send;
 import java.nio.ByteBuffer;
 
 /**
- * @see ObjectEncoder
+ * @see com.bytefacets.spinel.grpc.codec.ObjectEncoder
  */
 public interface BufferSupplier {
 

@@ -40,6 +40,7 @@ message ModifySubscription {
     string target = 1;
     string action = 2;
     repeated bytes arguments = 3;
+    ModificationAddRemove addRemove = 4;
 }
 
 message Metadata {
@@ -106,6 +107,11 @@ enum ResponseType {
     RESPONSE_TYPE_CHG = 3;
     RESPONSE_TYPE_REM = 4;
     RESPONSE_TYPE_INIT = 5;
+}
+
+enum ModificationAddRemove {
+    ADD = 0;
+    REMOVE = 1;
 }
 
 message Response {

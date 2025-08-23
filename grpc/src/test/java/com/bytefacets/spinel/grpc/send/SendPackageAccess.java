@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.grpc.send;
 
+import com.bytefacets.spinel.grpc.codec.ObjectEncoderImpl;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.util.function.IntSupplier;
 
 public final class SendPackageAccess {
-    private final ObjectEncoderImpl encoder = new ObjectEncoderImpl();
+    private final ObjectEncoderImpl encoder = ObjectEncoderImpl.encoder();
 
     public ByteString encode(final Object value) {
         return encoder.encode(value);

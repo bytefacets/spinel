@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.comms.send;
 
-import com.bytefacets.spinel.comms.subscription.ChangeDescriptor;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,17 +39,25 @@ public final class ModificationHandlerRegistry implements ModificationHandler {
     }
 
     @Override
-    public ModificationResponse apply(final ModificationRequest modificationRequest) {
-        if (modificationRequest instanceof ChangeDescriptor descriptor) {
-            final ModificationHandler handler = getHandler(descriptor.target());
-            if (handler == null) {
-                return new ModificationResponse(
-                        false, "Target not found: " + descriptor.target(), null);
-            }
-            return handler.apply(descriptor);
-        } else {
-            return ModificationResponse.MODIFICATION_NOT_UNDERSTOOD;
+    public ModificationResponse add(final ModificationRequest modificationRequest) {
+        final ModificationHandler handler = getHandler(modificationRequest.target());
+        if (handler == null) {
+            return notFound(modificationRequest.target());
         }
+        return handler.add(modificationRequest);
+    }
+
+    @Override
+    public ModificationResponse remove(final ModificationRequest modificationRequest) {
+        final ModificationHandler handler = getHandler(modificationRequest.target());
+        if (handler == null) {
+            return notFound(modificationRequest.target());
+        }
+        return handler.remove(modificationRequest);
+    }
+
+    private static ModificationResponse notFound(final String target) {
+        return new ModificationResponse(false, "Target not found: " + target, null);
     }
 
     private ModificationHandler getHandler(final String target) {

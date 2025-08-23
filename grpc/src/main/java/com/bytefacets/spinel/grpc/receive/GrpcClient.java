@@ -8,6 +8,7 @@ import com.bytefacets.spinel.comms.ConnectionHandle;
 import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
 import com.bytefacets.spinel.comms.receive.Receiver;
+import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.grpc.proto.DataServiceGrpc;
 import com.bytefacets.spinel.grpc.proto.ResponseType;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
@@ -132,10 +133,14 @@ public final class GrpcClient implements Receiver {
     }
 
     Subscription createSubscription(
-            final SchemaBuilder schemaBuilder, final SubscriptionConfig config) {
+            final SchemaBuilder schemaBuilder,
+            final SubscriptionConfig config,
+            final SubscriptionListener subscriptionListener) {
         final GrpcDecoder decoder = decoderSupplier.apply(schemaBuilder);
         final var subscriptionId = nextSubscription.incrementAndGet();
-        final var sub = subscriptionStore.createSubscription(subscriptionId, decoder, config);
+        final var sub =
+                subscriptionStore.createSubscription(
+                        subscriptionId, decoder, config, subscriptionListener);
         if (requestAdapter.requester != null) {
             sub.requestSubscriptionIfNecessary();
         }

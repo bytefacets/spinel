@@ -4,9 +4,9 @@ package com.bytefacets.spinel.grpc.send;
 
 import com.bytefacets.spinel.comms.subscription.ChangeDescriptor;
 import com.bytefacets.spinel.comms.subscription.ModificationRequest;
+import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.grpc.proto.ModifySubscription;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
-import com.bytefacets.spinel.grpc.receive.ObjectDecoderRegistry;
 
 final class MsgHelp {
     private static final Object[] EMPTY_ARGS = new Object[0];

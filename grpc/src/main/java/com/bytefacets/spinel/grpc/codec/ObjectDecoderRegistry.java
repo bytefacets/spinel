@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.grpc.receive;
+package com.bytefacets.spinel.grpc.codec;
 
 import com.bytefacets.collections.hash.ShortGenericIndexedMap;
 import com.bytefacets.collections.types.Pack;
@@ -35,7 +35,7 @@ public final class ObjectDecoderRegistry {
         final byte systemTypeId = encoded.byteAt(0);
         final byte userTypeId = encoded.byteAt(1);
         final ObjectDecoder decoder = registry.getOrDefault(key(systemTypeId, userTypeId), null);
-        if (decoder == null) {
+        if (decoder == null) { // REVISIT optional log-or-fail here?
             return null;
         } else {
             final ByteBuffer buffer = encoded.asReadOnlyByteBuffer();

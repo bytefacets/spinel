@@ -199,8 +199,13 @@ final class PermissionFilter {
                 final SubscriptionContainer delegate) {
             return new SubscriptionContainer() {
                 @Override
-                public ModificationResponse apply(final ModificationRequest update) {
-                    return delegate.apply(update);
+                public ModificationResponse add(final ModificationRequest update) {
+                    return delegate.add(update);
+                }
+
+                @Override
+                public ModificationResponse remove(final ModificationRequest update) {
+                    return delegate.remove(update);
                 }
 
                 @Override

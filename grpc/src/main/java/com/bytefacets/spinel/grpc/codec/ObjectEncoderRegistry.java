@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.grpc.send;
+package com.bytefacets.spinel.grpc.codec;
 
+import com.bytefacets.spinel.grpc.send.BufferSupplier;
 import com.bytefacets.spinel.schema.TypeId;
 import jakarta.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
