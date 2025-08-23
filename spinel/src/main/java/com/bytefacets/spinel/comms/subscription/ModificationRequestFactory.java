@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public final class ModificationRequestFactory {
+    private static final Object[] EMPTY_ARGS = new Object[0];
+
     public static final class Action {
         public static final String APPLY = "apply";
 
@@ -26,7 +28,13 @@ public final class ModificationRequestFactory {
      * the {@link com.bytefacets.spinel.comms.send.DefaultSubscriptionContainer}.
      */
     public static ModificationRequest applyFilterExpression(final String expression) {
-        return new Impl(Target.FILTER, Action.APPLY, new Object[] {expression});
+        return request(Target.FILTER, Action.APPLY, expression);
+    }
+
+    public static ModificationRequest request(
+            final String target, final String action, final Object... args) {
+        final var useArgs = args != null ? args : EMPTY_ARGS;
+        return new Impl(target, action, useArgs);
     }
 
     private record Impl(String target, String action, Object[] arguments)
