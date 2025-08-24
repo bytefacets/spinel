@@ -7,6 +7,14 @@ import com.bytefacets.spinel.schema.${type.name}Field;
 import com.bytefacets.spinel.schema.FieldResolver;
 import java.util.Objects;
 
+/**
+ * A convenience base class for a calculation that uses a single source field. Note that the type
+ * here only indicates the ${type.name}Calculation should produce a ${type.arrayType}. The source
+ * field is accessed using the FieldResolver which will attempt to upcast the field if necessary.
+ *
+ * @see com.bytefacets.spinel.schema.FieldResolver
+ * @see com.bytefacets.spinel.schema.Cast
+ */
 public abstract class ${type.name}Calculation implements ${type.name}FieldCalculation {
     private final String name;
     private ${type.name}Field field;

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.examples.prototype;
+package com.bytefacets.spinel.examples.filter;
 
 import static com.bytefacets.spinel.examples.Util.clientChannel;
 import static com.bytefacets.spinel.examples.Util.newEventLoop;
@@ -10,8 +10,12 @@ import ch.qos.logback.classic.LoggerContext;
 import com.bytefacets.spinel.common.Connector;
 import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
+import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.comms.send.DefaultSubscriptionProvider;
+import com.bytefacets.spinel.comms.send.ModificationResponse;
 import com.bytefacets.spinel.comms.send.RegisteredOutputsTable;
+import com.bytefacets.spinel.comms.subscription.ModificationRequest;
+import com.bytefacets.spinel.comms.subscription.ModificationRequestFactory;
 import com.bytefacets.spinel.examples.Util;
 import com.bytefacets.spinel.grpc.receive.GrpcClient;
 import com.bytefacets.spinel.grpc.receive.GrpcClientBuilder;
@@ -20,9 +24,6 @@ import com.bytefacets.spinel.grpc.receive.GrpcSourceBuilder;
 import com.bytefacets.spinel.grpc.send.GrpcService;
 import com.bytefacets.spinel.grpc.send.GrpcServiceBuilder;
 import com.bytefacets.spinel.printer.OutputLoggerBuilder;
-import com.bytefacets.spinel.prototype.Prototype;
-import com.bytefacets.spinel.prototype.PrototypeBuilder;
-import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.table.IntIndexedStructTable;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -33,25 +34,14 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
 /**
- * This example demonstrates how a Prototype operator can be used to stabilize the effect of
- * connection resets.
- *
- * <p>When a connection is reset, schemas are reset, too, meaning that the fields which provide
- * access to the data become unavailable. This can be problematic for things like UIs.
- *
- * <p>When you use a Prototype, you trade off defining the schema locally for schema stability for
- * the consumers of the Prototype output. The prototype can also navigate some degree of type
- * casting, like an int field becoming a short: if your client says it's an int, but the server
- * sends a short, the prototype will cast (using {@link com.bytefacets.spinel.schema.Cast}).
- *
- * @see Prototype
- * @see PrototypeBuilder
+ * In this example, a client connects to a server and issues requests to change the filter criteria
+ * on the server.
  */
-final class PrototypeExample {
+final class ClientServerFilter {
     private static final int orderPort = 26001;
-    private static final Logger log = LoggerFactory.getLogger(PrototypeExample.class);
+    private static final Logger log = LoggerFactory.getLogger("Example");
 
-    private PrototypeExample() {}
+    private ClientServerFilter() {}
 
     public static void main(final String[] args) throws Exception {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -66,54 +56,45 @@ final class PrototypeExample {
     private static void declareClient() {
         final ManagedChannel orderChannel = clientChannel("0.0.0.0:" + orderPort);
         final var eventLoop = newEventLoop("client-data-thread");
+        // the listener will print responses to the requests
+        final Listener listener = new Listener();
+
+        // define the client and point it to the server
         final GrpcClient orderClient =
                 GrpcClientBuilder.grpcClient(orderChannel, eventLoop)
                         .connectionInfo(new ConnectionInfo("order-server", "0.0.0.0:" + orderPort))
                         .build();
+
+        // define the subscription
         final SubscriptionConfig subscription =
                 SubscriptionConfig.subscriptionConfig("orders").defaultAll().build();
         final GrpcSource orders =
                 GrpcSourceBuilder.grpcSource(orderClient, "local-orders")
                         .subscription(subscription)
+                        .withListener(listener)
                         .build();
-        //
-        final Prototype prototype =
-                PrototypeBuilder.prototype("client-orders-prototype")
-                        .addFields(
-                                FieldDescriptor.intField("OrderId"),
-                                FieldDescriptor.stringField("Account"),
-                                FieldDescriptor.intField("Qty"),
-                                FieldDescriptor.doubleField("Price"))
-                        .build();
-        Connector.connectInputToOutput(prototype, orders);
+
+        // set up a task to periodically change the filter
+        final ChangeFilter changer = new ChangeFilter(orders);
+        listener.dumper = Util.dumper("OrdersDumper", orders.output());
 
         // log the changes happening out of the prototype
         Connector.connectInputToOutput(
-                OutputLoggerBuilder.logger("client-orders").logLevel(Level.INFO).build(),
-                prototype);
-        // every 5 seconds dump the entire contents of our local view of the output
-        eventLoop.scheduleAtFixedRate(
-                Util.dumper("OrdersDumper", orders.output()), 1, 5, TimeUnit.SECONDS);
-        eventLoop.scheduleAtFixedRate(
-                Util.dumper("PrototypeDumper", prototype.output()), 1, 5, TimeUnit.SECONDS);
-        final Runnable toggleConnection =
-                () -> {
-                    if (orderClient.isConnected()) {
-                        orderClient.disconnect();
-                    } else {
-                        orderClient.connect();
-                    }
-                };
-        eventLoop.scheduleAtFixedRate(toggleConnection, 10, 10, TimeUnit.SECONDS);
+                OutputLoggerBuilder.logger("client-orders").logLevel(Level.INFO).build(), orders);
+        eventLoop.scheduleAtFixedRate(changer, 1, 5, TimeUnit.SECONDS);
+        orderClient.connect(); // connect to the server now
     }
 
+    /** Create a server with an "orders" table available for subscription. */
     private static void declareServer() throws Exception {
         final IntIndexedStructTable<Order> orders = intIndexedStructTable(Order.class).build();
-        fillTable(orders);
-        final RegisteredOutputsTable registeredOutputs = new RegisteredOutputsTable();
-        registeredOutputs.register("orders", orders);
+        fillTable(orders); // we'll just have this one be static
         Connector.connectInputToOutput(
                 OutputLoggerBuilder.logger("server-orders").logLevel(Level.INFO).build(), orders);
+
+        // set it up so that the table can be subscribed to
+        final RegisteredOutputsTable registeredOutputs = new RegisteredOutputsTable();
+        registeredOutputs.register("orders", orders);
 
         final var eventLoop = newEventLoop("server-data-thread");
         final DefaultSubscriptionProvider subscriptionProvider =
@@ -126,9 +107,75 @@ final class PrototypeExample {
         server.start();
     }
 
+    /**
+     * A task which will cycle through "ACC1", "ACC2", and "ACC3" account filters. It will request a
+     * new filter, then remove the old one.
+     */
+    private static final class ChangeFilter implements Runnable {
+        private final GrpcSource source;
+        private int step;
+        private ModificationRequest current;
+
+        private ChangeFilter(final GrpcSource source) {
+            this.source = source;
+        }
+
+        @Override
+        public void run() {
+            // create a new filter request
+            final String acct = "ACC" + (step++ % 3);
+            final ModificationRequest newRequest =
+                    ModificationRequestFactory.applyFilterExpression(
+                            String.format("Account == '%s'", acct));
+            log.info("Sending filter for {}", newRequest.arguments()[0]);
+            source.subscriptionHandle().add(newRequest);
+
+            // remove the old filter
+            if (current != null) {
+                log.info("Sending REMOVE for {}", current.arguments()[0]);
+                source.subscriptionHandle().remove(current);
+            }
+            current = newRequest;
+        }
+    }
+
+    /** A periodic task which logs connection and out-of-band events on the subscription. */
+    private static class Listener implements SubscriptionListener {
+        private Runnable dumper;
+
+        @Override
+        public void onModificationAddResponse(
+                final ModificationRequest request, final ModificationResponse response) {
+            receivedResponse("Add", request, response);
+        }
+
+        @Override
+        public void onModificationRemoveResponse(
+                final ModificationRequest request, final ModificationResponse response) {
+            receivedResponse("Remove", request, response);
+        }
+
+        private void receivedResponse(
+                final String action,
+                final ModificationRequest request,
+                final ModificationResponse response) {
+            if (!response.success()) {
+                throw new RuntimeException(
+                        String.format(
+                                "Modification Failure on %s of %s: %s",
+                                action, request, response.message()));
+            } else {
+                log.info("Client received response to {} {}: {}", action, request, response);
+            }
+            // show what is in the output
+            dumper.run();
+        }
+    }
+
+    /** Fills the orders table on the server with 10 rows, cycling through 3 accounts. */
     private static void fillTable(final IntIndexedStructTable<Order> orders) {
         final Order order = orders.createFacade();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             orders.beginAdd(i, order)
                     .setAccount("ACC" + (i % 3))
                     .setQty((i + 1) * 100)
@@ -147,4 +194,5 @@ final class PrototypeExample {
         double getPrice();     Order setPrice(double value);
     }
     // formatting:on
+
 }

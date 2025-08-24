@@ -1,3 +1,32 @@
+# Example: PrototypeExample
+
+This example demonstrates how a Prototype operator can be used to stabilize the effect of connection
+resets. 
+
+When a connection is reset, schemas are reset, too, meaning that the fields which provide access to 
+the data become unavailable. This can be problematic for things like UIs. 
+
+When you use a Prototype, you trade off defining the schema locally for schema stability for the 
+consumers of the Prototype output. The prototype can also navigate some degree of type casting, 
+like an int field becoming a short: if your client says it's an int, but the server sends a short, 
+the prototype will cast.
+
+```text
+                                                                     
++---------------------+        +---------------------+        +-------------------+        +-------------------+
+|                     |        |                     |        |                   |        |                   |
+|                     |        |                     |        |                   |        |                   |
+|   Orders (Server)   +--------+   Orders (Client)   +--------+     Prototype     +--------+  Other Consumers  |
+|                     |        |                     |        |                   |        |                   |
+|                     |        |                     |        |                   |        |                   |
++---------------------+        +---------------------+        +-------------------+        +-------------------+
+```
+
+Below is an example of the output of running the example.
+
+### Example output
+
+```text
 [main] INFO server-orders -- e0          SCH Order: 4 fields [0,Account,String][1,Price,Double][2,Qty,Int][3,OrderId,Int]
 [main] INFO server-orders -- e0          ADD r0     : [Account=ACC0][Price=5.4][Qty=100][OrderId=0]
 [main] INFO server-orders -- e0          ADD r1     : [Account=ACC1][Price=6.4][Qty=200][OrderId=1]
@@ -83,3 +112,4 @@
 [client-data-thread] INFO PrototypeDumper -- Dumping Row[2]: [Account=ACC2][Price=7.4][Qty=300][OrderId=2]
 [client-data-thread] INFO PrototypeDumper -- Dumping Row[3]: [Account=ACC0][Price=8.4][Qty=400][OrderId=3]
 [client-data-thread] INFO PrototypeDumper -- Dumping Row[4]: [Account=ACC1][Price=9.4][Qty=500][OrderId=4]
+```
