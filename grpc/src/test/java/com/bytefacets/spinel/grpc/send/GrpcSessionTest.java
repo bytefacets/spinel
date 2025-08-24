@@ -101,7 +101,7 @@ class GrpcSessionTest {
         assertThat(
                 responseCaptor.getValue().getResponseType(),
                 equalTo(ResponseType.RESPONSE_TYPE_MESSAGE));
-        assertThat(responseCaptor.getValue().getResponse().getError(), equalTo(true));
+        assertThat(responseCaptor.getValue().getResponse().getSuccess(), equalTo(false));
         assertThat(
                 responseCaptor.getValue().getResponse().getMessage(),
                 equalTo("Request type not understood: 5"));
@@ -127,7 +127,7 @@ class GrpcSessionTest {
             assertThat(
                     responseCaptor.getValue().getResponseType(),
                     equalTo(ResponseType.RESPONSE_TYPE_MESSAGE));
-            assertThat(responseCaptor.getValue().getResponse().getError(), equalTo(true));
+            assertThat(responseCaptor.getValue().getResponse().getSuccess(), equalTo(false));
             assertThat(
                     responseCaptor.getValue().getResponse().getMessage(),
                     equalTo("Output not found: bar"));
@@ -144,7 +144,11 @@ class GrpcSessionTest {
                     SubscriptionResponse.newBuilder()
                             .setRefMsgToken(1)
                             .setResponseType(ResponseType.RESPONSE_TYPE_INIT)
-                            .setResponse(Response.newBuilder().setMessage("hello").build())
+                            .setResponse(
+                                    Response.newBuilder()
+                                            .setMessage("hello")
+                                            .setSuccess(true)
+                                            .build())
                             .build();
             assertThat(responseCaptor.getValue(), equalTo(expected));
         }

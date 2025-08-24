@@ -151,7 +151,7 @@ class GrpcClientTest {
         }
 
         private SubscriptionResponse initResponse(final int token) {
-            final var response = Response.newBuilder().setError(false).setMessage("hello").build();
+            final var response = Response.newBuilder().setSuccess(true).setMessage("hello").build();
             return SubscriptionResponse.newBuilder()
                     .setRefMsgToken(token)
                     .setResponseType(ResponseType.RESPONSE_TYPE_INIT)

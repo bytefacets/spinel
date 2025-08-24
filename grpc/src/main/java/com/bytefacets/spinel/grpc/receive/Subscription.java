@@ -183,6 +183,6 @@ final class Subscription {
     }
 
     private static ModificationResponse toModResponse(final Response response) {
-        return new ModificationResponse(!response.getError(), response.getMessage(), null);
+        return new ModificationResponse(response.getSuccess(), response.getMessage(), null);
     }
 }

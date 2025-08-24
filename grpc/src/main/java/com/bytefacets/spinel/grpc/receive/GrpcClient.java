@@ -303,7 +303,7 @@ public final class GrpcClient implements Receiver {
 
         private void receiveResponse(final SubscriptionResponse response) {
             final String message = response.getResponse().getMessage();
-            if (!response.getResponse().getError()) {
+            if (response.getResponse().getSuccess()) {
                 markSessionInitialized(true);
                 log.debug("{} Initialization response: {}", logPrefix, message);
                 log.info(

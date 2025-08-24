@@ -186,7 +186,10 @@ public final class CodecTest {
         when(response.getResponseType()).thenReturn(ResponseType.UNRECOGNIZED);
         when(response.getResponse())
                 .thenReturn(
-                        Response.newBuilder().setError(false).setMessage("this is a test").build());
+                        Response.newBuilder()
+                                .setSuccess(true)
+                                .setMessage("this is a test")
+                                .build());
         receiver.accept(response);
     }
 
