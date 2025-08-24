@@ -62,10 +62,10 @@ final class GrpcDecoder implements ChangeDecoder<SubscriptionResponse> {
     }
 
     private void notifyOwnerWithMessage(final Response response) {
-        if (response.getError()) {
-            log.warn("Received error message: {}", response.getMessage());
-        } else {
+        if (response.getSuccess()) {
             log.info("Received message: {}", response.getMessage());
+        } else {
+            log.warn("Received error message: {}", response.getMessage());
         }
     }
 

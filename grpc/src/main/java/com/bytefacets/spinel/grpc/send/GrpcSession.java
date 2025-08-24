@@ -109,7 +109,7 @@ final class GrpcSession {
                         subscriptionContainer.apply(
                                 request.getModification().getAddRemove(), modification);
                 outputStream.onNext(
-                        messageResponse(request, !response.success(), response.message()));
+                        messageResponse(request, response.success(), response.message()));
             } else {
                 outputStream.onNext(subscriptionNotFound(request));
             }
@@ -176,12 +176,13 @@ final class GrpcSession {
     }
 
     private static SubscriptionResponse messageResponse(
-            final SubscriptionRequest req, final boolean isError, final String message) {
+            final SubscriptionRequest req, final boolean isSuccess, final String message) {
         return SubscriptionResponse.newBuilder()
                 .setRefMsgToken(req.getMsgToken())
                 .setSubscriptionId(req.getSubscriptionId())
                 .setResponseType(ResponseType.RESPONSE_TYPE_MESSAGE)
-                .setResponse(Response.newBuilder().setError(isError).setMessage(message).build())
+                .setResponse(
+                        Response.newBuilder().setSuccess(isSuccess).setMessage(message).build())
                 .build();
     }
 
@@ -189,7 +190,7 @@ final class GrpcSession {
         return SubscriptionResponse.newBuilder()
                 .setRefMsgToken(refToken)
                 .setResponseType(ResponseType.RESPONSE_TYPE_INIT)
-                .setResponse(Response.newBuilder().setError(false).setMessage("hello").build())
+                .setResponse(Response.newBuilder().setSuccess(true).setMessage("hello").build())
                 .build();
     }
 
@@ -200,29 +201,30 @@ final class GrpcSession {
 
     private static SubscriptionResponse outputNotFound(
             final SubscriptionRequest req, final String name) {
-        return messageResponse(req, true, String.format("Output not found: %s", name));
+        return messageResponse(req, false, String.format("Output not found: %s", name));
     }
 
     private static SubscriptionResponse subscriptionNotFound(final SubscriptionRequest req) {
-        return messageResponse(req, true, "Subscription not found");
+        return messageResponse(req, false, "Subscription not found");
     }
 
     private static SubscriptionResponse error(
             final SubscriptionRequest req, final String name, final Exception ex) {
         return messageResponse(
                 req,
-                true,
+                false,
                 String.format("Exception handling subscription for %s: %s", name, ex.getMessage()));
     }
 
     private static SubscriptionResponse error(final SubscriptionRequest req, final Exception ex) {
         return messageResponse(
-                req, true, String.format("Exception modifying subscription: %s", ex.getMessage()));
+                req, false, String.format("Exception modifying subscription: %s", ex.getMessage()));
     }
 
     private static SubscriptionResponse invalidResponseType(
             final SubscriptionRequest req, final int typeId) {
-        return messageResponse(req, true, String.format("Request type not understood: %d", typeId));
+        return messageResponse(
+                req, false, String.format("Request type not understood: %d", typeId));
     }
 
     private static SubscriptionConfig toConfig(final CreateSubscription msg) {

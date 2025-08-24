@@ -131,7 +131,7 @@ class SubscriptionTest {
         return SubscriptionResponse.newBuilder()
                 .setRefMsgToken(token)
                 .setResponseType(ResponseType.RESPONSE_TYPE_MESSAGE)
-                .setResponse(Response.newBuilder().setError(error).setMessage(message).build())
+                .setResponse(Response.newBuilder().setSuccess(!error).setMessage(message).build())
                 .build();
     }
 }

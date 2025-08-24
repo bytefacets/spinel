@@ -115,7 +115,7 @@ enum ModificationAddRemove {
 }
 
 message Response {
-    bool error = 1;
+    bool success = 1;
     string message = 2;
 }
 
