@@ -48,6 +48,7 @@ class GrpcClientTest {
     private final SchemaBuilder schemaBuilder =
             new SchemaBuilder(matrixStoreFieldFactory(16, 16, i -> {}));
     private final SubscriptionStore subscriptionStore = new SubscriptionStore(cxInfo);
+    private final SubscriptionConfig config = SubscriptionConfig.subscriptionConfig("foo").build();
     private @Mock ManagedChannel channel;
     private @Mock EventLoop dataEventLoop;
     private @Mock DataServiceGrpc.DataServiceStub serviceStub;
@@ -61,6 +62,9 @@ class GrpcClientTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(serviceStub.subscribe(any())).thenReturn(requestStream);
+        lenient().when(decoderSupplier.apply(any())).thenReturn(decoder);
+        lenient().when(channel.getState(false)).thenReturn(ConnectivityState.READY);
         client =
                 new GrpcClient(
                         cxInfo,
@@ -69,16 +73,12 @@ class GrpcClientTest {
                         serviceStub,
                         decoderSupplier,
                         subscriptionStore);
-        lenient().when(serviceStub.subscribe(any())).thenReturn(requestStream);
-        lenient().when(decoderSupplier.apply(any())).thenReturn(decoder);
-        lenient().when(channel.getState(false)).thenReturn(ConnectivityState.READY);
     }
 
     @Test
     void shouldCreateAndSendSubscriptionWhenInitializeCompleted() {
         client.connection().connect();
-        final var config = SubscriptionConfig.subscriptionConfig("foo").build();
-        final var sub = client.createSubscription(schemaBuilder, config, this.subscriptionListener);
+        final Subscription sub = givenASubscription();
         assertThat(sub.isSubscribed(), equalTo(true));
         final var msgHelp = new MsgHelp();
         msgHelp.init(""); // burn off sequence 1
@@ -88,8 +88,7 @@ class GrpcClientTest {
 
     @Test
     void shouldCreateAndNotSendSubscriptionWhenNotConnected() {
-        final var config = SubscriptionConfig.subscriptionConfig("foo").build();
-        final var sub = client.createSubscription(schemaBuilder, config, subscriptionListener);
+        final Subscription sub = givenASubscription();
         assertThat(sub.isSubscribed(), equalTo(false));
         verifyNoInteractions(requestStream);
     }
@@ -167,8 +166,7 @@ class GrpcClientTest {
         @Test
         void shouldUnsubscribeWhenDisconnecting() {
             client.connection().connect();
-            final var config = SubscriptionConfig.subscriptionConfig("foo").build();
-            final var sub = client.createSubscription(schemaBuilder, config, subscriptionListener);
+            final Subscription sub = givenASubscription();
             reset(requestStream);
             // when
             client.connection().disconnect();
@@ -230,5 +228,9 @@ class GrpcClientTest {
             reconnectCaptor.getValue().run(); // reconnection fires
             assertThat(client.isInitializationInProgress(), equalTo(false));
         }
+    }
+
+    private Subscription givenASubscription() {
+        return client.createSubscription(schemaBuilder, config, subscriptionListener);
     }
 }

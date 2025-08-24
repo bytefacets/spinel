@@ -1,3 +1,32 @@
+# Example: PermissionFilter
+In this example, we're intercepting the subscription creation on the server and using the
+authenticated user to apply a Filter which only lets through rows relating to specific values in
+the Account field of an Orders table.
+
+When the user connects, we take the user's name and pull out a set of permitted accounts. We
+configure a Filter with a predicate that evaluates each row, limiting what passes by checking
+that the Account value is in the set of permitted accounts.
+
+In this example, we also configure a periodic task on the client side to dump the entire
+contents of the view that has been received by the user to show that it only contains the
+permitted accounts.
+
+```text
+                               -------------  Subscription Container --------------                       
++---------------------+        +---------------------+        +-------------------+        +-------------------+
+|      (Server)       |        |       (Server)      |        |      (Server)     |        |      (Client)     |
+|                     |        |                     |        |                   |        |                   |
+|       Orders        +--------+        Filter       +--------+       Filter      +--------+     GrpcSource    |
+|                     |        |                     |        |                   |        |                   |
+|                     |        |  [Permission Check] |        | [User configured] |        |                   |
++---------------------+        +---------------------+        +-------------------+        +-------------------+
+```
+
+Below is an example of the output of running the example.
+
+### Example output
+
+```text
 [main] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Initiating client subscription
 [grpc-default-executor-0] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Client state change: IDLE->CONNECTING
 [grpc-default-executor-1] INFO com.bytefacets.spinel.grpc.receive.GrpcClient -- ClientOf[name=order-server,endpoint=0.0.0.0:26001] Client state change: CONNECTING->READY
@@ -92,3 +121,4 @@
 [client-data-thread] INFO client-orders -- e20         ADD r5     : [Account=BOB][Price=5.04][Qty=300][OrderId=112]
 [server-data-thread] INFO server-orders -- e31         REM r3     :
 [client-data-thread] INFO client-orders -- e21         REM r2     :
+```

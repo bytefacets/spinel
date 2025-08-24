@@ -56,7 +56,7 @@ public final class ModificationRequestFactory {
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", Impl.class.getSimpleName() + "[", "]")
+            return new StringJoiner(", ", "ModificationRequest[", "]")
                     .add("target='" + target + "'")
                     .add("action='" + action + "'")
                     .add("arguments=" + Arrays.toString(arguments))
