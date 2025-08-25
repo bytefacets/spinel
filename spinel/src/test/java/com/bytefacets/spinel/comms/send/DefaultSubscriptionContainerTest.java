@@ -64,6 +64,7 @@ class DefaultSubscriptionContainerTest {
                 defaultSubscriptionContainer(
                         mock(ConnectedSessionInfo.class),
                         config,
+                        List.of(),
                         output,
                         ModificationHandlerRegistry.modificationHandlerRegistry());
     }

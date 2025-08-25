@@ -29,6 +29,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.netty.channel.EventLoop;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +83,8 @@ class GrpcClientTest {
         assertThat(sub.isSubscribed(), equalTo(true));
         final var msgHelp = new MsgHelp();
         msgHelp.init(""); // burn off sequence 1
-        final var msg = msgHelp.request(sub.subscriptionId(), msgHelp.subscription(config));
+        final var msg =
+                msgHelp.request(sub.subscriptionId(), msgHelp.subscription(config, List.of()));
         verify(requestStream, times(1)).onNext(eq(msg));
     }
 

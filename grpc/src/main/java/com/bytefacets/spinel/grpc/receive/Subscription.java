@@ -18,7 +18,8 @@ import com.bytefacets.spinel.grpc.proto.ResponseType;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
 
 final class Subscription {
     private static final SubscriptionListener NO_OP = new SubscriptionListener() {};
@@ -26,7 +27,7 @@ final class Subscription {
     private final int subscriptionId;
     private final SubscriptionConfig config;
     private final GrpcDecoder decoder;
-    private final Consumer<SubscriptionRequest> messageSink;
+    private final GrpcClient.MessageSink messageSink;
     private final MsgHelp msgHelp;
     private final GenericIntIndexedMap<ModificationRequest> activeRequests =
             new GenericIntIndexedMap<>(4);
@@ -41,7 +42,7 @@ final class Subscription {
             final GrpcDecoder decoder,
             final SubscriptionConfig config,
             final MsgHelp msgHelp,
-            final Consumer<SubscriptionRequest> messageSink,
+            final GrpcClient.MessageSink messageSink,
             final SubscriptionListener subscriptionListener) {
         this.subscriptionId = subscriptionId;
         this.decoder = requireNonNull(decoder, "decoder");
@@ -84,7 +85,7 @@ final class Subscription {
 
     @VisibleForTesting
     SubscriptionRequest createRequest() {
-        return msgHelp.request(subscriptionId, msgHelp.subscription(config));
+        return msgHelp.request(subscriptionId, msgHelp.subscription(config, requestsList()));
     }
 
     @Override
@@ -99,7 +100,7 @@ final class Subscription {
         final int newRefCount = activeRequests.getValueAt(entry) + 1;
         activeRequests.putValueAt(entry, newRefCount);
         if (before != activeRequests.size()) {
-            if (newRefCount == 1) {
+            if (newRefCount == 1 && messageSink.isConnected()) {
                 final SubscriptionRequest msg = msgHelp.addModification(subscriptionId, request);
                 final InFlightHolder holder = allocateHolder(request, ModificationAddRemove.ADD);
                 inFlightListeners.put(msg.getMsgToken(), holder);
@@ -114,10 +115,14 @@ final class Subscription {
             final int newRefCount = activeRequests.getValueAt(entry) - 1;
             if (newRefCount == 0) {
                 activeRequests.removeAt(entry);
-                final SubscriptionRequest msg = msgHelp.removeModification(subscriptionId, request);
-                final InFlightHolder holder = allocateHolder(request, ModificationAddRemove.REMOVE);
-                inFlightListeners.put(msg.getMsgToken(), holder);
-                messageSink.accept(msg);
+                if (messageSink.isConnected()) {
+                    final SubscriptionRequest msg =
+                            msgHelp.removeModification(subscriptionId, request);
+                    final InFlightHolder holder =
+                            allocateHolder(request, ModificationAddRemove.REMOVE);
+                    inFlightListeners.put(msg.getMsgToken(), holder);
+                    messageSink.accept(msg);
+                }
             } else {
                 activeRequests.putValueAt(entry, newRefCount);
             }
@@ -180,6 +185,15 @@ final class Subscription {
                 listener.onModificationAddResponse(request, listenerResponse);
             }
         }
+    }
+
+    private List<ModificationRequest> requestsList() {
+        if (activeRequests.isEmpty()) {
+            return List.of();
+        }
+        final List<ModificationRequest> list = new ArrayList<>(activeRequests.size());
+        activeRequests.forEach(list::add);
+        return list;
     }
 
     private static ModificationResponse toModResponse(final Response response) {

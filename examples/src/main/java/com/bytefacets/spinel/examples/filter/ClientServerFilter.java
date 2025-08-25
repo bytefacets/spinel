@@ -160,10 +160,9 @@ final class ClientServerFilter {
                 final ModificationRequest request,
                 final ModificationResponse response) {
             if (!response.success()) {
-                throw new RuntimeException(
-                        String.format(
-                                "Modification Failure on %s of %s: %s",
-                                action, request, response.message()));
+                System.err.printf(
+                        "Modification Failure on %s of %s: %s%n",
+                        action, request, response.message());
             } else {
                 log.info("Client received response to {} {}: {}", action, request, response);
             }

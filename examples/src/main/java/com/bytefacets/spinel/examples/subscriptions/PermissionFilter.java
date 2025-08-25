@@ -187,6 +187,7 @@ final class PermissionFilter {
                     DefaultSubscriptionContainer.defaultSubscriptionContainer(
                             subscriptionContext.sessionInfo(),
                             subscriptionContext.subscriptionConfig(),
+                            subscriptionContext.initialModifications(),
                             permissionedOutput.output(),
                             subscriptionContext.modificationHandler());
             return wrap(subscriptionContext.output(), permissionedOutput, standardContainer);

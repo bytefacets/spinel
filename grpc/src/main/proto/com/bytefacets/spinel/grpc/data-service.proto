@@ -34,6 +34,7 @@ message CreateSubscription {
     string name = 1;
     repeated string field_names = 2;
     bool default_all = 3;
+    repeated ModifySubscription modifications = 4;
 }
 
 message ModifySubscription {

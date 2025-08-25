@@ -11,6 +11,7 @@ import com.bytefacets.spinel.grpc.proto.ModificationAddRemove;
 import com.bytefacets.spinel.grpc.proto.ModifySubscription;
 import com.bytefacets.spinel.grpc.proto.RequestType;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
+import java.util.List;
 
 final class MsgHelp {
     private final ObjectEncoderImpl encoder = ObjectEncoderImpl.encoder();
@@ -62,12 +63,17 @@ final class MsgHelp {
         return modifyBuilder;
     }
 
-    CreateSubscription subscription(final SubscriptionConfig config) {
+    CreateSubscription subscription(
+            final SubscriptionConfig config, final List<ModificationRequest> initialRequests) {
         final var builder = CreateSubscription.newBuilder().setName(config.remoteOutputName());
         if (config.fields() != null && !config.fields().isEmpty()) {
             builder.addAllFieldNames(config.fields());
         }
         builder.setDefaultAll(config.defaultAll());
+        for (int i = 0, len = initialRequests.size(); i < len; i++) {
+            builder.addModifications(
+                    i, modify(initialRequests.get(i), ModificationAddRemove.ADD).build());
+        }
         return builder.build();
     }
 

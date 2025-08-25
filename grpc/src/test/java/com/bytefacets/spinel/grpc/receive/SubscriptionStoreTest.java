@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -29,7 +30,6 @@ import com.bytefacets.spinel.schema.Schema;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,11 +47,12 @@ class SubscriptionStoreTest {
             GrpcDecoder.grpcDecoder(new SchemaBuilder(matrixStoreFieldFactory(16, 16, i -> {})));
     private final SubscriptionConfig config =
             subscriptionConfig("test").setFields(List.of("a", "b")).build();
-    private @Mock Consumer<SubscriptionRequest> consumer;
+    private @Mock GrpcClient.MessageSink consumer;
     private @Mock SubscriptionListener listener;
 
     @BeforeEach
     void setUp() {
+        lenient().when(consumer.isConnected()).thenReturn(true);
         store.connect(new MsgHelp(), consumer);
     }
 
@@ -96,7 +97,7 @@ class SubscriptionStoreTest {
         subs.get(1).markUnsubscribed();
         subs.get(3).markUnsubscribed();
         // when
-        store.resubscribe(consumer);
+        store.resubscribe();
         // then
         final ArgumentCaptor<SubscriptionRequest> requestCaptor =
                 ArgumentCaptor.forClass(SubscriptionRequest.class);
@@ -134,10 +135,10 @@ class SubscriptionStoreTest {
                     GrpcDecoder.grpcDecoder(
                             new SchemaBuilder(matrixStoreFieldFactory(16, 16, x -> {})));
             store.createSubscription(i + 10, decoder, config, listener);
-            expected.add(msgHelp.request(i + 10, msgHelp.subscription(config)));
+            expected.add(msgHelp.request(i + 10, msgHelp.subscription(config, List.of())));
         }
         // when
-        store.resubscribe(consumer);
+        store.resubscribe();
         // then
         final ArgumentCaptor<SubscriptionRequest> requests =
                 ArgumentCaptor.forClass(SubscriptionRequest.class);
