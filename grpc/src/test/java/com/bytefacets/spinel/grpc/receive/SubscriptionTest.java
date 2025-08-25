@@ -7,7 +7,9 @@ import static com.bytefacets.spinel.comms.subscription.ModificationRequestFactor
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -111,6 +113,13 @@ class SubscriptionTest {
             verifyNoInteractions(msgSink);
             verifyNoInteractions(listener);
         }
+
+        @Test
+        void shouldNotSendWhenNotConnected() {
+            when(msgSink.isConnected()).thenReturn(false);
+            sub.add(request);
+            verify(msgSink, never()).accept(any());
+        }
     }
 
     @Nested
@@ -149,6 +158,13 @@ class SubscriptionTest {
             sub.remove(request); // reference count = 1
             verifyNoInteractions(msgSink);
             verifyNoInteractions(listener);
+        }
+
+        @Test
+        void shouldNotSendWhenNotConnected() {
+            when(msgSink.isConnected()).thenReturn(false);
+            sub.remove(request);
+            verify(msgSink, never()).accept(any());
         }
     }
 
