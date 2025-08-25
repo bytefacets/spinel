@@ -120,6 +120,7 @@ class SubscriptionTest {
         void setUp() {
             sub.add(request);
             reset(msgSink);
+            lenient().when(msgSink.isConnected()).thenReturn(true);
         }
 
         @Test
