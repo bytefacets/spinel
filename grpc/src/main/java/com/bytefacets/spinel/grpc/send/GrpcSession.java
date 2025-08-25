@@ -79,11 +79,13 @@ final class GrpcSession {
     }
 
     private void createSubscription(final SubscriptionRequest request) {
-        final CreateSubscription subscriptionRequest = request.getSubscription();
-        final SubscriptionConfig config = toConfig(subscriptionRequest);
+        final CreateSubscription createRequest = request.getSubscription();
+        final SubscriptionConfig config = toConfig(createRequest);
+        final List<ModificationRequest> initialModifications =
+                msgHelp.readModifications(createRequest);
         try {
             final SubscriptionContainer subscriptionContainer =
-                    subscriptionProvider.getSubscription(sessionInfo, config);
+                    subscriptionProvider.getSubscription(sessionInfo, config, initialModifications);
             if (subscriptionContainer != null) {
                 final int subscriptionId = request.getSubscriptionId();
                 final GrpcSink adapter = grpcSink(subscriptionId, outputStream);
@@ -92,10 +94,10 @@ final class GrpcSession {
                 // connection to the output must be done on the data thread
                 Connector.connectOutputToInput(subscriptionContainer, adapter);
             } else {
-                outputStream.onNext(outputNotFound(request, subscriptionRequest.getName()));
+                outputStream.onNext(outputNotFound(request, createRequest.getName()));
             }
         } catch (Exception ex) {
-            outputStream.onNext(error(request, subscriptionRequest.getName(), ex));
+            outputStream.onNext(error(request, createRequest.getName(), ex));
         }
     }
 

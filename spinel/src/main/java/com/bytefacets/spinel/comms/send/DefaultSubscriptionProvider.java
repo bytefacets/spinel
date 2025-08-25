@@ -6,7 +6,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
+import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 import jakarta.annotation.Nullable;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -62,18 +64,26 @@ public final class DefaultSubscriptionProvider implements SubscriptionProvider {
 
     @Override
     public @Nullable SubscriptionContainer getSubscription(
-            final ConnectedSessionInfo sessionInfo, final SubscriptionConfig config) {
+            final ConnectedSessionInfo sessionInfo,
+            final SubscriptionConfig config,
+            final List<ModificationRequest> initialModifications) {
         final TransformOutput output = registry.lookup(config.remoteOutputName());
         if (output == null) {
             return null;
         }
         return subscriptionFactory.create(
-                new Context(sessionInfo, config, output, modificationHandlerSupplier.get()));
+                new Context(
+                        sessionInfo,
+                        config,
+                        initialModifications,
+                        output,
+                        modificationHandlerSupplier.get()));
     }
 
     private record Context(
             ConnectedSessionInfo sessionInfo,
             SubscriptionConfig subscriptionConfig,
+            List<ModificationRequest> initialModifications,
             TransformOutput output,
             ModificationHandlerRegistry modificationHandler)
             implements CommonSubscriptionContext {}

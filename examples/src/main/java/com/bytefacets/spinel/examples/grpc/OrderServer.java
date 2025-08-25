@@ -200,19 +200,12 @@ final class OrderServer {
     }
 
     /** A simplified model of an Order which will get inspected at turned into a table structure. */
+    // formatting:off
     public interface Order {
         int getOrderId(); // getter only bc it's the key field
-
-        int getQty();
-
-        Order setQty(int value);
-
-        double getPrice();
-
-        Order setPrice(double value);
-
-        int getInstrumentId();
-
-        Order setInstrumentId(int value);
+        int getQty();           Order setQty(int value);
+        double getPrice();      Order setPrice(double value);
+        int getInstrumentId();  Order setInstrumentId(int value);
     }
+    // formatting:on
 }

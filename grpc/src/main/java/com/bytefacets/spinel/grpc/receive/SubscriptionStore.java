@@ -8,10 +8,8 @@ import com.bytefacets.collections.hash.IntGenericIndexedMap;
 import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
 import com.bytefacets.spinel.comms.receive.SubscriptionListener;
-import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,19 +17,19 @@ final class SubscriptionStore {
     private static final Logger log = LoggerFactory.getLogger(SubscriptionStore.class);
     private final IntGenericIndexedMap<Subscription> subscriptions = new IntGenericIndexedMap<>(16);
     private final ConnectionInfo connectionInfo;
-    private Consumer<SubscriptionRequest> messageSink;
+    private GrpcClient.MessageSink messageSink;
     private MsgHelp msgHelp;
 
     SubscriptionStore(final ConnectionInfo connectionInfo) {
         this.connectionInfo = requireNonNull(connectionInfo, "connectionInfo");
     }
 
-    void connect(final MsgHelp msgHelp, final Consumer<SubscriptionRequest> messageSink) {
+    void connect(final MsgHelp msgHelp, final GrpcClient.MessageSink messageSink) {
         this.msgHelp = requireNonNull(msgHelp, "msgHelp");
         this.messageSink = requireNonNull(messageSink, "messageSink");
     }
 
-    void resubscribe(final Consumer<SubscriptionRequest> consumer) {
+    void resubscribe() {
         synchronized (subscriptions) {
             subscriptions.forEachValue(Subscription::requestSubscriptionIfNecessary);
         }

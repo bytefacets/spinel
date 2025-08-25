@@ -126,11 +126,10 @@ final class MarketDataServer {
         eventLoop.execute(new MarketDataCreator());
     }
 
+    // formatting:off
     interface MarketData {
         int getInstrumentId(); // getter only = key field
-
-        double getPrice();
-
-        void setPrice(double value);
+        double getPrice(); void setPrice(double value);
     }
+    // formatting:on
 }

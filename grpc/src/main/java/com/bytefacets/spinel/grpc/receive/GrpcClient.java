@@ -107,7 +107,7 @@ public final class GrpcClient implements Receiver {
                         connectionInfo.name(), connectionInfo.endpoint());
         this.errorEval = new ClientErrorEval(log, logPrefix);
         requestAdapter.trackConnectionStateChange();
-        subscriptionStore.connect(msgHelp, this::issueSubscriptionRequest);
+        subscriptionStore.connect(msgHelp, new Sink());
     }
 
     public void connect() {
@@ -157,7 +157,7 @@ public final class GrpcClient implements Receiver {
                     request.getSubscription().getName());
             requestAdapter.requester.onNext(request);
         } else {
-            log.warn("{} issueSubscriptionRequest called by requester is null", logPrefix);
+            log.warn("{} not connected", logPrefix);
         }
     }
 
@@ -310,10 +310,28 @@ public final class GrpcClient implements Receiver {
                         "{} Resubscribing {} outputs if necessary",
                         logPrefix,
                         subscriptionStore.numSubscriptions());
-                subscriptionStore.resubscribe(GrpcClient.this::issueSubscriptionRequest);
+                subscriptionStore.resubscribe();
             } else {
                 log.warn("{} initialization error response: {}", logPrefix, message);
             }
+        }
+    }
+
+    interface MessageSink {
+        boolean isConnected();
+
+        void accept(SubscriptionRequest request);
+    }
+
+    private final class Sink implements MessageSink {
+        @Override
+        public boolean isConnected() {
+            return GrpcClient.this.isConnected();
+        }
+
+        @Override
+        public void accept(final SubscriptionRequest request) {
+            issueSubscriptionRequest(request);
         }
     }
 

@@ -16,6 +16,7 @@ import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 import com.bytefacets.spinel.comms.subscription.ModificationRequestFactory;
 import com.bytefacets.spinel.filter.Filter;
 import com.bytefacets.spinel.projection.Projection;
+import java.util.List;
 
 /**
  * A basic container which provides, per-subscription, a Filter and an optional Projection.
@@ -36,10 +37,11 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
     public static DefaultSubscriptionContainer defaultSubscriptionContainer(
             final ConnectedSessionInfo sessionInfo,
             final SubscriptionConfig subscriptionConfig,
+            final List<ModificationRequest> initialModifications,
             final TransformOutput output,
             final ModificationHandlerRegistry modificationHandler) {
         return new DefaultSubscriptionContainer(
-                sessionInfo, subscriptionConfig, output, modificationHandler);
+                sessionInfo, subscriptionConfig, List.of(), output, modificationHandler);
     }
 
     public static DefaultSubscriptionContainer defaultSubscriptionContainer(
@@ -47,6 +49,7 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
         return new DefaultSubscriptionContainer(
                 context.sessionInfo(),
                 context.subscriptionConfig(),
+                context.initialModifications(),
                 context.output(),
                 context.modificationHandler());
     }
@@ -54,6 +57,7 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
     private DefaultSubscriptionContainer(
             final ConnectedSessionInfo sessionInfo,
             final SubscriptionConfig subscriptionConfig,
+            final List<ModificationRequest> initialModifications,
             final TransformOutput output,
             final ModificationHandlerRegistry modificationHandler) {
         requireNonNull(subscriptionConfig, "subscriptionConfig");
@@ -63,20 +67,34 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
 
         final Filter filter = createFilter(subscriptionConfig);
         this.input = filter.input();
-        Connector.connectOutputToInput(source, filter);
 
         // register filter management
-        modificationHandler.register(
-                ModificationRequestFactory.Target.FILTER,
+        final FilterExpressionManager expressionMgr =
                 filterExpressionManager(
-                        filter, JexlEngineProvider.defaultJexlEngine(), sessionInfo.toString()));
+                        filter, JexlEngineProvider.defaultJexlEngine(), sessionInfo.toString());
+        modificationHandler.register(ModificationRequestFactory.Target.FILTER, expressionMgr);
 
+        // inject projection if necessary
         if (!subscriptionConfig.fields().isEmpty()) {
             final Projection projection = createProjection(subscriptionConfig);
             Connector.connectOutputToInput(filter, projection);
             this.output = projection.output();
         } else {
             this.output = filter.output();
+        }
+
+        //
+        applyModifications(modificationHandler, initialModifications);
+
+        // do last for one pass over the rows
+        Connector.connectOutputToInput(source, filter);
+    }
+
+    private void applyModifications(
+            final ModificationHandlerRegistry modificationHandler,
+            final List<ModificationRequest> initialModifications) {
+        for (ModificationRequest request : initialModifications) {
+            modificationHandler.add(request);
         }
     }
 
