@@ -18,6 +18,8 @@ import com.bytefacets.spinel.table.IntIndexedStructTable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -28,10 +30,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
+@SuppressWarnings("FinalClass")
 @Configuration
-public final class TopologyBuilder {
+public class TopologyBuilder {
     private static final int NUM_INSTRUMENTS = 10;
     private static final int MAX_ORDERS = 15;
+    private static final Duration CHANGE_RATE = Duration.ofMillis(100);
     private final IntIndexedStructTable<Order> orders;
     private final RegisteredOutputsTable outputs = new RegisteredOutputsTable();
     private final IntIndexedStructTable<Instrument> instruments;
@@ -67,7 +71,6 @@ public final class TopologyBuilder {
 
     @Bean
     HandlerMapping handlerMapping() {
-        System.out.println("CREATING HANDLER MAPPING");
         final var mapping =
                 new SimpleUrlHandlerMapping(
                         Map.of(
@@ -79,7 +82,7 @@ public final class TopologyBuilder {
 
     void start() {
         final OrderCreator creator = new OrderCreator();
-        eventLoop.scheduleAtFixedRate(creator, 1, 500, TimeUnit.MILLISECONDS);
+        eventLoop.scheduleAtFixedRate(creator, 1, CHANGE_RATE.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP")

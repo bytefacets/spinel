@@ -83,7 +83,9 @@ final class FluxAdapter<T> {
         }
 
         private void enqueue(final T data) {
-            log.info("Queueing data...{}", data);
+            if(log.isTraceEnabled()) {
+                log.trace("Queueing data...{}", data);
+            }
             queue.offer(data);
         }
 
