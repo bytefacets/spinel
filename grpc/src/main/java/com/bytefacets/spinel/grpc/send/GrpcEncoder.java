@@ -52,7 +52,7 @@ public final class GrpcEncoder implements ChangeEncoder<SubscriptionResponse> {
         this.subscriptionId = subscriptionId;
     }
 
-    static GrpcEncoder grpcEncoder(final int subscriptionId) {
+    public static GrpcEncoder grpcEncoder(final int subscriptionId) {
         return new GrpcEncoder(subscriptionId);
     }
 

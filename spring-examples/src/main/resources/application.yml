@@ -1,0 +1,5 @@
+spring:
+  debug: true
+  mvc:
+    async:
+      request-timeout: -1
