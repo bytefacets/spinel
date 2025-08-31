@@ -18,31 +18,37 @@ import com.bytefacets.spinel.table.IntIndexedStructTable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
-
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.event.Level;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
 @SuppressWarnings("FinalClass")
 @Configuration
 public class TopologyBuilder {
-    private static final int NUM_INSTRUMENTS = 10;
-    private static final int MAX_ORDERS = 15;
-    private static final Duration CHANGE_RATE = Duration.ofMillis(100);
     private final IntIndexedStructTable<Order> orders;
     private final RegisteredOutputsTable outputs = new RegisteredOutputsTable();
     private final IntIndexedStructTable<Instrument> instruments;
     private final EventLoop eventLoop;
     private final DefaultSubscriptionProvider subscriptionProvider;
 
-    @SuppressWarnings("this-escape")
+    @Value("${spinel.topology.num-instruments}")
+    private int numInstruments = 10;
+
+    @Value("${spinel.topology.max-orders}")
+    private int maxOrders = 15;
+
+    @Value("${spinel.topology.change-rate-millis}")
+    private long changeRateMillis = 1000;
+
     public TopologyBuilder() {
         this.eventLoop =
                 new DefaultEventLoop(
@@ -66,7 +72,6 @@ public class TopologyBuilder {
         outputs.register("instruments", instruments);
         outputs.register("order-view", join.output());
         subscriptionProvider = defaultSubscriptionProvider(outputs);
-        start();
     }
 
     @Bean
@@ -80,9 +85,10 @@ public class TopologyBuilder {
         return mapping;
     }
 
-    void start() {
+    @EventListener(ContextRefreshedEvent.class)
+    public void start() {
         final OrderCreator creator = new OrderCreator();
-        eventLoop.scheduleAtFixedRate(creator, 1, CHANGE_RATE.toMillis(), TimeUnit.MILLISECONDS);
+        eventLoop.scheduleAtFixedRate(creator, 1, changeRateMillis, TimeUnit.MILLISECONDS);
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP")
@@ -99,7 +105,7 @@ public class TopologyBuilder {
     private final class OrderCreator implements Runnable {
         private final Random random = new Random(7652702);
         private final Order facade;
-        private final IntDeque activeOrders = new IntDeque(MAX_ORDERS);
+        private final IntDeque activeOrders = new IntDeque(maxOrders);
         int id = 1;
 
         private OrderCreator() {
@@ -108,7 +114,7 @@ public class TopologyBuilder {
 
         public void run() {
             for (int i = 0, len = random.nextInt(1, 3); i < len; i++) {
-                if (activeOrders.size() < MAX_ORDERS) {
+                if (activeOrders.size() < maxOrders) {
                     activeOrders.addLast(createOrder());
                 } else {
                     final int orderId = activeOrders.removeFirst();
@@ -122,7 +128,7 @@ public class TopologyBuilder {
 
         private int createOrder() {
             final int orderId = id++;
-            final int instrumentId = (orderId * 31) % NUM_INSTRUMENTS;
+            final int instrumentId = (orderId * 31) % numInstruments;
             final int numLots = random.nextInt(1, 10);
             orders.beginAdd(orderId, facade)
                     .setInstrumentId(instrumentId)
@@ -149,7 +155,7 @@ public class TopologyBuilder {
 
     private void registerInstruments() {
         final Instrument facade = instruments.createFacade();
-        for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+        for (int i = 0; i < numInstruments; i++) {
             instruments
                     .beginAdd(i, facade)
                     .setSymbol(Integer.toHexString(109010 * (i + 1)).toUpperCase());

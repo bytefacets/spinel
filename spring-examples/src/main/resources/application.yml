@@ -3,3 +3,9 @@ spring:
   mvc:
     async:
       request-timeout: -1
+
+spinel:
+  topology:
+    num-instruments: 10
+    max-orders: 15
+    change-rate-millis: 1000

@@ -132,6 +132,71 @@
 
     <!-- Include protobuf.js library -->
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.5/dist/protobuf.min.js"></script>
-    <script src="spinel-client.js"></script>
+    <!-- Include Spinel library and example implementation -->
+    <script src="spinel-lib.js"></script>
+    <script src="example-table.js"></script>
+    <script>
+        // Global application instance
+        let app = null;
+
+        // Initialize the application when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                app = new ExampleApplication();
+                await app.initialize();
+                app.log('Example application initialized', 'success');
+            } catch (error) {
+                console.error('Failed to initialize application:', error);
+                document.getElementById('log').innerHTML += `<div class="log-entry error">[${new Date().toLocaleTimeString()}] Failed to initialize: ${error.message}</div>`;
+            }
+        });
+
+        // Global functions for UI
+        async function connect() {
+            if (app) {
+                try {
+                    await app.connect();
+                } catch (error) {
+                    app.log(`Connection failed: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function disconnect() {
+            if (app) {
+                app.disconnect();
+            }
+        }
+
+        function subscribeToOrders() {
+            if (app) {
+                try {
+                    app.subscribeToTable('orders');
+                } catch (error) {
+                    app.log(`Subscription failed: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function subscribeToInstruments() {
+            if (app) {
+                try {
+                    app.subscribeToTable('instruments');
+                } catch (error) {
+                    app.log(`Subscription failed: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function subscribeToOrderView() {
+            if (app) {
+                try {
+                    app.subscribeToTable('order-view');
+                } catch (error) {
+                    app.log(`Subscription failed: ${error.message}`, 'error');
+                }
+            }
+        }
+    </script>
 </body>
 </html>
