@@ -20,3 +20,4 @@ pluginManagement {
 include("spinel")
 include("examples")
 include("grpc")
+include("spring-examples")
