@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.bytefacets.collections.hash.StringGenericIndexedMap;
 import com.bytefacets.spinel.cache.Cache;
 import com.bytefacets.spinel.cache.CacheBuilder;
+import com.bytefacets.spinel.interner.RowInterner;
 import com.bytefacets.spinel.schema.FieldBitSet;
 import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.schema.MatrixStoreFieldFactory;
@@ -24,12 +25,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class GroupBySchemaBuilder {
+    private final GroupFunctionBinding groupFunctionBinding = new GroupFunctionBinding();
     private final DependencyMap dependencyMap;
     private final String name;
     private final Collection<AggregationFunction> aggFunctions;
-    private final List<String> groupFieldNames;
+    private final Set<String> groupFieldNames;
     private final String groupFieldName;
     private final String countFieldName;
     private final StringGenericIndexedMap<SchemaField> fieldMap;
@@ -43,7 +46,7 @@ final class GroupBySchemaBuilder {
             final int initialOutboundSize,
             final int chunkSize,
             final Collection<AggregationFunction> aggFunctions,
-            final List<String> groupFieldNames) {
+            final Set<String> groupFieldNames) {
         this.name = requireNonNull(name, "name");
         this.groupFieldName = groupFieldName;
         this.countFieldName = countFieldName;
@@ -66,14 +69,18 @@ final class GroupBySchemaBuilder {
         return dependencyMap;
     }
 
+    GroupFunctionBinding groupFunctionBinding() {
+        return groupFunctionBinding;
+    }
+
     private void initializeFieldMap(final SummaryFieldAllocator summaryFieldAllocator) {
         if (groupFieldName != null) {
             fieldMap.add(groupFieldName);
         }
+        groupFieldNames.forEach(fieldMap::add);
         if (countFieldName != null) {
             fieldMap.add(countFieldName);
         }
-        groupFieldNames.forEach(fieldMap::add);
         aggFunctions.forEach(function -> function.collectFieldReferences(summaryFieldAllocator));
         summaryFieldAllocator.allocate();
     }
@@ -82,10 +89,15 @@ final class GroupBySchemaBuilder {
         return (groupFieldName != null ? 1 : 0)
                 + (countFieldName != null ? 1 : 0)
                 + groupFieldNames.size()
-                + aggFunctions.size();
+                + aggFunctions.size()
+                + 2; // accommodation for group by function fields
     }
 
-    Schema buildParentSchema(final Schema inSchema, final GroupMapping groupMapping) {
+    Schema buildParentSchema(
+            final Schema inSchema,
+            final RowInterner groupFunction,
+            final GroupMapping groupMapping) {
+        groupFunctionBinding.bind(inSchema, groupFunction);
         dependencyMap.reset();
         mapGroupFieldIfNecessary(groupMapping);
         mapCountFieldIfNecessary(groupMapping);
@@ -116,20 +128,30 @@ final class GroupBySchemaBuilder {
     }
 
     private void mapGroupFields(final Schema inSchema, final GroupMapping groupMapping) {
-        groupFieldNames.forEach(
-                fieldName -> {
-                    // should already be added to the fieldMap
-                    final int id = fieldMap.lookupEntry(fieldName);
-                    final SchemaField inField = inSchema.maybeField(fieldName);
-                    if (inField == null) {
-                        throw fieldNotFound(fieldName, inSchema.name());
-                    }
-                    final var outField =
-                            asMappedField(inField.field(), groupMapping.passThroughFieldMapper());
-                    fieldMap.putValueAt(
-                            id, schemaField(id, fieldName, outField, inField.metadata()));
-                    dependencyMap.mapInboundFieldIdToOutboundFieldId(inField.fieldId(), id);
-                });
+        groupFieldNames.forEach(fieldName -> mapGroupField(fieldName, inSchema, groupMapping));
+        groupFunctionBinding
+                .fieldNames()
+                .forEach(
+                        fieldName -> {
+                            // don't add ones we've already added
+                            if (!groupFieldNames.contains(fieldName)) {
+                                mapGroupField(fieldName, inSchema, groupMapping);
+                            }
+                        });
+    }
+
+    private void mapGroupField(
+            final String fieldName, final Schema inSchema, final GroupMapping groupMapping) {
+        // explicitly forward fields will have been added to the fieldMap already
+        // fields from the groupFunctionBinding will be at the end bc we're finding these out later
+        final int id = fieldMap.add(fieldName);
+        final SchemaField inField = inSchema.maybeField(fieldName);
+        if (inField == null) {
+            throw fieldNotFound(fieldName, inSchema.name());
+        }
+        final var outField = asMappedField(inField.field(), groupMapping.passThroughFieldMapper());
+        fieldMap.putValueAt(id, schemaField(id, fieldName, outField, inField.metadata()));
+        dependencyMap.mapInboundFieldIdToOutboundFieldId(inField.fieldId(), id);
     }
 
     private void mapGroupFieldIfNecessary(final GroupMapping groupMapping) {
@@ -151,7 +173,7 @@ final class GroupBySchemaBuilder {
         }
     }
 
-    public Collection<AggregationFunction> aggregationFunctions() {
+    Collection<AggregationFunction> aggregationFunctions() {
         return aggFunctions;
     }
 

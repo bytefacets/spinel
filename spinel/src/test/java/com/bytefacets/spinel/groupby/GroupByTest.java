@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.groupby;
 
-import static com.bytefacets.spinel.groupby.lib.IntGroupFunction.intGroupFunction;
+import static com.bytefacets.spinel.interner.IntRowInterner.intInterner;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 
@@ -43,7 +43,7 @@ class GroupByTest {
                         .build();
         value1FieldId = table.fieldId("Value1");
         value2FieldId = table.fieldId("Value2");
-        builder.groupFunction(intGroupFunction("Value1", 16))
+        builder.groupByFunction(intInterner("Value1", 16))
                 .addForwardedFields("Value1")
                 .addAggregation(SumFactory.sumToInt("Value2", "Sum2"))
                 .includeCountField("Count")
