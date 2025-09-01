@@ -144,7 +144,7 @@ final class GroupByExample {
      * Quantity. Downstream of the orders table, projections and aggregations will compute other
      * fields.
      */
-    private static class Updater implements Runnable {
+    private static final class Updater implements Runnable {
         final IntIndexedStructTable<Order> orders;
         private final Order facade;
         private final IntDeque activeOrders = new IntDeque(16);
