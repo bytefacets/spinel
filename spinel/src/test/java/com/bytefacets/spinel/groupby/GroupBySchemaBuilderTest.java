@@ -73,7 +73,13 @@ class GroupBySchemaBuilderTest {
                     .bindToSchema(any());
             final var builder =
                     new GroupBySchemaBuilder(
-                            "foo", null, null, 2, 2, List.of(), new LinkedHashSet<>(List.of("g1", "g2", "g3")));
+                            "foo",
+                            null,
+                            null,
+                            2,
+                            2,
+                            List.of(),
+                            new LinkedHashSet<>(List.of("g1", "g2", "g3")));
             parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             assertThat(parentSchema.field("i1"), notNullValue());
             assertThat(parentSchema.field("i2"), notNullValue());
@@ -91,7 +97,13 @@ class GroupBySchemaBuilderTest {
                     .bindToSchema(any());
             final var builder =
                     new GroupBySchemaBuilder(
-                            "foo", null, null, 2, 2, List.of(), new LinkedHashSet<>(List.of("g1", "i2")));
+                            "foo",
+                            null,
+                            null,
+                            2,
+                            2,
+                            List.of(),
+                            new LinkedHashSet<>(List.of("g1", "i2")));
             parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             assertThat(parentSchema.field("i1"), notNullValue());
             assertThat(parentSchema.field("i2"), notNullValue());
@@ -109,7 +121,13 @@ class GroupBySchemaBuilderTest {
             inSchema = schema("f1", "g1", "f2", "g2", "f3", "g3");
             final var builder =
                     new GroupBySchemaBuilder(
-                            "foo", null, null, 2, 2, List.of(), new LinkedHashSet<>(List.of("g1", "g2", "g3")));
+                            "foo",
+                            null,
+                            null,
+                            2,
+                            2,
+                            List.of(),
+                            new LinkedHashSet<>(List.of("g1", "g2", "g3")));
             parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             depMap = builder.dependencyMap();
         }
