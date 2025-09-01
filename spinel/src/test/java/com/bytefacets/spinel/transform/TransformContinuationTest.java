@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.transform;
 
+import static com.bytefacets.spinel.interner.IntRowInterner.intInterner;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.bytefacets.spinel.TransformInput;
-import com.bytefacets.spinel.groupby.lib.IntGroupFunction;
 import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.schema.IntWritableField;
 import com.bytefacets.spinel.table.IntIndexedTable;
@@ -33,7 +33,7 @@ class TransformContinuationTest {
     void shouldConnectGroupByParent() {
         continuation
                 .groupBy()
-                .groupFunction(IntGroupFunction.intGroupFunction("f1", 16))
+                .groupByFunction(intInterner("f1", 16))
                 .includeCountField("count")
                 .build()
                 .parentOutput()
@@ -45,7 +45,7 @@ class TransformContinuationTest {
     void shouldConnectGroupByChild() {
         continuation
                 .groupBy()
-                .groupFunction(IntGroupFunction.intGroupFunction("f1", 16))
+                .groupByFunction(intInterner("f1", 16))
                 .includeCountField("count")
                 .build()
                 .parentOutput()

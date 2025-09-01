@@ -4,11 +4,14 @@ package com.bytefacets.spinel.groupby;
 
 import static com.bytefacets.spinel.common.DefaultNameSupplier.resolveName;
 import static com.bytefacets.spinel.exception.OperatorSetupException.setupException;
+import static com.bytefacets.spinel.interner.DynamicRowInterner.dynamicRowInterner;
 import static com.bytefacets.spinel.transform.BuilderSupport.builderSupport;
 import static com.bytefacets.spinel.transform.TransformContext.continuation;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
 
+import com.bytefacets.spinel.interner.RowInterner;
 import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
@@ -16,24 +19,26 @@ import com.bytefacets.spinel.transform.TransformContinuation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 public final class GroupByBuilder {
     private final TransformContext transformContext;
-    private final List<String> forwardedFields = new ArrayList<>(2);
+    private final LinkedHashSet<String> forwardedFields = new LinkedHashSet<>(2);
     private final List<AggregationFunction> aggFunctions = new ArrayList<>(2);
     private final Set<String> outboundAggFieldNames = new HashSet<>(2);
     private final OutboundFieldNameCollector fieldNameCollector = new OutboundFieldNameCollector();
     private final String name;
     private final BuilderSupport<GroupBy> builderSupport;
-    private GroupFunction groupFunction;
+    private RowInterner groupFunction;
     private String groupIdFieldName;
     private String countFieldName;
     private int initialOutboundSize = 128;
     private int initialInboundSize = 128;
     private int chunkSize = 128;
+    private List<String> groupFunctionFields;
 
     private GroupByBuilder(final String name) {
         this.name = requireNonNull(name, "name");
@@ -83,9 +88,14 @@ public final class GroupByBuilder {
         return new GroupBy(
                 schemaBuilder(),
                 childSchemaBuilder(),
-                groupFunction,
+                chooseGroupFunction(),
                 initialOutboundSize,
                 initialInboundSize);
+    }
+
+    private RowInterner chooseGroupFunction() {
+        return requireNonNullElseGet(
+                groupFunction, () -> dynamicRowInterner(groupFunctionFields, initialOutboundSize));
     }
 
     private ChildSchemaBuilder childSchemaBuilder() {
@@ -96,8 +106,16 @@ public final class GroupByBuilder {
         return builderSupport.createOperator();
     }
 
-    public GroupByBuilder groupFunction(final GroupFunction groupFunction) {
+    public GroupByBuilder groupByFunction(final RowInterner groupFunction) {
         this.groupFunction = requireNonNull(groupFunction, "groupFunction");
+        this.groupFunctionFields = null;
+        return this;
+    }
+
+    public GroupByBuilder groupByFields(final String... fields) {
+        // defer instantiating the function so that it can get the initialOutboundSize
+        this.groupFunction = null;
+        this.groupFunctionFields = List.of(fields);
         return this;
     }
 
@@ -152,6 +170,11 @@ public final class GroupByBuilder {
     }
 
     GroupBySchemaBuilder schemaBuilder() {
+        if (groupFunctionFields != null) {
+            // this is a convenience that puts the given fields first
+            // otherwise, if the user specifies a function, the fields will appear last
+            forwardedFields.addAll(groupFunctionFields);
+        }
         if (groupIdFieldName == null
                 && countFieldName == null
                 && outboundAggFieldNames.isEmpty()

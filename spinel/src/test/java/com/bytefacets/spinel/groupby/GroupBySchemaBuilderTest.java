@@ -17,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.bytefacets.spinel.exception.FieldNotFoundException;
+import com.bytefacets.spinel.interner.RowInterner;
 import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.FieldBitSet;
 import com.bytefacets.spinel.schema.FieldDescriptor;
@@ -29,6 +30,7 @@ import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.schema.WritableField;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +48,56 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GroupBySchemaBuilderTest {
     private final GroupMapping groupMapping = new GroupMapping(2, 2);
+    private @Mock RowInterner groupFunction;
     private DependencyMap depMap;
+
+    @Nested
+    class GroupFunctionFieldTests {
+        private Schema inSchema;
+        private Schema parentSchema;
+
+        @BeforeEach
+        void setUp() {
+            inSchema = schema("i1", "i2", "f1", "g1", "f2", "g2", "f3", "g3");
+        }
+
+        @Test
+        void shouldAddGroupFunctionFieldsToParentSchema() {
+            doAnswer(
+                            inv -> {
+                                final var resolver = inv.getArgument(0, FieldResolver.class);
+                                Stream.of("i1", "i2").forEach(resolver::findIntField);
+                                return null;
+                            })
+                    .when(groupFunction)
+                    .bindToSchema(any());
+            final var builder =
+                    new GroupBySchemaBuilder(
+                            "foo", null, null, 2, 2, List.of(), new LinkedHashSet<>(List.of("g1", "g2", "g3")));
+            parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
+            assertThat(parentSchema.field("i1"), notNullValue());
+            assertThat(parentSchema.field("i2"), notNullValue());
+        }
+
+        @Test
+        void shouldAccommodateFieldsFromGroupFunctionAndForward() {
+            doAnswer(
+                            inv -> {
+                                final var resolver = inv.getArgument(0, FieldResolver.class);
+                                Stream.of("i1", "i2").forEach(resolver::findIntField);
+                                return null;
+                            })
+                    .when(groupFunction)
+                    .bindToSchema(any());
+            final var builder =
+                    new GroupBySchemaBuilder(
+                            "foo", null, null, 2, 2, List.of(), new LinkedHashSet<>(List.of("g1", "i2")));
+            parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
+            assertThat(parentSchema.field("i1"), notNullValue());
+            assertThat(parentSchema.field("i2"), notNullValue());
+            assertThat(parentSchema.field("g1"), notNullValue());
+        }
+    }
 
     @Nested
     class GroupFieldsTests {
@@ -58,8 +109,8 @@ class GroupBySchemaBuilderTest {
             inSchema = schema("f1", "g1", "f2", "g2", "f3", "g3");
             final var builder =
                     new GroupBySchemaBuilder(
-                            "foo", null, null, 2, 2, List.of(), List.of("g1", "g2", "g3"));
-            parentSchema = builder.buildParentSchema(inSchema, groupMapping);
+                            "foo", null, null, 2, 2, List.of(), new LinkedHashSet<>(List.of("g1", "g2", "g3")));
+            parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             depMap = builder.dependencyMap();
         }
 
@@ -95,11 +146,11 @@ class GroupBySchemaBuilderTest {
         void shouldThrowWhenGroupFieldNotFound() {
             final var builder =
                     new GroupBySchemaBuilder(
-                            "foo", null, null, 2, 2, List.of(), List.of("not-around"));
+                            "foo", null, null, 2, 2, List.of(), Set.of("not-around"));
             final var ex =
                     assertThrows(
                             FieldNotFoundException.class,
-                            () -> builder.buildParentSchema(inSchema, groupMapping));
+                            () -> builder.buildParentSchema(inSchema, groupFunction, groupMapping));
             assertThat(ex.getMessage(), containsString("'not-around'"));
             assertThat(ex.getMessage(), containsString("'in-schema'"));
         }
@@ -109,9 +160,9 @@ class GroupBySchemaBuilderTest {
     class CalcFieldTests {
         private Schema inSchema;
         private Schema parentSchema;
-        private @Mock(lenient = true) AggregationFunction calc1;
-        private @Mock(lenient = true) AggregationFunction calc2;
-        private @Mock(lenient = true) AggregationFunction calc3;
+        private @Mock(strictness = Mock.Strictness.LENIENT) AggregationFunction calc1;
+        private @Mock(strictness = Mock.Strictness.LENIENT) AggregationFunction calc2;
+        private @Mock(strictness = Mock.Strictness.LENIENT) AggregationFunction calc3;
         private List<AggregationFunction> calcFields;
         private GroupBySchemaBuilder builder;
 
@@ -161,8 +212,8 @@ class GroupBySchemaBuilderTest {
                             calc(calc2, "c2", "i1", "i2"),
                             calc(calc3, "c3", "i3"));
             inSchema = schema("f1", "i1", "f2", "i2", "f3", "i3");
-            builder = new GroupBySchemaBuilder("foo", null, null, 2, 2, calcFields, List.of());
-            parentSchema = builder.buildParentSchema(inSchema, groupMapping);
+            builder = new GroupBySchemaBuilder("foo", null, null, 2, 2, calcFields, Set.of());
+            parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             depMap = builder.dependencyMap();
         }
 
@@ -223,7 +274,9 @@ class GroupBySchemaBuilderTest {
             final var ex =
                     assertThrows(
                             FieldNotFoundException.class,
-                            () -> builder.buildParentSchema(badSchema, groupMapping));
+                            () ->
+                                    builder.buildParentSchema(
+                                            badSchema, groupFunction, groupMapping));
             assertThat(ex.getMessage(), containsString("'i3'"));
             assertThat(ex.getMessage(), containsString("'in-schema'"));
         }
@@ -238,8 +291,8 @@ class GroupBySchemaBuilderTest {
         void setUp() {
             inSchema = schema("f1", "g1", "f2", "g2", "f3", "g3");
             final var builder =
-                    new GroupBySchemaBuilder("foo", "group-id", null, 2, 2, List.of(), List.of());
-            parentSchema = builder.buildParentSchema(inSchema, groupMapping);
+                    new GroupBySchemaBuilder("foo", "group-id", null, 2, 2, List.of(), Set.of());
+            parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             depMap = builder.dependencyMap();
         }
 
@@ -256,8 +309,8 @@ class GroupBySchemaBuilderTest {
         @Test
         void shouldNotSetDependencyMapGroupIdFieldIdWhenNoGroupIdField() {
             depMap.reset();
-            new GroupBySchemaBuilder("foo", null, null, 2, 2, List.of(), List.of("f1"))
-                    .buildParentSchema(inSchema, groupMapping);
+            new GroupBySchemaBuilder("foo", null, null, 2, 2, List.of(), Set.of("f1"))
+                    .buildParentSchema(inSchema, groupFunction, groupMapping);
             assertThat(depMap.groupFieldId(), equalTo(-1));
         }
     }
@@ -271,8 +324,8 @@ class GroupBySchemaBuilderTest {
         void setUp() {
             inSchema = schema("f1", "g1", "f2", "g2", "f3", "g3");
             final var builder =
-                    new GroupBySchemaBuilder("foo", null, "count", 2, 2, List.of(), List.of());
-            parentSchema = builder.buildParentSchema(inSchema, groupMapping);
+                    new GroupBySchemaBuilder("foo", null, "count", 2, 2, List.of(), Set.of());
+            parentSchema = builder.buildParentSchema(inSchema, groupFunction, groupMapping);
             depMap = builder.dependencyMap();
         }
 
@@ -288,8 +341,8 @@ class GroupBySchemaBuilderTest {
         @Test
         void shouldNotSetDependencyMapCountFieldIdWhenNoGroupIdField() {
             depMap.reset();
-            new GroupBySchemaBuilder("foo", null, null, 2, 2, List.of(), List.of("f1"))
-                    .buildParentSchema(inSchema, groupMapping);
+            new GroupBySchemaBuilder("foo", null, null, 2, 2, List.of(), Set.of("f1"))
+                    .buildParentSchema(inSchema, groupFunction, groupMapping);
             depMap.markCountChanged();
             assertThat(depMap.outboundFieldChangeSet().size(), equalTo(0));
         }

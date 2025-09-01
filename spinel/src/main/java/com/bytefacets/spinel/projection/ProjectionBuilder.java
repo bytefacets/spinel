@@ -128,7 +128,8 @@ public final class ProjectionBuilder {
         final Set<String> included = includedFields != null ? new HashSet<>(includedFields) : null;
         final Set<String> omitted = omittedFields != null ? Set.copyOf(omittedFields) : null;
         return (projectionName, fieldList) -> {
-            final Map<String, SchemaField> result = new HashMap<>(fieldList.size());
+            // Linked to preserve order, fwiw
+            final Map<String, SchemaField> result = new LinkedHashMap<>(fieldList.size(), 1f);
             for (int i = 0, len = fieldList.size(); i < len; i++) {
                 final var field = fieldList.fieldAt(i);
                 final boolean include = included == null || included.remove(field.name());

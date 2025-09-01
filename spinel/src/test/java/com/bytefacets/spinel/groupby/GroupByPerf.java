@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.groupby;
 
-import static com.bytefacets.spinel.groupby.lib.IntGroupFunction.intGroupFunction;
+import static com.bytefacets.spinel.interner.IntRowInterner.intInterner;
 
 import com.bytefacets.spinel.PerfHarness;
 import com.bytefacets.spinel.TransformInput;
@@ -59,7 +59,7 @@ class GroupByPerf implements PerfHarness.Callback {
                 .chunkSize(256)
                 .then()
                 .groupBy("Agg")
-                .groupFunction(intGroupFunction("Group", 64))
+                .groupByFunction(intInterner("Group", 64))
                 .initialInboundSize(1024)
                 .includeGroupIdField("Group")
                 .initialOutboundSize(64)

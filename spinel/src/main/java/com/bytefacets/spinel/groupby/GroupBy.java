@@ -15,6 +15,7 @@ import com.bytefacets.spinel.cache.Cache;
 import com.bytefacets.spinel.common.BitSetRowProvider;
 import com.bytefacets.spinel.common.OutputManager;
 import com.bytefacets.spinel.common.StateChangeSet;
+import com.bytefacets.spinel.interner.RowInterner;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.FieldBitSet;
 import com.bytefacets.spinel.schema.FieldMapping;
@@ -26,18 +27,19 @@ import java.util.BitSet;
 import java.util.Collection;
 
 public final class GroupBy implements InputProvider, OutputProvider {
+    private final GroupFunctionBinding groupFunctionBinding;
     private final GroupMapping groupMapping;
     private final GroupBySchemaBuilder schemaBuilder;
     private final ChildSchemaBuilder childSchemaBuilder;
     private final OutputManager parentOutput;
     private final OutputManager childOutput;
     private final Input input;
-    private final GroupFunction groupFunction;
+    private final RowInterner groupFunction;
 
     GroupBy(
             final GroupBySchemaBuilder schemaBuilder,
             final ChildSchemaBuilder childSchemaBuilder,
-            final GroupFunction groupFunction,
+            final RowInterner groupFunction,
             final int initialOutboundSize,
             final int initialInboundSize) {
         this.schemaBuilder = requireNonNull(schemaBuilder, "schemaBuilder");
@@ -47,6 +49,7 @@ public final class GroupBy implements InputProvider, OutputProvider {
         this.parentOutput = outputManager(input.parentRowProvider);
         this.childOutput = outputManager(delegatedRowProvider(() -> input.source));
         this.groupFunction = requireNonNull(groupFunction, "groupFunction");
+        this.groupFunctionBinding = schemaBuilder.groupFunctionBinding();
     }
 
     @Override
@@ -54,22 +57,29 @@ public final class GroupBy implements InputProvider, OutputProvider {
         return input;
     }
 
-    /** The parent output */
+    /** Implicitly, the parent output (the aggregated output). */
     @Override
     public TransformOutput output() {
         return parentOutput.output();
     }
 
+    /** Explicitly the parent output (the aggregated output). */
     public TransformOutput parentOutput() {
         return parentOutput.output();
     }
 
+    /**
+     * The child output, meaning the original inbound rows, which are decorated with 1 new Int field
+     * which indicates to which group the row belongs. This is useful for setting up a filter in a
+     * UI parent/child screen for example, where the user can select an aggregate row (from the
+     * parent output) which then filters the child output to show only the rows that are members of
+     * the selected aggregation.
+     */
     public TransformOutput childOutput() {
         return childOutput.output();
     }
 
     private final class Input implements TransformInput {
-        private final GroupFunctionBinding groupFunctionBinding = new GroupFunctionBinding();
         private final DependencyMap dependencyMap;
         private final FieldBitSet fieldBitSet;
         private final StateChangeSet stateChange;
@@ -114,8 +124,8 @@ public final class GroupBy implements InputProvider, OutputProvider {
 
         private void setUp() {
             groupMapping.reset();
-            groupFunctionBinding.bind(inboundSchema, groupFunction);
-            final Schema outSchema = schemaBuilder.buildParentSchema(inboundSchema, groupMapping);
+            final Schema outSchema =
+                    schemaBuilder.buildParentSchema(inboundSchema, groupFunction, groupMapping);
             parentOutput.updateSchema(outSchema);
             cache = schemaBuilder.cache();
 
@@ -140,7 +150,7 @@ public final class GroupBy implements InputProvider, OutputProvider {
 
         @Override
         public void rowsAdded(final IntIterable rows) {
-            rows.forEach(row -> processRowAddedToGroup(groupFunction.group(row), row));
+            rows.forEach(row -> processRowAddedToGroup(groupFunction.intern(row), row));
             updateAllFunctions();
             fire();
             cache.updateAll(rows);
@@ -172,7 +182,7 @@ public final class GroupBy implements InputProvider, OutputProvider {
                 final GenericIndexedSet<AggregationFunction> changedFunctions) {
             rows.forEach(
                     row -> {
-                        final int newGroup = groupFunction.group(row);
+                        final int newGroup = groupFunction.intern(row);
                         final int oldGroup = groupMapping.groupOfInboundRow(row);
                         if (newGroup == oldGroup) {
                             processGroupUpdateFromChange(newGroup, row);
@@ -262,7 +272,7 @@ public final class GroupBy implements InputProvider, OutputProvider {
         }
 
         private void fire() {
-            stateChange.fire(parentOutput, groupFunction::onEmptyGroup);
+            stateChange.fire(parentOutput, groupFunction::freeEntry);
 
             rowsAddedToGroups.reset();
             rowsChangedInGroups.reset();
