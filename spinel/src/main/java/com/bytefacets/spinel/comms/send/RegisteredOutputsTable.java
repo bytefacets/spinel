@@ -16,6 +16,12 @@ public final class RegisteredOutputsTable implements OutputProvider, OutputRegis
             StringIndexedTableBuilder.stringIndexedTable().keyFieldName("OutputName").build();
     private final Map<String, TransformOutput> outputMap = new ConcurrentHashMap<>();
 
+    public static RegisteredOutputsTable registeredOutputsTable() {
+        return new RegisteredOutputsTable();
+    }
+
+    private RegisteredOutputsTable() {}
+
     public void register(final String name, final TransformOutput out) {
         outputMap.put(name, out);
         table.beginAdd(name);

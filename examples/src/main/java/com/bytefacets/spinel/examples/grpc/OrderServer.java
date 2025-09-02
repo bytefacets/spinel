@@ -109,7 +109,7 @@ final class OrderServer {
         registerInstruments();
 
         // then register some of the outputs so they are available to clients
-        outputs = new RegisteredOutputsTable();
+        outputs = RegisteredOutputsTable.registeredOutputsTable();
         outputs.register("orders", orders);
         outputs.register("instruments", instruments);
         outputs.register("order-view", join);

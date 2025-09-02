@@ -117,7 +117,8 @@ final class PermissionFilter {
 
     private static void declareServer() throws Exception {
         final IntIndexedStructTable<Order> orders = intIndexedStructTable(Order.class).build();
-        final RegisteredOutputsTable registeredOutputs = new RegisteredOutputsTable();
+        final RegisteredOutputsTable registeredOutputs =
+                RegisteredOutputsTable.registeredOutputsTable();
         registeredOutputs.register("orders", orders);
         Connector.connectInputToOutput(
                 OutputLoggerBuilder.logger("server-orders").logLevel(Level.INFO).build(), orders);

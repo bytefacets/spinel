@@ -34,7 +34,7 @@ final class MarketDataServer {
     static final LongSupplier SLOW = () -> 5000;
     static final LongSupplier FAST = () -> 50 + (long) (Math.random() * 100);
     private final EventLoop eventLoop;
-    private final RegisteredOutputsTable outputs = new RegisteredOutputsTable();
+    private final RegisteredOutputsTable outputs = RegisteredOutputsTable.registeredOutputsTable();
     private final IntIndexedStructTable<MarketData> marketData;
     private final LongSupplier rate;
 

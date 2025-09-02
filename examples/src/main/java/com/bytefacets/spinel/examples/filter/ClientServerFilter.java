@@ -93,7 +93,8 @@ final class ClientServerFilter {
                 OutputLoggerBuilder.logger("server-orders").logLevel(Level.INFO).build(), orders);
 
         // set it up so that the table can be subscribed to
-        final RegisteredOutputsTable registeredOutputs = new RegisteredOutputsTable();
+        final RegisteredOutputsTable registeredOutputs =
+                RegisteredOutputsTable.registeredOutputsTable();
         registeredOutputs.register("orders", orders);
 
         final var eventLoop = newEventLoop("server-data-thread");
