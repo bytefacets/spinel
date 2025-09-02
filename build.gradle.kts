@@ -67,7 +67,7 @@ allprojects {
 subprojects {
     apply(plugin = "maven-publish")
 
-    if(project.name == "diaspore") {
+    if(project.name == "spinel" || project.name == "grpc") {
         apply(plugin = "bytefacets-publishing-convention")
     }
 

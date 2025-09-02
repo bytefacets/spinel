@@ -1,4 +1,6 @@
 import com.google.protobuf.gradle.id
+import java.time.Instant
+
 plugins {
     `java-library`
     id("com.google.protobuf") version "0.9.4"
@@ -58,7 +60,6 @@ dependencies {
     implementation(project(":spinel"))
     implementation("io.grpc:grpc-protobuf:${grpcVersion}")
     implementation("io.grpc:grpc-stub:${grpcVersion}")
-//    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
     implementation("io.grpc:grpc-netty:${grpcVersion}")
     implementation("io.netty:netty-transport:${nettyVersion}")
     implementation("com.auth0:java-jwt:${auth0}")
@@ -71,4 +72,16 @@ dependencies {
 
     testImplementation("io.grpc:grpc-inprocess:${grpcVersion}")
     testImplementation(testFixtures(project(":spinel")))
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes(mapOf(
+            "Implementation-Title" to "spinel-grpc",
+            "Implementation-Version" to project.version.toString(),
+            "Implementation-Vendor" to "Byte Facets",
+            "Built-By" to System.getProperty("user.name"),
+            "Build-Date" to Instant.now().toString()
+        ))
+    }
 }

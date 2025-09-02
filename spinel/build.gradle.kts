@@ -54,7 +54,7 @@ dependencies {
 tasks.named<Jar>("jar") {
     manifest {
         attributes(mapOf(
-            "Implementation-Title" to "diaspore",
+            "Implementation-Title" to "spinel",
             "Implementation-Version" to project.version.toString(),
             "Implementation-Vendor" to "Byte Facets",
             "Built-By" to System.getProperty("user.name"),

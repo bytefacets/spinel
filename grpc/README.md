@@ -5,7 +5,7 @@ to a remove server and establish and modify subscriptions of registered outputs 
 server.
 
 See an [Example Client](../examples/src/main/java/com/bytefacets/spinel/examples/grpc/Client.java),
-or [Example Server](../examples/src/main/java/com/bytefacets/diaspore/examples/grpc/MarketDataServer.java).
+or [Example Server](../examples/src/main/java/com/bytefacets/spinel/examples/grpc/MarketDataServer.java).
 
 ## Creating a client
 See [GrpcClient](src/main/java/com/bytefacets/spinel/grpc/receive/GrpcClient.java)
