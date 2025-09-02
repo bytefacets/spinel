@@ -3,7 +3,7 @@ import java.time.Instant
 plugins {
     `java-library`
     id("java-test-fixtures")
-    id("com.bytefacets.template_processor") version "0.9.0"
+    id("com.bytefacets.template_processor") version "0.10.0"
 }
 
 apply(plugin = "com.bytefacets.template_processor")
