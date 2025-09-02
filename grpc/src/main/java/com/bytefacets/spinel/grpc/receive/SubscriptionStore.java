@@ -9,7 +9,6 @@ import com.bytefacets.spinel.comms.ConnectionInfo;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
 import com.bytefacets.spinel.comms.receive.SubscriptionListener;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,12 +80,12 @@ final class SubscriptionStore {
         }
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     int numSubscriptions() {
         return subscriptions.size();
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     Subscription get(final int subscriptionId) {
         return subscriptions.getOrDefault(subscriptionId, null);
     }

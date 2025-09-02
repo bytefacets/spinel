@@ -17,7 +17,6 @@ import com.bytefacets.spinel.grpc.proto.Response;
 import com.bytefacets.spinel.grpc.proto.ResponseType;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +82,7 @@ final class Subscription {
         }
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     SubscriptionRequest createRequest() {
         return msgHelp.request(subscriptionId, msgHelp.subscription(config, requestsList()));
     }

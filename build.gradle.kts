@@ -75,7 +75,6 @@ subprojects {
 
     extra.apply {
         set("findbugsVersion", "4.7.3")
-        set("guavaVersion", "31.0.1-jre")
         set("logbackVersion", "1.5.18")
         set("nettyVersion", "4.2.3.Final")
         set("slfApiVersion", "2.0.17")
@@ -86,7 +85,6 @@ subprojects {
 
     val spotbugsVersion: String by extra
     val findbugsVersion: String by extra
-    val guavaVersion: String by extra
     val logbackVersion: String by extra
     val slfApiVersion: String by extra
     val junitVersion = "5.7.0"
@@ -107,7 +105,6 @@ subprojects {
 
         testImplementation("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
         testImplementation("org.hamcrest:hamcrest:${hamcrestVersion}")
-        testImplementation("com.google.guava:guava-testlib:${guavaVersion}")
         testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
         testImplementation("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
         testImplementation("org.junit-pioneer:junit-pioneer:${junitPioneerVersion}")
