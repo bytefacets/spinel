@@ -4,11 +4,11 @@ This module enables inter-process communication over gRPC, allowing a client to 
 to a remove server and establish and modify subscriptions of registered outputs on the 
 server.
 
-See an [Example Client](../examples/src/main/java/com/bytefacets/diaspore/examples/grpc/Client.java),
+See an [Example Client](../examples/src/main/java/com/bytefacets/spinel/examples/grpc/Client.java),
 or [Example Server](../examples/src/main/java/com/bytefacets/diaspore/examples/grpc/MarketDataServer.java).
 
 ## Creating a client
-See [GrpcClient](src/main/java/com/bytefacets/diaspore/grpc/receive/GrpcClient.java)
+See [GrpcClient](src/main/java/com/bytefacets/spinel/grpc/receive/GrpcClient.java)
 
 ```java
 ManagedChannel channel = ManagedChannelBuilder.forTarget("0.0.0.0:15000")
@@ -48,7 +48,7 @@ final var orderClient =
 ```
 
 ## Creating a server
-See [GrpcService](src/main/java/com/bytefacets/diaspore/grpc/send/GrpcService.java)
+See [GrpcService](src/main/java/com/bytefacets/spinel/grpc/send/GrpcService.java)
 
 ```java
 RegisteredOutputs registry = new RegisteredOutputs();

@@ -52,12 +52,12 @@ final class Inspector {
             typeInfo.collectGetter(method);
         } else if (isSetterMethod(method)) {
             typeInfo.collectSetter(method);
-        } else if (!isDiasporeIfc(method)) {
+        } else if (!isSpinelIfc(method)) {
             typeInfo.collectSkippedMethod(method);
         }
     }
 
-    private boolean isDiasporeIfc(final Method method) {
+    private boolean isSpinelIfc(final Method method) {
         return method.getDeclaringClass().equals(StructFacade.class)
                 || method.getDeclaringClass().equals(SchemaBindable.class);
     }

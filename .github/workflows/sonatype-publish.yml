@@ -42,7 +42,7 @@ jobs:
           GIT_TAG: ${{ github.ref_name }}
 
       - name: Publish to Sonatype
-        run: ls -lR diaspore/build; ./gradlew publishMaven-javaPublicationToSonatypePortalRepository --stacktrace
+        run: ls -lR spinel/build; ./gradlew publishMaven-javaPublicationToSonatypePortalRepository --stacktrace
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.BYTEFACETS_TOKEN }}
