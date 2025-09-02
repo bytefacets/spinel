@@ -75,7 +75,7 @@ class TransformBuilderTemplatedTest {
 </#list>
 
     private void addFilter(final TransformContinuation continuation) {
-        continuation.filter("x").initialPredicate(IntPredicate.intPredicate("F1", i -> i % 2 == 0))
+        continuation.filter("x").where(IntPredicate.intPredicate("F1", i -> i % 2 == 0))
             .build().output().attachInput(input);
     }
 
