@@ -20,7 +20,6 @@ import com.bytefacets.spinel.grpc.proto.Response;
 import com.bytefacets.spinel.grpc.proto.ResponseType;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
-import com.google.common.annotations.VisibleForTesting;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.netty.channel.EventLoop;
@@ -196,7 +195,7 @@ final class GrpcSession {
                 .build();
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     int activeAdapters() {
         return subscriptions.size();
     }

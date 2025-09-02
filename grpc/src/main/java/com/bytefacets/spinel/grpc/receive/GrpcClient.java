@@ -13,7 +13,6 @@ import com.bytefacets.spinel.grpc.proto.DataServiceGrpc;
 import com.bytefacets.spinel.grpc.proto.ResponseType;
 import com.bytefacets.spinel.grpc.proto.SubscriptionRequest;
 import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
-import com.google.common.annotations.VisibleForTesting;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
@@ -335,22 +334,22 @@ public final class GrpcClient implements Receiver {
         }
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     boolean isSessionInitialized() {
         return initializer.sessionInitialized.get();
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     boolean isInitializationInProgress() {
         return initializer.initializationInProgress.get();
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     boolean isReconnect() {
         return this.requestAdapter.reconnect;
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     void markSessionInitialized(final boolean value) {
         initializer.sessionInitialized.set(value);
         initializer.initializationInProgress.set(false);
