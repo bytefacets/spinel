@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.MapContext;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -58,7 +58,7 @@ class JexlEngineProviderTest {
     })
     void shouldFail(final String source, final String exceptionContent) {
         context.set("refNow", System.currentTimeMillis());
-        final ThrowingRunnable call =
+        final Executable call =
                 () ->
                         System.out.printf(
                                 "'%s' RESULT: %s%n",

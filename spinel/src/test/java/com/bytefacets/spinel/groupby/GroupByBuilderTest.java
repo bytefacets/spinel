@@ -13,9 +13,9 @@ import static org.mockito.Mockito.mock;
 import com.bytefacets.spinel.exception.OperatorSetupException;
 import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.schema.TypeId;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 class GroupByBuilderTest {
     private final GroupByBuilder builder = GroupByBuilder.groupBy("test");
@@ -87,7 +87,7 @@ class GroupByBuilderTest {
         }
 
         private void validateException(
-                final String type1, final String type2, final ThrowingRunnable action) {
+                final String type1, final String type2, final Executable action) {
             final var ex = assertThrows(OperatorSetupException.class, action);
             assertThat(ex.getMessage(), containsString("'foo'"));
             assertThat(ex.getMessage(), containsString(type1));
