@@ -35,7 +35,7 @@ import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 @Configuration
 public class TopologyBuilder {
     private final IntIndexedStructTable<Order> orders;
-    private final RegisteredOutputsTable outputs = new RegisteredOutputsTable();
+    private final RegisteredOutputsTable outputs = RegisteredOutputsTable.registeredOutputsTable();
     private final IntIndexedStructTable<Instrument> instruments;
     private final EventLoop eventLoop;
     private final DefaultSubscriptionProvider subscriptionProvider;

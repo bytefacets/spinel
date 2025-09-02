@@ -167,7 +167,7 @@ Connector.connectInputToOutput(orderView.leftInput(), orders);
 Connector.connectInputToOutput(orderView.rightInput(), instruments);
 
 // Register for real-time subscriptions
-OutputRegistry registry = new RegisteredOutputsTable();
+OutputRegistry registry = RegisteredOutputsTable.registeredOutputsTable();
 registry.register("enriched-orders", orderView.output());
 ```
 
@@ -245,7 +245,7 @@ subscription.attachInput(new class extends TransformInput {
 ### **Microservices Communication**
 ```java
 // Server: Expose data via gRPC
-RegisteredOutputsTable registry = new RegisteredOutputsTable();
+RegisteredOutputsTable registry = RegisteredOutputsTable.registeredOutputsTable();
 registry.register("market-data", marketDataTable);
 
 GrpcService service = GrpcServiceBuilder
@@ -331,7 +331,7 @@ Real-time dashboard example with:
 
 4. **Set up real-time streaming:**
    ```java
-   RegisteredOutputsTable registry = new RegisteredOutputsTable();
+   RegisteredOutputsTable registry = RegisteredOutputsTable.registeredOutputsTable()e;
    registry.register("orders", orders);
    
    // WebSocket, gRPC, or custom protocol integration
