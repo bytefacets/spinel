@@ -177,8 +177,7 @@ final class PermissionFilter {
                             // we always have a predicate, but let's do for explicitness
                             .passesWhenNoPredicate(false)
                             // our permission check which is applied to each row
-                            .initialPredicate(
-                                    StringPredicate.stringPredicate("Account", allowed::contains))
+                            .where(StringPredicate.stringPredicate("Account", allowed::contains))
                             .build();
             Connector.connectInputToOutput(permissionedOutput, subscriptionContext.output());
             // create the standard default container, but we've replaced the output with

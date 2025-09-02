@@ -3,6 +3,7 @@
 package com.bytefacets.spinel.filter;
 
 import static com.bytefacets.spinel.common.DefaultNameSupplier.resolveName;
+import static com.bytefacets.spinel.filter.JexlRowPredicate.jexlPredicate;
 import static com.bytefacets.spinel.transform.BuilderSupport.builderSupport;
 import static com.bytefacets.spinel.transform.TransformContext.continuation;
 import static java.util.Objects.requireNonNull;
@@ -51,8 +52,18 @@ public final class FilterBuilder {
      * RowPredicate while it's running. If you do not set this, the default behavior of a Filter
      * with no RowPredicate is governed by {@link #passesWhenNoPredicate}.
      */
-    public FilterBuilder initialPredicate(final RowPredicate predicate) {
+    public FilterBuilder where(final RowPredicate predicate) {
         this.initialPredicate = predicate;
+        return this;
+    }
+
+    /**
+     * The initial predicate for the Filter. This is optional, and you can change the Filter's
+     * RowPredicate while it's running. If you do not set this, the default behavior of a Filter
+     * with no RowPredicate is governed by {@link #passesWhenNoPredicate}.
+     */
+    public FilterBuilder where(final String predicate) {
+        this.initialPredicate = jexlPredicate(predicate);
         return this;
     }
 

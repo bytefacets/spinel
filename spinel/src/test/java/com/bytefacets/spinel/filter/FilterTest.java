@@ -80,14 +80,14 @@ class FilterTest {
         @Test
         void shouldBindSchemaToPredicate() {
             final RowPredicate mockPredicate = mock(RowPredicate.class);
-            initialize(FilterBuilder.filter().initialPredicate(mockPredicate));
+            initialize(FilterBuilder.filter().where(mockPredicate));
             verify(mockPredicate, times(1)).bindToSchema(any());
         }
 
         @Test
         void shouldUnbindSchemaFromPredicateWhenNullSchema() {
             final RowPredicate mockPredicate = mock(RowPredicate.class);
-            initialize(FilterBuilder.filter().initialPredicate(mockPredicate));
+            initialize(FilterBuilder.filter().where(mockPredicate));
 
             table.output().detachInput(filter.input());
             verify(mockPredicate, times(1)).unbindSchema();
@@ -145,7 +145,7 @@ class FilterTest {
                             })
                     .when(mockPredicate)
                     .bindToSchema(any());
-            initialize(FilterBuilder.filter().initialPredicate(mockPredicate));
+            initialize(FilterBuilder.filter().where(mockPredicate));
             addSourceRow(1, 98, 77);
             addSourceRow(2, 100, 177);
             addSourceRow(3, 102, 177);
@@ -190,7 +190,7 @@ class FilterTest {
     class AddTests {
         @BeforeEach
         void setUp() {
-            initialize(FilterBuilder.filter().initialPredicate(predicate));
+            initialize(FilterBuilder.filter().where(predicate));
             validation.clearChanges();
         }
 
@@ -208,7 +208,7 @@ class FilterTest {
     class ChangeTests {
         @BeforeEach
         void setUp() {
-            initialize(FilterBuilder.filter().initialPredicate(predicate));
+            initialize(FilterBuilder.filter().where(predicate));
             addSourceRow(1, 98, 77);
             addSourceRow(2, 100, 177);
             addSourceRow(3, 102, 177);
@@ -263,7 +263,7 @@ class FilterTest {
     class RemoveTests {
         @BeforeEach
         void setUp() {
-            initialize(FilterBuilder.filter().initialPredicate(predicate));
+            initialize(FilterBuilder.filter().where(predicate));
             addSourceRow(1, 98, 77);
             addSourceRow(2, 100, 177);
             addSourceRow(3, 102, 177);

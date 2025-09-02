@@ -51,7 +51,7 @@ class FilterPerf implements PerfHarness.Callback {
                 .chunkSize(256)
                 .then()
                 .filter("Filter")
-                .initialPredicate(IntPredicate.intPredicate("Value1", i -> i % 2 == 0))
+                .where(IntPredicate.intPredicate("Value1", i -> i % 2 == 0))
                 .initialSize(1024);
         return builder;
     }
