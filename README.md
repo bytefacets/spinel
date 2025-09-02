@@ -40,14 +40,18 @@ Ideal for microservices architectures and data processing workflows:
 - Event sourcing systems with live projections
 - Inter-service communication with structured data contracts
 
-### **Embedded Analytics**
-Seamlessly embed into existing applications:
-```java
-// Embed in Kafka Streams applications
-SpinelTable orders = intIndexedStructTable(Order.class).build();
-Join orderView = JoinBuilder.lookupJoin("enriched-orders")
-    .inner().joinOn("productId").build();
-```
+### **Embeddable**
+Seamlessly embed into existing applications. All transforms and data processing are just plain 
+Java, and require no other infrastructure. Your topology can be totally contained in your process,
+or you can connect topologies across processes. 
+
+You can also author your own operators by conforming to the
+[TransformInput](spinel/src/main/java/com/bytefacets/spinel/TransformInput.java) and
+[TransformOutput](spinel/src/main/java/com/bytefacets/spinel/TransformOutput.java) interfaces.
+
+Event flow into an Operator begins with a Schema update, which describes the data to the operator, 
+but also *is* how the operator will access the data. Data in Spinel is typically *column-oriented*
+and accessible through the Field interfaces.
 
 ## 🏗️ Example Architecture Overview
 
