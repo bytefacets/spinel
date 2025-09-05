@@ -5,6 +5,7 @@ package com.bytefacets.spinel.transform;
 import static com.bytefacets.spinel.transform.TransformContinuation.throwIfMissingTransform;
 import static java.util.Objects.requireNonNull;
 
+import jakarta.annotation.Nullable;
 import java.util.function.Supplier;
 
 public final class TransformContext {
@@ -34,7 +35,7 @@ public final class TransformContext {
     }
 
     public <T> BuilderSupport<T> createBuilderSupport(
-            final Supplier<T> creator, final InputProvider inputProvider) {
+            final Supplier<T> creator, final @Nullable InputProvider inputProvider) {
         final var support = BuilderSupport.builderSupport(name, creator);
         transform.registerTransformNode(support.transformNode());
         if (source != null && inputProvider != null) {

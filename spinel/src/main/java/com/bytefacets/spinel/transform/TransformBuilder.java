@@ -10,6 +10,7 @@ import static com.bytefacets.spinel.transform.ExplicitTransformNode.transformNod
 import com.bytefacets.spinel.conflation.ChangeConflatorBuilder;
 import com.bytefacets.spinel.filter.FilterBuilder;
 import com.bytefacets.spinel.groupby.GroupByBuilder;
+import com.bytefacets.spinel.jdbc.source.JdbcSourceBuilder;
 import com.bytefacets.spinel.join.JoinBuilder;
 import com.bytefacets.spinel.printer.OutputLoggerBuilder;
 import com.bytefacets.spinel.projection.ProjectionBuilder;
@@ -145,6 +146,14 @@ public final class TransformBuilder {
             final Class<S> type) {
         return GenericIndexedStructTableBuilder.genericIndexedStructTable(
                 type, newContext(type.getSimpleName()));
+    }
+
+    public JdbcSourceBuilder jdbcSource() {
+        return jdbcSource(null);
+    }
+
+    public JdbcSourceBuilder jdbcSource(final @Nullable String name) {
+        return JdbcSourceBuilder.jdbcSource(newContext(resolveName("JdbcSource", name)));
     }
 
     public FilterBuilder filter() {

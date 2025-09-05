@@ -3,6 +3,7 @@
 package com.bytefacets.spinel.jdbc.source;
 
 import static com.bytefacets.spinel.jdbc.source.JdbcSourceBindingProvider.jdbcSourceBindingProvider;
+import static com.bytefacets.spinel.jdbc.source.JdbcUtil.typeMapping;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
@@ -26,35 +27,35 @@ class JdbcSourceBindingProviderTest {
 
     private static Stream<Arguments> sqlTypes() {
         return Stream.of(
-                        mapping(Types.BIT, TypeId.Bool),
-                        mapping(Types.BOOLEAN, TypeId.Bool),
-                        mapping(Types.TINYINT, TypeId.Byte),
-                        mapping(Types.SMALLINT, TypeId.Short),
-                        mapping(Types.CHAR, TypeId.Char),
-                        mapping(Types.INTEGER, TypeId.Int),
-                        mapping(Types.BIGINT, TypeId.Long),
-                        mapping(Types.FLOAT, TypeId.Float),
-                        mapping(Types.REAL, TypeId.Double),
-                        mapping(Types.DECIMAL, TypeId.Double),
-                        mapping(Types.NUMERIC, TypeId.Double),
-                        mapping(Types.DATE, TypeId.Int),
-                        mapping(Types.TIME, TypeId.Int),
-                        mapping(Types.TIME_WITH_TIMEZONE, TypeId.Int),
-                        mapping(Types.TIMESTAMP, TypeId.Long),
-                        mapping(Types.TIMESTAMP_WITH_TIMEZONE, TypeId.Long),
-                        mapping(Types.VARCHAR, TypeId.String),
-                        mapping(Types.NVARCHAR, TypeId.String),
-                        mapping(Types.LONGNVARCHAR, TypeId.String),
-                        mapping(Types.LONGVARCHAR, TypeId.String),
-                        mapping(Types.JAVA_OBJECT, TypeId.Generic))
+                        typeMapping(Types.BIT, TypeId.Bool),
+                        typeMapping(Types.BOOLEAN, TypeId.Bool),
+                        typeMapping(Types.TINYINT, TypeId.Byte),
+                        typeMapping(Types.SMALLINT, TypeId.Short),
+                        typeMapping(Types.CHAR, TypeId.Char),
+                        typeMapping(Types.INTEGER, TypeId.Int),
+                        typeMapping(Types.BIGINT, TypeId.Long),
+                        typeMapping(Types.FLOAT, TypeId.Float),
+                        typeMapping(Types.REAL, TypeId.Double),
+                        typeMapping(Types.DECIMAL, TypeId.Double),
+                        typeMapping(Types.NUMERIC, TypeId.Double),
+                        typeMapping(Types.DATE, TypeId.Int),
+                        typeMapping(Types.TIME, TypeId.Int),
+                        typeMapping(Types.TIME_WITH_TIMEZONE, TypeId.Int),
+                        typeMapping(Types.TIMESTAMP, TypeId.Long),
+                        typeMapping(Types.TIMESTAMP_WITH_TIMEZONE, TypeId.Long),
+                        typeMapping(Types.VARCHAR, TypeId.String),
+                        typeMapping(Types.NVARCHAR, TypeId.String),
+                        typeMapping(Types.LONGNVARCHAR, TypeId.String),
+                        typeMapping(Types.LONGVARCHAR, TypeId.String),
+                        typeMapping(Types.JAVA_OBJECT, TypeId.Generic))
                 .map(Arguments::of);
     }
 
     @ParameterizedTest
     @MethodSource("sqlTypes")
-    void shouldProduceBindingWithExpectedDescriptor(final TypeMapping mapping) {
-        final JdbcFieldBinding binding = provider.create("foo", mapping.sqlType);
-        assertThat(binding.createDescriptor("foo").fieldType(), equalTo(mapping.type));
+    void shouldProduceBindingWithExpectedDescriptor(final JdbcUtil.TypeMapping mapping) {
+        final JdbcFieldBinding binding = provider.create("foo", mapping.sqlType());
+        assertThat(binding.createDescriptor("foo").fieldType(), equalTo(mapping.type()));
         assertThat(binding.createDescriptor("foo").name(), equalTo("foo"));
     }
 
@@ -85,10 +86,4 @@ class JdbcSourceBindingProviderTest {
                 provider.create("foo", Types.CLOB).createDescriptor("foo").fieldType(),
                 equalTo(TypeId.String));
     }
-
-    private static TypeMapping mapping(final int sqlType, final byte type) {
-        return new TypeMapping(sqlType, type);
-    }
-
-    private record TypeMapping(int sqlType, byte type) {}
 }
