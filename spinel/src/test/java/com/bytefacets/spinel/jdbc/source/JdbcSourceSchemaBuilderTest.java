@@ -3,6 +3,7 @@
 package com.bytefacets.spinel.jdbc.source;
 
 import static com.bytefacets.spinel.jdbc.source.JdbcSourceBindingProvider.jdbcSourceBindingProvider;
+import static com.bytefacets.spinel.jdbc.source.JdbcUtil.mapping;
 import static com.bytefacets.spinel.schema.MatrixStoreFieldFactory.matrixStoreFieldFactory;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -66,11 +67,11 @@ class JdbcSourceSchemaBuilderTest {
         assertThat(schema.fieldAt(1).objectValueAt(5), equalTo(4876487L));
     }
 
-    private void setUpMetaData(final Mapping... mappings) throws Exception {
+    private void setUpMetaData(final JdbcUtil.Mapping... mappings) throws Exception {
         when(rsMetaData.getColumnCount()).thenReturn(mappings.length);
         for (int i = 0, len = mappings.length; i < len; i++) {
-            when(rsMetaData.getColumnName(i + 1)).thenReturn(mappings[i].name);
-            when(rsMetaData.getColumnType(i + 1)).thenReturn(mappings[i].type);
+            when(rsMetaData.getColumnName(i + 1)).thenReturn(mappings[i].name());
+            when(rsMetaData.getColumnType(i + 1)).thenReturn(mappings[i].type());
         }
     }
 
@@ -78,10 +79,4 @@ class JdbcSourceSchemaBuilderTest {
         when(rs.getInt(anyInt())).thenReturn(46);
         when(rs.getLong(anyInt())).thenReturn(4876487L);
     }
-
-    private Mapping mapping(final int type, final String name) {
-        return new Mapping(type, name);
-    }
-
-    private record Mapping(int type, String name) {}
 }
