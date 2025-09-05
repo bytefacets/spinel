@@ -71,9 +71,7 @@ class JdbcSourceTest {
         final AtomicInteger remainingRowCt = new AtomicInteger(rowCt);
         doAnswer(inv -> remainingRowCt.getAndDecrement() > 0).when(resultSet).next();
         doAnswer(inv -> remainingRowCt.get() * salt + 1).when(resultSet).getInt(anyInt());
-        doAnswer(inv -> (long) (remainingRowCt.get() * salt + 5))
-                .when(resultSet)
-                .getLong(anyInt());
+        doAnswer(inv -> (long) (remainingRowCt.get() * salt + 5)).when(resultSet).getLong(anyInt());
         doAnswer(inv -> Integer.toString(remainingRowCt.get() * salt + 197, 16))
                 .when(resultSet)
                 .getString(anyInt());
