@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Byte Facets
 // SPDX-License-Identifier: MIT
-package com.bytefacets.spinel.grpc.send;
+package com.bytefacets.spinel.grpc.codec;
 
 import java.nio.ByteBuffer;
 
@@ -8,11 +8,6 @@ import java.nio.ByteBuffer;
  * @see com.bytefacets.spinel.grpc.codec.ObjectEncoder
  */
 public interface BufferSupplier {
-
-    default ByteBuffer beginSystemType(byte systemTypeId, int lengthOfValue) {
-        throw new UnsupportedOperationException("beginSystemType not supported");
-    }
-
     /**
      * For implementers of ObjectEncoder, this will return you a positioned and sized ByteBuffer
      *

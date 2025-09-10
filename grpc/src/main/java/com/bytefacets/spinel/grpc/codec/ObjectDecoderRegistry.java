@@ -53,7 +53,7 @@ public final class ObjectDecoderRegistry {
     }
 
     private static Object decodeBool(final ByteBuffer buffer) {
-        return buffer.get() == 1;
+        return buffer.get() != 0;
     }
 
     private static Object decodeByte(final ByteBuffer buffer) {

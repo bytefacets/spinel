@@ -79,7 +79,7 @@ subprojects {
         set("nettyVersion", "4.2.3.Final")
         set("slfApiVersion", "2.0.17")
         set("spotbugsVersion", "4.8.6")
-        set("bytefacetsCollectionsVersion", "0.4.0")
+        set("bytefacetsCollectionsVersion", "0.5.0")
         set("auth0", "4.4.0")
     }
 

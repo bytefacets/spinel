@@ -22,14 +22,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-final class SchemaBuilder {
+public final class SchemaBuilder {
     private final MatrixStoreFieldFactory fieldFactory;
+
+    public static SchemaBuilder schemaBuilder(final MatrixStoreFieldFactory fieldFactory) {
+        return new SchemaBuilder(fieldFactory);
+    }
 
     SchemaBuilder(final MatrixStoreFieldFactory fieldFactory) {
         this.fieldFactory = requireNonNull(fieldFactory, "fieldFactory");
     }
 
-    Schema createSchema(final SchemaUpdate schemaUpdate) {
+    public Schema createSchema(final SchemaUpdate schemaUpdate) {
         final int fieldCt = schemaUpdate.getFieldsCount();
         final var fieldMap = new StringGenericIndexedMap<SchemaField>(fieldCt, 1f);
         final Map<Byte, List<FieldDescriptor>> typeMap = new HashMap<>();
