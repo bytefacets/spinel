@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.grpc.codec;
 
-import com.bytefacets.spinel.grpc.send.BufferSupplier;
 import com.bytefacets.spinel.schema.TypeId;
 import com.google.protobuf.ByteString;
 import java.nio.ByteBuffer;
 
 public final class ObjectEncoderImpl {
     private static final int HEADER_SIZE = 2;
-    private final InternalBufferSupplier bufferSupplier = new InternalBufferSupplier();
+    private static final byte[] EMPTY_ARRAY = new byte[0];
+    private final BufferSupplierImpl bufferSupplier = new BufferSupplierImpl();
     private ByteBuffer buffer = ByteBuffer.allocate(64);
 
     public static ObjectEncoderImpl encoder() {
@@ -19,7 +19,7 @@ public final class ObjectEncoderImpl {
     private ObjectEncoderImpl() {}
 
     public ByteString encode(final Object value) {
-        final ObjectEncoder encoder = ObjectEncoderRegistry.lookup(value);
+        final InternalObjectEncoder encoder = ObjectEncoderRegistry.lookup(value);
         if (encoder != null) {
             buffer.clear();
             encoder.encode(bufferSupplier, value);
@@ -29,7 +29,20 @@ public final class ObjectEncoderImpl {
         }
     }
 
-    private final class InternalBufferSupplier implements BufferSupplier {
+    public byte[] encodeToArray(final Object value) {
+        final InternalObjectEncoder encoder = ObjectEncoderRegistry.lookup(value);
+        if (encoder != null) {
+            buffer.clear();
+            encoder.encode(bufferSupplier, value);
+            final byte[] copy = new byte[buffer.position()];
+            buffer.flip().get(copy);
+            return copy;
+        } else {
+            return EMPTY_ARRAY;
+        }
+    }
+
+    private final class BufferSupplierImpl implements InternalBufferSupplier {
         @Override
         public ByteBuffer beginSystemType(final byte systemTypeId, final int lengthOfValue) {
             ensureSize(lengthOfValue);

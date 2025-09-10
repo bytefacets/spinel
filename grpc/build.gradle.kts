@@ -4,7 +4,7 @@ import java.time.Instant
 plugins {
     `java-library`
     id("com.google.protobuf") version "0.9.4"
-    id("com.bytefacets.template_processor") version "0.10.0"
+    id("com.bytefacets.template_processor") version "0.11.0"
 }
 
 apply(plugin = "com.bytefacets.template_processor")
