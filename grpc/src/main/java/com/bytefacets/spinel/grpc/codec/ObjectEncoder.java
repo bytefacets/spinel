@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.grpc.codec;
 
-import java.nio.ByteBuffer;
-
 /**
  * @see ObjectEncoderRegistry#register(Class, ObjectEncoder)
- * @see ObjectDecoder#decode(ByteBuffer)
+ * @see ObjectDecoder#decode(java.nio.ByteBuffer)
  */
 public interface ObjectEncoder {
     /**
