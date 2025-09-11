@@ -82,7 +82,8 @@ public final class TypeId {
             case Float -> "Float";
             case Double -> "Double";
             case String -> "String";
-            default -> "Generic";
+            case Generic -> "Generic";
+            default -> "Unknown(" + id + ")";
         };
     }
 }
