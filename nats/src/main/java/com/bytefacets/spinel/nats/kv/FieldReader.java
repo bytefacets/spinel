@@ -11,6 +11,7 @@ import com.bytefacets.collections.types.ShortType;
 import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.schema.TypeId;
 import com.google.protobuf.ByteString;
+import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("CyclomaticComplexity")
 final class FieldReader {
@@ -226,7 +227,7 @@ final class FieldReader {
         if (size == -1) {
             return null;
         }
-        final String value = new String(data, pos, size);
+        final String value = new String(data, pos, size, StandardCharsets.UTF_8);
         pos += size;
         return value;
     }
