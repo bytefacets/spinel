@@ -12,6 +12,7 @@ import com.bytefacets.spinel.grpc.codec.ObjectDecoderRegistry;
 import com.bytefacets.spinel.schema.TypeId;
 import com.google.protobuf.ByteString;
 
+@SuppressWarnings("CyclomaticComplexity")
 final class FieldReader {
     private int pos = -1;
     private byte[] data;
@@ -160,6 +161,7 @@ final class FieldReader {
         };
     }
 
+    @SuppressWarnings("InnerAssignment")
     void skip() {
         final byte typeId = data[pos++];
         switch (typeId) {
