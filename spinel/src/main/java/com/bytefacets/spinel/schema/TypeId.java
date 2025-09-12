@@ -5,6 +5,7 @@ package com.bytefacets.spinel.schema;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("CyclomaticComplexity")
 public final class TypeId {
     private static final Map<Class<?>, Byte> mapping = new HashMap<>(32);
 
