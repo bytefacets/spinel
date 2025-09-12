@@ -74,12 +74,14 @@ subprojects {
     project.version = project.parent?.version!!
 
     extra.apply {
+        set("bytefacetsCollectionsVersion", "0.5.0")
         set("findbugsVersion", "4.7.3")
         set("logbackVersion", "1.5.18")
+        set("natsVersion", "2.21.5")
         set("nettyVersion", "4.2.3.Final")
+        set("protobufVersion", "4.29.3")
         set("slfApiVersion", "2.0.17")
         set("spotbugsVersion", "4.8.6")
-        set("bytefacetsCollectionsVersion", "0.5.0")
         set("auth0", "4.4.0")
     }
 

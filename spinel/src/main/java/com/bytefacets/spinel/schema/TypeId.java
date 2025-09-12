@@ -5,6 +5,7 @@ package com.bytefacets.spinel.schema;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("CyclomaticComplexity")
 public final class TypeId {
     private static final Map<Class<?>, Byte> mapping = new HashMap<>(32);
 
@@ -82,7 +83,8 @@ public final class TypeId {
             case Float -> "Float";
             case Double -> "Double";
             case String -> "String";
-            default -> "Generic";
+            case Generic -> "Generic";
+            default -> "Unknown(" + id + ")";
         };
     }
 }
