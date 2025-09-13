@@ -9,9 +9,7 @@ import com.bytefacets.spinel.schema.FieldResolver;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Creates a NATS subject from a row in a schema.
- */
+/** Creates a NATS subject from a row in a schema. */
 public final class FieldSequenceNatsSubjectBuilder implements NatsSubjectBuilder {
     private final List<String> fieldNames;
     private final List<ValueAppender> appenders = new ArrayList<>(4);
