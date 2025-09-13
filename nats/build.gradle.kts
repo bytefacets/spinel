@@ -16,6 +16,10 @@ template_processor {
     }
 }
 
+tasks.named("compileJava") {
+    dependsOn("create-generated-source-dir", "generate-typed-main-sources")
+}
+
 val bytefacetsCollectionsVersion : String by extra
 val logbackVersion: String by extra // temporary
 val natsVersion: String by extra
