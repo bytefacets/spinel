@@ -187,15 +187,11 @@ class NatsKvSinkTest {
         }
     }
 
+    // formatting:off
     interface Data {
         int getKey();
-
-        String getValue1();
-
-        Data setValue1(String value);
-
-        int getValue2();
-
-        Data setValue2(int value);
+        String getValue1(); Data setValue1(String value);
+        int getValue2(); Data setValue2(int value);
     }
+    // formatting:on
 }
