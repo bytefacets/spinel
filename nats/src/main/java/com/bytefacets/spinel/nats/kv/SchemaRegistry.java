@@ -106,6 +106,10 @@ final class SchemaRegistry {
             return encodedSchema;
         }
 
+        boolean isPresent() {
+            return schemaId != -1;
+        }
+
         int schemaId() {
             return schemaId;
         }

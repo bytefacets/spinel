@@ -45,6 +45,7 @@ class SchemaRegistryTest {
         final SchemaUpdate update568 = schemaUpdate("foo", "a", "b", "c");
         registry.apply(entry(SCHEMA_PREFIX + "567", update567, 677));
         registry.apply(entry(SCHEMA_PREFIX + "568", update568, 678));
+        assertThat(registry.latest().isPresent(), equalTo(true));
         assertThat(registry.latest().schemaId(), equalTo(568));
         assertThat(registry.latest().encodedSchema(), equalTo(update568));
     }
@@ -82,6 +83,20 @@ class SchemaRegistryTest {
         assertThat(registry.register(update568), equalTo(568));
         verifyNoInteractions(kv);
         verifyNoInteractions(counter);
+    }
+
+    @Test
+    void shouldSkipUnparseableKey() {
+        final SchemaUpdate update = schemaUpdate("foo", "a", "b");
+        registry.apply(entry(SCHEMA_PREFIX + "67a", update, 677));
+        assertThat(registry.latest().isPresent(), equalTo(false));
+    }
+
+    @Test
+    void shouldSkipMissingSchemaIdPartInKey() {
+        final SchemaUpdate update = schemaUpdate("foo", "a", "b");
+        registry.apply(entry(SCHEMA_PREFIX, update, 677));
+        assertThat(registry.latest().isPresent(), equalTo(false));
     }
 
     private SchemaUpdate schemaUpdate(final String name, final String... fieldNames) {
