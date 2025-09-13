@@ -12,6 +12,10 @@ import io.nats.client.KeyValue;
 import io.nats.client.api.KeyValueConfiguration;
 import java.io.IOException;
 
+/**
+ * @see NatsKvSource
+ * @see NatsKvSink
+ */
 public final class NatsKvSinkBuilder {
     private KeyValue keyValueBucket;
     private int initialSize = 128;

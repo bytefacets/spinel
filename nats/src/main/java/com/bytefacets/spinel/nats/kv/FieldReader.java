@@ -29,10 +29,7 @@ final class FieldReader {
         return pos;
     }
 
-    boolean more() {
-        return pos < data.length;
-    }
-
+    /** Reads a Bool, Byte, Short, or Int value into a Bool field. */
     boolean readToBool() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -44,6 +41,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, or Char value into a Byte field. */
     byte readToByte() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -54,6 +52,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, Char, or Short value into a Short field. */
     short readToShort() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -65,6 +64,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, Char, or Short value into a Char field. */
     char readToChar() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -76,6 +76,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, Char, Short, or Int value into an Int field. */
     int readToInt() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -88,6 +89,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, Char, Short, Int or Long value into a Long field. */
     long readToLong() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -101,6 +103,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, Char, Short, Int, or Float value into a Float field. */
     float readToFloat() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -114,6 +117,7 @@ final class FieldReader {
         };
     }
 
+    /** Reads a Bool, Byte, Char, Short, Int, Long, Float, or Double value into a Double field. */
     double readToDouble() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -129,6 +133,10 @@ final class FieldReader {
         };
     }
 
+    /**
+     * Reads a Bool, Byte, Char, Short, Int, Long, Float, Double, or String value into a String
+     * field.
+     */
     String readToString() {
         final byte typeId = data[pos++];
         return switch (typeId) {
@@ -145,6 +153,10 @@ final class FieldReader {
         };
     }
 
+    /**
+     * Reads a Bool, Byte, Char, Short, Int, Long, Float, Double, String, or Generic value into a
+     * Generic field.
+     */
     Object readToGeneric() {
         final byte typeId = data[pos++];
         return switch (typeId) {
