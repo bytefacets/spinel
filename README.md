@@ -6,7 +6,7 @@
 
 Spinel is an efficient, column-oriented data streaming framework designed for real-time tabular data processing. Built for both embedded and distributed architectures, Spinel enables efficient data transformations with minimal memory overhead and maximum throughput.
 
-## 🚀 Key Benefits
+## Key Benefits
 
 ### **Exceptional Performance**
 - **Column-Oriented Storage**: Optimized memory layout with superior cache locality and reduced fragmentation
@@ -24,7 +24,7 @@ Spinel is an efficient, column-oriented data streaming framework designed for re
 - **Multi-Process Communication**: Built-in IPC operators for distributed systems
 - **Protocol Agnostic**: Support for WebSockets, gRPC, and custom protocols
 
-## 🎯 Use Cases
+## Use Cases
 
 ### **Real-Time Dashboards**
 Perfect for financial trading platforms, IoT monitoring, and business intelligence dashboards requiring:
@@ -77,7 +77,7 @@ and accessible through the Field interfaces.
        +---------------+ +---------------+
 ```
 
-## 🛠️ Core Operators
+## Core Operators
 
 **Data Storage & Access**
 - **KeyedTables**: Indexed tables by primitive types (int, long, string)
@@ -96,7 +96,7 @@ and accessible through the Field interfaces.
 - **Subscription Management**: Multi-client subscription handling
 - **Protocol Adapters**: WebSocket, gRPC, and custom protocol support
 
-## 🔧 Performance Characteristics
+## Performance Characteristics
 
 **Memory Efficiency**
 - Column-oriented storage reduces memory fragmentation
@@ -175,7 +175,7 @@ OutputRegistry registry = RegisteredOutputsTable.registeredOutputsTable();
 registry.register("enriched-orders", orderView.output());
 ```
 
-## 🏗️ Topology Composition
+## Topology Composition
 
 Spinel offers two powerful approaches for building data processing topologies:
 
@@ -220,7 +220,7 @@ Connector.connectInputToOutput(openOrders, orders);
 Connector.connectInputToOutput(byInstrument, openOrders);
 ```
 
-## 🔌 Integration Patterns
+## Integration Patterns
 
 ### **Real-Time Web Dashboards**
 ```java
@@ -267,7 +267,7 @@ GrpcSource marketData = GrpcSourceBuilder
     .build();
 ```
 
-## 📁 Examples & Documentation
+## Examples & Documentation
 
 ### **Core Examples** ([`examples/`](examples/))
 - **[Table Operations](examples/src/main/java/com/bytefacets/spinel/examples/table/)**: Basic CRUD operations and data modeling
@@ -292,9 +292,9 @@ Real-time dashboard example with:
 
 ### **JavaFX Integration** (Coming soon)
 
-## 🎯 When to Use Spinel
+## When to Use Spinel
 
-**✅ Perfect For:**
+**Perfect For:**
 - Real-time financial trading platforms
 - IoT sensor data aggregation and monitoring
 - Live business intelligence dashboards
@@ -302,7 +302,7 @@ Real-time dashboard example with:
 - Event sourcing with live projections
 - Microservices requiring structured data exchange
 
-## 🚀 Getting Started
+## Getting Started
 
 1. **Add Spinel to your project:**
    ```gradle
@@ -341,7 +341,7 @@ Real-time dashboard example with:
    // WebSocket, gRPC, or custom protocol integration
    ```
 
-## 📚 Learn More
+## Learn More
 
 - **[Spring Examples](spring-examples/README.md)**: Complete real-time dashboard example
 - **[Core Examples](examples/)**: Fundamental usage patterns
