@@ -98,12 +98,6 @@ class DistributedCounterTest {
         assertThat(counter.currentValue(), equalTo(5));
     }
 
-    private KeyValueEntry mockEntry(final long revision) {
-        final KeyValueEntry entry = mock(KeyValueEntry.class);
-        when(entry.getRevision()).thenReturn(revision);
-        return entry;
-    }
-
     private KeyValueEntry mockEntry(final int value, final long revision) {
         final KeyValueEntry entry = mock(KeyValueEntry.class);
         lenient().when(entry.getOperation()).thenReturn(KeyValueOperation.PUT);
