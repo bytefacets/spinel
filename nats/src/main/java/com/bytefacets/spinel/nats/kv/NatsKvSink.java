@@ -23,6 +23,21 @@ import java.io.IOException;
 import java.util.BitSet;
 import java.util.Objects;
 
+/**
+ * Connects an output to a NATS KeyValue bucket. Schemas are written with a prefix of "__s.", and
+ * rows are written with a prefix of "__d." .
+ *
+ * <p>Subjects are build from the row in the schema using a ${@link NatsSubjectBuilder}. For
+ * example, if you use the {@link com.bytefacets.spinel.nats.FieldSequenceNatsSubjectBuilder}, it
+ * will set the build a key from the values in the given fields, with '.' separators.
+ *
+ * <p>If the subject changes (as indicated by the changed field flags in a change set), the key will
+ * first be deleted, and then be republished as a put.
+ *
+ * <p>Note that all adds and changes serialize the entire row to the KV key.
+ *
+ * <p>This can be used in conjunction with the NatsKvSource.
+ */
 public final class NatsKvSink implements InputProvider {
     private static final GrpcEncoder SCHEMA_ENCODER = GrpcEncoder.grpcEncoder(-1);
     private final Input input;
