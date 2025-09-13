@@ -118,11 +118,14 @@ final class BucketCodecTest {
             write(sourceSchema, sourceRow, 8);
             write(sourceSchema.field("fBool"), sourceRow, 0);
             final BitSet expected = new BitSet();
-            expected.set(1, targetSchema.size());
+            expected.set(0, targetSchema.size());
             final byte[] updateData = encoder.encode(sourceRow);
             decoder.write(false, targetRow, updateData);
             assertThat(changedFields, equalTo(expected));
-            assertValues(targetSchema, targetRow, 8, Set.of());
+            final Set<String> assertValuesFields = new HashSet<>();
+            targetSchema.forEachField(f -> assertValuesFields.add(f.name()));
+            assertValuesFields.remove("fBool");
+            assertValues(targetSchema, targetRow, 8, assertValuesFields);
         }
 
         @Test
@@ -294,7 +297,6 @@ final class BucketCodecTest {
                         field -> {
                             final String name = nameSelector.createName(field.typeId());
                             final int fieldId = fieldMap.add(name);
-                            System.out.printf("Source field %s at fieldId %d%n", name, fieldId);
                             fieldMap.putValueAt(fieldId, schemaField(fieldId, name, field));
                         });
         return Schema.schema("TEST", fieldList(fieldMap));
