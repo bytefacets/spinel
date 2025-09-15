@@ -10,6 +10,9 @@ import io.grpc.ManagedChannel;
 import io.netty.channel.EventLoop;
 import java.util.function.Function;
 
+/**
+ * @see GrpcClient
+ */
 public final class GrpcClientBuilder {
     private static final ConnectionInfo EMPTY = new ConnectionInfo("", "");
     private final ManagedChannel channel;

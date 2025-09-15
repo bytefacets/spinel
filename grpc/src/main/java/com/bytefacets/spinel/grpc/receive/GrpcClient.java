@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * ManagedChannel channel = ManagedChannelBuilder.forTarget("0.0.0.0:15000")
  *                          .usePlaintext()
  *                          .enableRetry()
- *                           .keepAliveTime(5, TimeUnit.MINUTES)
+ *                          .keepAliveTime(5, TimeUnit.MINUTES)
  *                          .keepAliveTimeout(20, TimeUnit.SECONDS)
  *                          .build();
  *

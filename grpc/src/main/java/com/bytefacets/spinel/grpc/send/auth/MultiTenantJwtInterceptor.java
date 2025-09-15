@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * <pre>
  * final GrpcService service = GrpcServiceBuilder.grpcService(registry, eventLoop).build();
- * final Map<String, String> tenantSecrets = Map.of("bob", "bobs-secret");
+ * final Map&lt;String, String&gt; tenantSecrets = Map.of("bob", "bobs-secret");
  * final MultiTenantJwtInterceptor jwtInterceptor =
  *                      MultiTenantJwtInterceptor.multiTenantJwt(tenantSecrets::get);
  * final Server server = ServerBuilder.forPort(port)

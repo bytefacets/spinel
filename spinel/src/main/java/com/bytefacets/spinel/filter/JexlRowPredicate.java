@@ -32,7 +32,7 @@ import org.apache.commons.jexl3.JexlScript;
  *   <li>quantity * price >= 10000
  *   <li>side == \"buy\"
  *   <li>side == 1
- *   <li>account != null && account.toLowerCase() == \"client5\"
+ *   <li>account != null &amp;&amp; account.toLowerCase() == \"client5\"
  *   <li>symbol.startsWith(\"GO\")
  * </ul>
  *
