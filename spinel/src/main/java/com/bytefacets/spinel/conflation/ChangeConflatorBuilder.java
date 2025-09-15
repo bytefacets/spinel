@@ -52,8 +52,8 @@ public final class ChangeConflatorBuilder {
      * Used in the context of a TransformBuilder to chain the conflator to some next operator. This
      * call is only valid for ChangeConflatorBuilders that were created using {@link
      * #changeConflator(TransformContext)}, which usually comes from {@link
-     * com.bytefacets.spinel.transform.TransformBuilder#changeConflator()} or
-     * {@link com.bytefacets.spinel.transform.TransformBuilder#changeConflator(String)}.
+     * com.bytefacets.spinel.transform.TransformBuilder#changeConflator()} or {@link
+     * com.bytefacets.spinel.transform.TransformBuilder#changeConflator(String)}.
      *
      * @see com.bytefacets.spinel.transform.TransformBuilder
      */
