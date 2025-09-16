@@ -26,7 +26,7 @@ public final class ArrayFieldFactory {
         };
     }
 
-    public static Field writableArrayField(final byte typeId,
+    public static Field writableArrayFieldOver(final byte typeId,
                                            final Object initialValues,
                                            final int fieldId,
                                            final FieldChangeListener changeListener) {
