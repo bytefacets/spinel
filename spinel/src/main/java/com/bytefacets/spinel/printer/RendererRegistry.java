@@ -13,6 +13,7 @@ import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.FloatField;
 import com.bytefacets.spinel.schema.IntField;
 import com.bytefacets.spinel.schema.LongField;
+import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
 import com.bytefacets.spinel.schema.ShortField;
 import com.bytefacets.spinel.schema.TypeId;
@@ -30,6 +31,10 @@ public final class RendererRegistry {
     private static final ShortGenericIndexedMap<Function<SchemaField, ValueRenderer>> registry =
             new ShortGenericIndexedMap<>(16);
 
+    static {
+        DoubleRenderers.register();
+    }
+
     /** Creates a new instance of the registry with a copy of the default renderer mappings. */
     public static RendererRegistry rendererRegistry() {
         return new RendererRegistry();
@@ -37,6 +42,14 @@ public final class RendererRegistry {
 
     RendererRegistry() {
         registry.copyFrom(DEFAULTS);
+    }
+
+    public ValueRenderer[] renderers(final Schema schema) {
+        final ValueRenderer[] renderers = new ValueRenderer[schema.size()];
+        for (int i = 0, len = schema.size(); i < len; i++) {
+            renderers[i] = renderer(schema.fieldAt(i));
+        }
+        return renderers;
     }
 
     /** A renderer bound to the given schema field. */
