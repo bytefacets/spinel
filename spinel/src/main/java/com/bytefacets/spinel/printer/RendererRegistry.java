@@ -32,6 +32,7 @@ public final class RendererRegistry {
             new ShortGenericIndexedMap<>(16);
 
     static {
+        LongRenderers.register();
         DoubleRenderers.register();
     }
 
