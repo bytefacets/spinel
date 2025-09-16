@@ -11,7 +11,7 @@ import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.TypeId;
 
 /**
- * Registers double renderers for Natural, Quantity, and Percent.
+ * Registers boolean renderer for "Natural" content type.
  *
  * <table>
  *     <tr>
