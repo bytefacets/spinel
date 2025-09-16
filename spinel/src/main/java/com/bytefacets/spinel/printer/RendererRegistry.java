@@ -30,6 +30,10 @@ public final class RendererRegistry {
     private static final ShortGenericIndexedMap<Function<SchemaField, ValueRenderer>> registry =
             new ShortGenericIndexedMap<>(16);
 
+    static {
+        DoubleRenderers.register();
+    }
+
     /** Creates a new instance of the registry with a copy of the default renderer mappings. */
     public static RendererRegistry rendererRegistry() {
         return new RendererRegistry();
