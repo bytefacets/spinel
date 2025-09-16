@@ -167,6 +167,6 @@ class JexlRowContextTest {
     }
 
     private Field field(final byte typeId, final int fieldId, final Object values) {
-        return ArrayFieldFactory.writableArrayField(typeId, values, fieldId, i -> {});
+        return ArrayFieldFactory.writableArrayFieldOver(typeId, values, fieldId, i -> {});
     }
 }
