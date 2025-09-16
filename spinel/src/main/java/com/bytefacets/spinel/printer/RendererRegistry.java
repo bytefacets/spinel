@@ -33,6 +33,8 @@ public final class RendererRegistry {
 
     static {
         ByteRenderers.register();
+        CharRenderers.register();
+        ShortRenderers.register();
         LongRenderers.register();
         DoubleRenderers.register();
     }
