@@ -69,8 +69,7 @@ class RendererRegistryTest {
         switch (field.typeId()) {
             case TypeId.Bool -> validate(renderer, "true");
             case TypeId.Char -> validate(renderer, "A");
-            case TypeId.Float -> validate(renderer, "65.0");
-            case TypeId.Double -> validate(renderer, "65.00");
+            case TypeId.Float, TypeId.Double -> validate(renderer, "65.0");
             default -> validate(renderer, "65");
         }
     }

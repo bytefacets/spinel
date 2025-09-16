@@ -19,7 +19,7 @@ public final class AttributeConstants {
     public static final class DisplayFormats {
         private DisplayFormats() {}
 
-        // Thousands (k), Millions, Billions, Trillions
+        /** Thousands (k), Millions, Billions, Trillions **/
         public static final String kMBT = "kMBT";
 
         /** Little Endian, for numeric types when represented as text. Value is "LE" */
