@@ -83,6 +83,27 @@ class LongRenderersTest {
         }
     }
 
+    @Nested
+    class TimeTests {
+        @Test
+        public void shouldRenderTimestamp() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Timestamp);
+            assertThat(render(1757972797123456789L), equalTo("2025-09-15 21:46:37.123456789"));
+        }
+
+        @Test
+        public void shouldRenderTime() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Time);
+            assertThat(render(1757972797123456789L), equalTo("21:46:37.123456789"));
+        }
+
+        @Test
+        public void shouldRenderDuration() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Duration);
+            assertThat(render(3765376576357L), equalTo("01:02:45.376576357"));
+        }
+    }
+
     private String render(final long value) {
         final ValueRenderer renderer = registry.renderer(schemaField(value));
         final StringBuilder sb = new StringBuilder();
