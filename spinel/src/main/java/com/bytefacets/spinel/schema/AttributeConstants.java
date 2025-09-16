@@ -3,6 +3,7 @@
 package com.bytefacets.spinel.schema;
 
 import com.bytefacets.collections.types.ByteType;
+import java.time.ZoneId;
 import java.util.Map;
 
 public final class AttributeConstants {
@@ -55,7 +56,7 @@ public final class AttributeConstants {
             private Timestamp() {}
 
             // formatting:off
-            public static final byte Second = -1;
+            public static final byte Second =  1;
             public static final byte Milli  = -3;
             public static final byte Micro  = -6;
             public static final byte Nano   = -9;
@@ -79,6 +80,14 @@ public final class AttributeConstants {
 
     public static void setDisplayFormat(final Map<String, Object> attributes, final String format) {
         attributes.put(DisplayFormat, format);
+    }
+
+    public static void setTimeZone(final Map<String, Object> attributes, final ZoneId zone) {
+        attributes.put(TimeZone, zone.getId());
+    }
+
+    public static void setTimeZone(final Map<String, Object> attributes, final String zone) {
+        attributes.put(TimeZone, zone);
     }
 
     public static byte contentType(final Metadata metadata) {

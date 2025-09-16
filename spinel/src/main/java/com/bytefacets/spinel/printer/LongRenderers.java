@@ -4,6 +4,9 @@ package com.bytefacets.spinel.printer;
 
 import static com.bytefacets.spinel.printer.KmbtRenderState.kmbFormat;
 import static com.bytefacets.spinel.printer.RendererRegistry.registerDefault;
+import static com.bytefacets.spinel.printer.TimeRenderers.durationRenderer;
+import static com.bytefacets.spinel.printer.TimeRenderers.timeRenderer;
+import static com.bytefacets.spinel.printer.TimeRenderers.timestampRenderer;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.types.LongType;
@@ -39,6 +42,24 @@ import java.util.Objects;
  *         <td></td>
  *     </tr>
  *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Time</td>
+ *         <td>DisplayPrecision, ValuePrecision, TimeZone</td>
+ *         <td>Renders a time to nano precision</td>
+ *         <td>ValuePrecision allows for values in seconds to nanos; Note that it goes thru Instant and ZonedDateTime</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Timestamp</td>
+ *         <td>DisplayPrecision, ValuePrecision, TimeZone</td>
+ *         <td>Renders a timestamp to nano precision</td>
+ *         <td>ValuePrecision allows for values in seconds to nanos; Note that it goes thru Instant and ZonedDateTime</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Duration</td>
+ *         <td>DisplayPrecision, ValuePrecision</td>
+ *         <td>Renders a duration to nano precision</td>
+ *         <td>ValuePrecision allows for values in seconds to nanos</td>
+ *     </tr>
+ *     <tr>
  *         <td>AttributeConstants.ContentTypes.Text</td>
  *         <td>DisplayFormat (LittleEndian or BigEndian)</td>
  *         <td>Renders a string from the 8 bytes of the long value</td>
@@ -66,6 +87,18 @@ final class LongRenderers {
                 TypeId.Long,
                 AttributeConstants.ContentTypes.Text,
                 sField -> new LongRenderer(sField.field(), new TextRender(sField.metadata())));
+        registerDefault(
+                TypeId.Long,
+                AttributeConstants.ContentTypes.Time,
+                sField -> new LongRenderer(sField.field(), timeRenderer(sField.metadata())));
+        registerDefault(
+                TypeId.Long,
+                AttributeConstants.ContentTypes.Timestamp,
+                sField -> new LongRenderer(sField.field(), timestampRenderer(sField.metadata())));
+        registerDefault(
+                TypeId.Long,
+                AttributeConstants.ContentTypes.Duration,
+                sField -> new LongRenderer(sField.field(), durationRenderer(sField.metadata())));
     }
 
     private static final class NaturalRenderer implements RenderMethod {
