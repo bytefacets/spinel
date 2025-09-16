@@ -6,6 +6,8 @@ import com.bytefacets.collections.types.ByteType;
 import java.util.Map;
 
 public final class AttributeConstants {
+    private AttributeConstants() {}
+
     // formatting:off
     public static final String ContentType      = "contyp";
     public static final String ValuePrecision   = "valprc";
@@ -49,7 +51,7 @@ public final class AttributeConstants {
     public static final class Precisions {
         private Precisions() {}
 
-        public static class Timestamp {
+        public static final class Timestamp {
             private Timestamp() {}
 
             // formatting:off
