@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.bytefacets.collections.types.LongType;
+import com.bytefacets.collections.types.Pack;
 import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.LongField;
 import com.bytefacets.spinel.schema.SchemaField;
@@ -135,6 +136,41 @@ class LongRenderersTest {
                 }
             }
             return setBits.toString().replace('[', '{').replace(']', '}').replace(" ", "");
+        }
+    }
+
+    @Nested
+    class PackTests {
+        @Test
+        void shouldRenderPack2() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Packed2);
+            assertThat(render(Pack.packToLong(3653, -8782)), equalTo("(3653,-8782)"));
+            assertThat(
+                    render(Pack.packToLong(Integer.MAX_VALUE, Integer.MIN_VALUE)),
+                    equalTo("(2147483647,-2147483648)"));
+            assertThat(
+                    render(Pack.packToLong(Integer.MIN_VALUE, Integer.MAX_VALUE)),
+                    equalTo("(-2147483648,2147483647)"));
+        }
+
+        @Test
+        void shouldRenderPack4() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Packed4);
+            assertThat(render(pack4(1, 10, 32, -67)), equalTo("(1,10,32,-67)"));
+            assertThat(
+                    render(
+                            pack4(
+                                    Short.MIN_VALUE,
+                                    Short.MAX_VALUE,
+                                    Short.MAX_VALUE,
+                                    Short.MIN_VALUE)),
+                    equalTo("(-32768,32767,32767,-32768)"));
+        }
+
+        private long pack4(final int a, final int b, final int c, final int d) {
+            final int hi = Pack.packToInt((short) a, (short) b);
+            final int lo = Pack.packToInt((short) c, (short) d);
+            return Pack.packToLong(hi, lo);
         }
     }
 

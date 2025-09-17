@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.bytefacets.collections.types.IntType;
+import com.bytefacets.collections.types.Pack;
 import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.IntField;
 import com.bytefacets.spinel.schema.SchemaField;
@@ -111,6 +112,35 @@ class IntRenderersTest {
                 }
             }
             return setBits.toString().replace('[', '{').replace(']', '}').replace(" ", "");
+        }
+    }
+
+    @Nested
+    class PackTests {
+        @Test
+        void shouldRenderPack2() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Packed2);
+            assertThat(
+                    render(Pack.packToInt((short) 3653, (short) -8782)), equalTo("(3653,-8782)"));
+            assertThat(
+                    render(Pack.packToInt(Short.MAX_VALUE, Short.MIN_VALUE)),
+                    equalTo("(32767,-32768)"));
+            assertThat(
+                    render(Pack.packToInt(Short.MIN_VALUE, Short.MAX_VALUE)),
+                    equalTo("(-32768,32767)"));
+        }
+
+        @Test
+        void shouldRenderPack4() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Packed4);
+            assertThat(render(pack4(1, 10, 32, -67)), equalTo("(1,10,32,-67)"));
+            assertThat(
+                    render(pack4(Byte.MIN_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MIN_VALUE)),
+                    equalTo("(-128,127,127,-128)"));
+        }
+
+        private int pack4(final int a, final int b, final int c, final int d) {
+            return Pack.packToInt((byte) a, (byte) b, (byte) c, (byte) d);
         }
     }
 

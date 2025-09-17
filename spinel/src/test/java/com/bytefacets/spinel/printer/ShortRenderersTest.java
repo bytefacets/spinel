@@ -6,6 +6,7 @@ import static com.bytefacets.spinel.schema.Metadata.metadata;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import com.bytefacets.collections.types.Pack;
 import com.bytefacets.collections.types.ShortType;
 import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.SchemaField;
@@ -104,6 +105,21 @@ class ShortRenderersTest {
         void shouldRenderText(final short value, final String expected) {
             AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Flag);
             assertThat(render(value), equalTo(expected));
+        }
+    }
+
+    @Nested
+    class PackTests {
+        @Test
+        void shouldRenderPack2() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Packed2);
+            assertThat(render(Pack.packToShort((byte) 64, (byte) -76)), equalTo("(64,-76)"));
+            assertThat(
+                    render(Pack.packToShort(Byte.MIN_VALUE, Byte.MAX_VALUE)),
+                    equalTo("(-128,127)"));
+            assertThat(
+                    render(Pack.packToShort(Byte.MAX_VALUE, Byte.MIN_VALUE)),
+                    equalTo("(127,-128)"));
         }
     }
 
