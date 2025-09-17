@@ -10,6 +10,7 @@ import static com.bytefacets.spinel.printer.TimeRenderers.timestampRenderer;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.types.LongType;
+import com.bytefacets.collections.types.Pack;
 import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.LongField;
@@ -20,7 +21,8 @@ import java.text.NumberFormat;
 import java.util.Objects;
 
 /**
- * Registers long renderers for Natural, Id, and Text content types.
+ * Registers long renderers for Natural, Id, Duration, Time, Timestamp, Packed2, Packed4, Text, and
+ * Flag content types.
  *
  * <table>
  *     <tr>
@@ -72,6 +74,18 @@ import java.util.Objects;
  *         indicating the bits that are set</td>
  *         <td></td>
  *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Pack2</td>
+ *         <td>none</td>
+ *         <td>Will append the the long as a tuple of two ints, e.g. (2762,3873)</td>
+ *         <td></td>
+ *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Pack4</td>
+ *         <td>none</td>
+ *         <td>Will append the the long as a tuple of four shorts, e.g. (10,28,76,89)</td>
+ *         <td></td>
+ *     </tr>
  * </table>
  *
  * @see LongType#readLE(byte[], int)
@@ -79,6 +93,8 @@ import java.util.Objects;
  */
 final class LongRenderers {
     private static final RenderMethod FLAG = new FlagMethod();
+    private static final RenderMethod PACK2 = new Pack2Method();
+    private static final RenderMethod PACK4 = new Pack4Method();
 
     private LongRenderers() {}
 
@@ -111,6 +127,14 @@ final class LongRenderers {
                 TypeId.Long,
                 AttributeConstants.ContentTypes.Flag,
                 sField -> new LongRenderer(sField.field(), FLAG));
+        registerDefault(
+                TypeId.Long,
+                AttributeConstants.ContentTypes.Packed2,
+                sField -> new LongRenderer(sField.field(), PACK2));
+        registerDefault(
+                TypeId.Long,
+                AttributeConstants.ContentTypes.Packed4,
+                sField -> new LongRenderer(sField.field(), PACK4));
     }
 
     private static final class NaturalRenderer implements RenderMethod {
@@ -213,6 +237,32 @@ final class LongRenderers {
                 }
             }
             sb.setCharAt(sb.length() - 1, '}');
+        }
+    }
+
+    private static final class Pack2Method implements RenderMethod {
+        @Override
+        public void renderValue(final StringBuilder sb, final long value) {
+            sb.append('(')
+                    .append(Pack.unpackHiInt(value))
+                    .append(',')
+                    .append(Pack.unpackLoInt(value))
+                    .append(')');
+        }
+    }
+
+    private static final class Pack4Method implements RenderMethod {
+        @Override
+        public void renderValue(final StringBuilder sb, final long value) {
+            final int hi = Pack.unpackHiInt(value);
+            final int lo = Pack.unpackLoInt(value);
+            // formatting:off
+            sb.append('(')
+                    .append(Pack.unpackHiShort(hi)).append(',')
+                    .append(Pack.unpackLoShort(hi)).append(',')
+                    .append(Pack.unpackHiShort(lo)).append(',')
+                    .append(Pack.unpackLoShort(lo)).append(')');
+            // formatting:on
         }
     }
 }

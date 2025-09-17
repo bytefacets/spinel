@@ -6,6 +6,7 @@ import static com.bytefacets.spinel.printer.KmbtRenderState.kmbFormat;
 import static com.bytefacets.spinel.printer.RendererRegistry.registerDefault;
 import static java.util.Objects.requireNonNull;
 
+import com.bytefacets.collections.types.Pack;
 import com.bytefacets.collections.types.ShortType;
 import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.Field;
@@ -57,6 +58,12 @@ import java.util.Objects;
  *         indicating the bits that are set</td>
  *         <td></td>
  *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Packed2</td>
+ *         <td>none</td>
+ *         <td>Will append the the short as a tuple of two bytes, e.g. (45,67)</td>
+ *         <td></td>
+ *     </tr>
  * </table>
  *
  * @see ShortType#writeBE(byte[], int, short)
@@ -65,6 +72,7 @@ import java.util.Objects;
 final class ShortRenderers {
     private static final RenderMethod NATURAL = StringBuilder::append;
     private static final RenderMethod FLAG = new FlagMethod();
+    private static final RenderMethod PACK2 = new Pack2Method();
 
     private ShortRenderers() {}
 
@@ -91,6 +99,10 @@ final class ShortRenderers {
                 TypeId.Short,
                 AttributeConstants.ContentTypes.Flag,
                 sField -> new ShortRenderer(sField.field(), FLAG));
+        registerDefault(
+                TypeId.Short,
+                AttributeConstants.ContentTypes.Packed2,
+                sField -> new ShortRenderer(sField.field(), PACK2));
     }
 
     interface RenderMethod {
@@ -179,6 +191,17 @@ final class ShortRenderers {
                 }
             }
             sb.setCharAt(sb.length() - 1, '}');
+        }
+    }
+
+    private static final class Pack2Method implements RenderMethod {
+        @Override
+        public void renderValue(final StringBuilder sb, final short value) {
+            sb.append('(')
+                    .append(Pack.unpackHiByte(value))
+                    .append(',')
+                    .append(Pack.unpackLoByte(value))
+                    .append(')');
         }
     }
 }

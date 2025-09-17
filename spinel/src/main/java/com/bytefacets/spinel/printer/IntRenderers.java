@@ -7,6 +7,7 @@ import static com.bytefacets.spinel.printer.RendererRegistry.registerDefault;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.types.IntType;
+import com.bytefacets.collections.types.Pack;
 import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.IntField;
@@ -17,7 +18,8 @@ import java.text.NumberFormat;
 import java.util.Objects;
 
 /**
- * Registers int renderers for Natural, Id, Quantity, Text, and Flag content types.
+ * Registers int renderers for Natural, Id, Quantity, Text, Packed2, Packed4, and Flag content
+ * types.
  *
  * <table>
  *     <tr>
@@ -57,6 +59,18 @@ import java.util.Objects;
  *         indicating the bits that are set</td>
  *         <td></td>
  *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Packed2</td>
+ *         <td>none</td>
+ *         <td>Will append the the int as a tuple of two shorts, e.g. (2762,3873)</td>
+ *         <td></td>
+ *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Packed4</td>
+ *         <td>none</td>
+ *         <td>Will append the the int as a tuple of four bytes, e.g. (10,28,76,89)</td>
+ *         <td></td>
+ *     </tr>
  * </table>
  *
  * @see IntType#writeBE(byte[], int, int)
@@ -65,6 +79,8 @@ import java.util.Objects;
 final class IntRenderers {
     private static final RenderMethod NATURAL = StringBuilder::append;
     private static final RenderMethod FLAG = new FlagMethod();
+    private static final RenderMethod PACK2 = new Pack2Method();
+    private static final RenderMethod PACK4 = new Pack4Method();
 
     private IntRenderers() {}
 
@@ -90,6 +106,14 @@ final class IntRenderers {
                 TypeId.Int,
                 AttributeConstants.ContentTypes.Flag,
                 sField -> new IntRenderer(sField.field(), FLAG));
+        registerDefault(
+                TypeId.Int,
+                AttributeConstants.ContentTypes.Packed2,
+                sField -> new IntRenderer(sField.field(), PACK2));
+        registerDefault(
+                TypeId.Int,
+                AttributeConstants.ContentTypes.Packed4,
+                sField -> new IntRenderer(sField.field(), PACK4));
     }
 
     interface RenderMethod {
@@ -158,6 +182,32 @@ final class IntRenderers {
             } else {
                 renderBE(sb, value);
             }
+        }
+    }
+
+    private static final class Pack2Method implements RenderMethod {
+        @Override
+        public void renderValue(final StringBuilder sb, final int value) {
+            sb.append('(')
+                    .append(Pack.unpackHiShort(value))
+                    .append(',')
+                    .append(Pack.unpackLoShort(value))
+                    .append(')');
+        }
+    }
+
+    private static final class Pack4Method implements RenderMethod {
+        @Override
+        public void renderValue(final StringBuilder sb, final int value) {
+            final short hi = Pack.unpackHiShort(value);
+            final short lo = Pack.unpackLoShort(value);
+            // formatting:off
+            sb.append('(')
+              .append(Pack.unpackHiByte(hi)).append(',')
+              .append(Pack.unpackLoByte(hi)).append(',')
+              .append(Pack.unpackHiByte(lo)).append(',')
+              .append(Pack.unpackLoByte(lo)).append(')');
+            // formatting:on
         }
     }
 
