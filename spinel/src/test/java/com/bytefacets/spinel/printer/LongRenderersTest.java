@@ -11,7 +11,9 @@ import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.LongField;
 import com.bytefacets.spinel.schema.SchemaField;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -101,6 +103,38 @@ class LongRenderersTest {
         public void shouldRenderDuration() {
             AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Duration);
             assertThat(render(3765376576357L), equalTo("01:02:45.376576357"));
+        }
+    }
+
+    @Nested
+    class FlagTests {
+        @ParameterizedTest
+        @ValueSource(
+                longs = {
+                    15,
+                    6,
+                    0,
+                    -32768,
+                    32767,
+                    Integer.MAX_VALUE,
+                    Integer.MIN_VALUE,
+                    Long.MAX_VALUE,
+                    Long.MIN_VALUE
+                })
+        void shouldRenderText(final long value) {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Flag);
+            assertThat(render(value), equalTo(expectedBits(value)));
+        }
+
+        private static String expectedBits(final long value) {
+            final String bin = String.format("%64s", Long.toBinaryString(value)).replace(' ', '0');
+            final List<Integer> setBits = new ArrayList<>();
+            for (int i = 0; i < bin.length(); i++) {
+                if (bin.charAt(bin.length() - 1 - i) == '1') {
+                    setBits.add(i);
+                }
+            }
+            return setBits.toString().replace('[', '{').replace(']', '}').replace(" ", "");
         }
     }
 
