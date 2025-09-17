@@ -100,7 +100,10 @@ final class ByteRenderers {
                 return;
             }
             sb.append('{');
-            for (int i = 0; i < 8; i++) {
+            final int start = Integer.numberOfTrailingZeros(value);
+            // shift so top of byte is at top of int
+            final int end = 7 - Integer.numberOfLeadingZeros(value << 24);
+            for (int i = start; i <= end; i++) {
                 if ((value & (1 << i)) != 0) {
                     sb.append(i).append(',');
                 }

@@ -65,12 +65,20 @@ import java.util.Objects;
  *         <td>Renders a string from the 8 bytes of the long value</td>
  *         <td>Default format is LittleEndian</td>
  *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Flag</td>
+ *         <td>none</td>
+ *         <td>Will append the long value to the StringBuilder as a set of flags, e.g. 15 = {0,1,2,3}
+ *         indicating the bits that are set</td>
+ *         <td></td>
+ *     </tr>
  * </table>
  *
  * @see LongType#readLE(byte[], int)
  * @see LongType#readBE(byte[], int)
  */
 final class LongRenderers {
+    private static final RenderMethod FLAG = new FlagMethod();
 
     private LongRenderers() {}
 
@@ -99,6 +107,10 @@ final class LongRenderers {
                 TypeId.Long,
                 AttributeConstants.ContentTypes.Duration,
                 sField -> new LongRenderer(sField.field(), durationRenderer(sField.metadata())));
+        registerDefault(
+                TypeId.Long,
+                AttributeConstants.ContentTypes.Flag,
+                sField -> new LongRenderer(sField.field(), FLAG));
     }
 
     private static final class NaturalRenderer implements RenderMethod {
@@ -182,6 +194,25 @@ final class LongRenderers {
         @Override
         public void render(final StringBuilder sb, final int row) {
             renderMethod.renderValue(sb, field.valueAt(row));
+        }
+    }
+
+    private static final class FlagMethod implements RenderMethod {
+        @Override
+        public void renderValue(final StringBuilder sb, final long value) {
+            if (value == 0) {
+                sb.append("{}");
+                return;
+            }
+            sb.append('{');
+            final int start = Long.numberOfTrailingZeros(value); // lowest set bit
+            final int end = Long.SIZE - 1 - Long.numberOfLeadingZeros(value); // highest set bit
+            for (int i = start; i <= end; i++) {
+                if ((value & (1L << i)) != 0) {
+                    sb.append(i).append(',');
+                }
+            }
+            sb.setCharAt(sb.length() - 1, '}');
         }
     }
 }

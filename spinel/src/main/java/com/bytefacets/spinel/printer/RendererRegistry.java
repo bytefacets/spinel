@@ -35,7 +35,9 @@ public final class RendererRegistry {
         ByteRenderers.register();
         CharRenderers.register();
         ShortRenderers.register();
+        IntRenderers.register();
         LongRenderers.register();
+        FloatRenderers.register();
         DoubleRenderers.register();
     }
 
