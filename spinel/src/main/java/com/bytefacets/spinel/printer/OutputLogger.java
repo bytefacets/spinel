@@ -24,8 +24,11 @@ public final class OutputLogger implements InputProvider, OutputProvider {
     private final Input input;
 
     OutputLogger(
-            final Logger logger, final BiConsumer<Logger, String> logMethod, final Level logLevel) {
-        this.input = new Input(logger, logMethod, logLevel);
+            final Logger logger,
+            final BiConsumer<Logger, String> logMethod,
+            final Level logLevel,
+            final RendererRegistry rendererRegistry) {
+        this.input = new Input(logger, logMethod, logLevel, rendererRegistry);
     }
 
     @Override
@@ -52,6 +55,8 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         private final Level logLevel;
         private final StringBuilder sb = new StringBuilder(128);
         private final OutputManager outputManager;
+        private final RendererRegistry rendererRegistry;
+        private ValueRenderer[] renderers;
         private TransformOutput source;
         private boolean enabled = true;
         private long eventId;
@@ -60,10 +65,12 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         private Input(
                 final Logger logger,
                 final BiConsumer<Logger, String> logMethod,
-                final Level logLevel) {
+                final Level logLevel,
+                final RendererRegistry rendererRegistry) {
             this.logger = requireNonNull(logger, "logger");
             this.logMethod = requireNonNull(logMethod, "logMethod");
             this.logLevel = requireNonNull(logLevel, "logLevel");
+            this.rendererRegistry = requireNonNull(rendererRegistry, "rendererRegistry");
             this.outputManager = OutputManager.outputManager(delegatedRowProvider(() -> source));
         }
 
@@ -83,10 +90,14 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         @Override
         public void schemaUpdated(final Schema schema) {
             this.schema = schema;
+            if (schema != null) {
+                renderers = rendererRegistry.renderers(schema);
+            }
             if (doLog()) {
                 if (schema != null) {
                     logSchema(eventId);
                 } else {
+                    renderers = null;
                     logIt(String.format("e%-10d SCH null", eventId));
                 }
             }
@@ -138,7 +149,9 @@ public final class OutputLogger implements InputProvider, OutputProvider {
             sb.append(String.format("e%-10d ADD r%-6d: ", eventId, row));
             for (int i = 0, len = schema.size(); i < len; i++) {
                 final SchemaField field = schema.fieldAt(i);
-                sb.append(String.format("[%s=%s]", field.name(), field.objectValueAt(row)));
+                sb.append('[').append(field.name()).append('=');
+                renderers[i].render(sb, row);
+                sb.append(']');
             }
             logIt(sb.toString());
         }
@@ -149,7 +162,9 @@ public final class OutputLogger implements InputProvider, OutputProvider {
             changed.forEach(
                     fieldId -> {
                         final var field = schema.fieldAt(fieldId);
-                        sb.append(String.format("[%s=%s]", field.name(), field.objectValueAt(row)));
+                        sb.append('[').append(field.name()).append('=');
+                        renderers[field.fieldId()].render(sb, row);
+                        sb.append(']');
                     });
             logIt(sb.toString());
         }

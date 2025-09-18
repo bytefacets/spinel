@@ -56,6 +56,7 @@ public final class AttributeConstants {
             private Timestamp() {}
 
             // formatting:off
+            public static final byte Minute =  2;
             public static final byte Second =  1;
             public static final byte Milli  = -3;
             public static final byte Micro  = -6;

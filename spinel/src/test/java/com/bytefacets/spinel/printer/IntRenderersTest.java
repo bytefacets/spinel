@@ -144,6 +144,52 @@ class IntRenderersTest {
         }
     }
 
+    @Nested
+    class DateTests {
+        @Test
+        void shouldRenderDate() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Date);
+            assertThat(render(20250917), equalTo("2025-09-17"));
+            assertThat(render(20250905), equalTo("2025-09-05"));
+            assertThat(render(20251105), equalTo("2025-11-05"));
+            // make no claims about validations
+            assertThat(render(7894567), equalTo("789-45-67"));
+            assertThat(render(Integer.MAX_VALUE), equalTo("214748-36-47"));
+            // make no claims about negative numbers
+        }
+    }
+
+    @Nested
+    class DurationTests {
+        @ParameterizedTest
+        @CsvSource({
+            "1,1,9123456,2534:17:36",
+            "1,1,86465,24:01:05",
+            "1,2,86465,24:01",
+            "2,1,1478,24:38:00",
+            "2,2,1478,24:38",
+            "-3,1,9123456,02:32:03",
+            "-3,1,-9123456,-02:32:03"
+        })
+        void shouldRenderDate(
+                final byte valuePrecision,
+                final byte displayPrecision,
+                final int value,
+                final String expected) {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Duration);
+            AttributeConstants.setDisplayPrecision(attrs, displayPrecision);
+            AttributeConstants.setValuePrecision(attrs, valuePrecision);
+            assertThat(render(value), equalTo(expected));
+        }
+
+        @Test
+        void shouldNotAppendAnythingWhenAtMinOrMax() {
+            AttributeConstants.setContentType(attrs, AttributeConstants.ContentTypes.Duration);
+            assertThat(render(Integer.MAX_VALUE), equalTo(""));
+            assertThat(render(Integer.MIN_VALUE), equalTo(""));
+        }
+    }
+
     private String render(final int value) {
         final ValueRenderer renderer = registry.renderer(schemaField(value));
         final StringBuilder sb = new StringBuilder();

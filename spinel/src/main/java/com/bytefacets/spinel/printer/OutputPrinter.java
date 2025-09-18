@@ -8,6 +8,7 @@ import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.spinel.TransformInput;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
+import com.bytefacets.spinel.schema.SchemaField;
 import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.transform.InputProvider;
 import java.io.PrintStream;
@@ -34,7 +35,10 @@ public final class OutputPrinter implements InputProvider {
     }
 
     private static final class Input implements TransformInput {
+        private final RendererRegistry rendererRegistry = RendererRegistry.rendererRegistry();
         private final PrintStream out;
+        private final StringBuilder sb = new StringBuilder();
+        private ValueRenderer[] renderers;
         private Schema schema;
 
         private Input(final PrintStream out) {
@@ -45,6 +49,7 @@ public final class OutputPrinter implements InputProvider {
         public void schemaUpdated(final Schema schema) {
             this.schema = schema;
             if (schema != null) {
+                renderers = rendererRegistry.renderers(schema);
                 out.printf("SCH %s: %d fields ", schema.name(), schema.size());
                 schema.forEachField(
                         field ->
@@ -56,6 +61,7 @@ public final class OutputPrinter implements InputProvider {
                 out.println();
             } else {
                 out.println("SCH null");
+                renderers = null;
             }
         }
 
@@ -81,23 +87,26 @@ public final class OutputPrinter implements InputProvider {
 
         private void printAdd(final int row) {
             out.printf("ADD r%s: ", padRowId(row));
-            schema.forEachField(
-                    field -> out.printf("[%s=%s]", field.name(), field.objectValueAt(row)));
+            schema.forEachField(field -> out.print(render(field, row)));
             out.println();
         }
 
         private void printChange(final int row, final ChangedFieldSet changed) {
             out.printf("CHG r%s: ", padRowId(row));
-            changed.forEach(
-                    fieldId -> {
-                        final var field = schema.fieldAt(fieldId);
-                        out.printf("[%s=%s]", field.name(), field.objectValueAt(row));
-                    });
+            changed.forEach(fieldId -> out.print(render(schema.fieldAt(fieldId), row)));
             out.println();
         }
 
         private void printRemove(final int row) {
             out.printf("REM r%s%n", padRowId(row));
+        }
+
+        private StringBuilder render(final SchemaField field, final int row) {
+            sb.setLength(0);
+            final var render = renderers[field.fieldId()];
+            render.render(sb.append('[').append(field.name()).append('='), row);
+            sb.append(']');
+            return sb;
         }
     }
 }

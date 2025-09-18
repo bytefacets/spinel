@@ -6,6 +6,7 @@ import static com.bytefacets.spinel.common.DefaultNameSupplier.resolveName;
 import static com.bytefacets.spinel.transform.BuilderSupport.builderSupport;
 import static com.bytefacets.spinel.transform.TransformContext.continuation;
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElseGet;
 
 import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
@@ -20,6 +21,7 @@ public final class OutputLoggerBuilder {
     private final BuilderSupport<OutputLogger> builderSupport;
     private final TransformContext transformContext;
     private final String name;
+    private RendererRegistry rendererRegistry;
     private Level logLevel = Level.TRACE;
     private Logger logger;
     private boolean enabled = true;
@@ -65,7 +67,13 @@ public final class OutputLoggerBuilder {
     private OutputLogger internalBuild() {
         final var useLogger = logger != null ? logger : LoggerFactory.getLogger(name);
         final var method = logMethod();
-        final var node = new OutputLogger(useLogger, method, logLevel);
+        final var node =
+                new OutputLogger(
+                        useLogger,
+                        method,
+                        logLevel,
+                        requireNonNullElseGet(
+                                rendererRegistry, RendererRegistry::rendererRegistry));
         node.enabled(this.enabled);
         return node;
     }
@@ -87,6 +95,11 @@ public final class OutputLoggerBuilder {
 
     public OutputLoggerBuilder withLogger(final @Nullable Logger logger) {
         this.logger = logger;
+        return this;
+    }
+
+    public OutputLoggerBuilder rendererRegistry(final RendererRegistry rendererRegistry) {
+        this.rendererRegistry = rendererRegistry;
         return this;
     }
 
