@@ -36,7 +36,7 @@ final class TimeRenderers {
                     ChronoUnit.MINUTES, DateTimeFormatter.ofPattern("HH:mm"),
                     ChronoUnit.HOURS, DateTimeFormatter.ofPattern("HH"));
 
-    private static long normalizeToNanos(final long value, final ChronoUnit valuePrecision) {
+    static long normalizeToNanos(final long value, final ChronoUnit valuePrecision) {
         return TimeUnit.of(requireNonNullElse(valuePrecision, ChronoUnit.NANOS)).toNanos(value);
     }
 
@@ -167,6 +167,16 @@ final class TimeRenderers {
             return; // don't output anything
         }
 
+        final boolean showNanos = displayPrecision.equals(ChronoUnit.NANOS);
+        final boolean showMicros = showNanos || displayPrecision.equals(ChronoUnit.MICROS);
+        final boolean showMillis = showMicros || displayPrecision.equals(ChronoUnit.MILLIS);
+        final boolean showSeconds = showMillis || displayPrecision.equals(ChronoUnit.SECONDS);
+
+        if (nanos < 0) {
+            sb.append('-');
+            nanos = -nanos;
+        }
+
         final long hours = TimeUnit.NANOSECONDS.toHours(nanos);
         nanos -= TimeUnit.HOURS.toNanos(hours);
         if (hours < 10) sb.append('0');
@@ -175,16 +185,15 @@ final class TimeRenderers {
         final long minutes = TimeUnit.NANOSECONDS.toMinutes(nanos);
         nanos -= TimeUnit.MINUTES.toNanos(minutes);
         if (minutes < 10) sb.append('0');
-        sb.append(minutes).append(':');
+        sb.append(minutes);
 
-        final long seconds = TimeUnit.NANOSECONDS.toSeconds(nanos);
-        nanos -= TimeUnit.SECONDS.toNanos(seconds);
-        if (seconds < 10) sb.append('0');
-        sb.append(seconds);
-
-        final boolean showNanos = displayPrecision.equals(ChronoUnit.NANOS);
-        final boolean showMicros = showNanos || displayPrecision.equals(ChronoUnit.MICROS);
-        final boolean showMillis = showMicros || displayPrecision.equals(ChronoUnit.MILLIS);
+        if (showSeconds) {
+            sb.append(':');
+            final long seconds = TimeUnit.NANOSECONDS.toSeconds(nanos);
+            nanos -= TimeUnit.SECONDS.toNanos(seconds);
+            if (seconds < 10) sb.append('0');
+            sb.append(seconds);
+        }
         if (showMillis) {
             sb.append('.');
             final long millis = TimeUnit.NANOSECONDS.toMillis(nanos);
@@ -207,12 +216,13 @@ final class TimeRenderers {
         }
     }
 
-    private static ZoneId toZoneId(final String zoneId) {
+    static ZoneId toZoneId(final String zoneId) {
         return zoneId != null ? ZoneId.of(zoneId) : UTC;
     }
 
-    private static ChronoUnit toChronoUnit(final byte precision) {
+    static ChronoUnit toChronoUnit(final byte precision) {
         return switch (precision) {
+            case AttributeConstants.Precisions.Timestamp.Minute -> ChronoUnit.MINUTES;
             case AttributeConstants.Precisions.Timestamp.Second -> ChronoUnit.SECONDS;
             case AttributeConstants.Precisions.Timestamp.Milli -> ChronoUnit.MILLIS;
             case AttributeConstants.Precisions.Timestamp.Micro -> ChronoUnit.MICROS;

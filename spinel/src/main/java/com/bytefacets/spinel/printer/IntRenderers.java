@@ -4,6 +4,9 @@ package com.bytefacets.spinel.printer;
 
 import static com.bytefacets.spinel.printer.KmbtRenderState.kmbFormat;
 import static com.bytefacets.spinel.printer.RendererRegistry.registerDefault;
+import static com.bytefacets.spinel.printer.TimeRenderers.normalizeToNanos;
+import static com.bytefacets.spinel.printer.TimeRenderers.toChronoUnit;
+import static com.bytefacets.spinel.printer.TimeRenderers.writeDuration;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.types.IntType;
@@ -15,11 +18,12 @@ import com.bytefacets.spinel.schema.Metadata;
 import com.bytefacets.spinel.schema.TypeId;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
- * Registers int renderers for Natural, Id, Quantity, Text, Packed2, Packed4, and Flag content
- * types.
+ * Registers int renderers for Natural, Id, Quantity, Text, Packed2, Packed4, Date, Duration, and
+ * Flag content types.
  *
  * <table>
  *     <tr>
@@ -39,6 +43,18 @@ import java.util.Objects;
  *         <td>none</td>
  *         <td>Will append the int value to the StringBuilder</td>
  *         <td></td>
+ *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Date</td>
+ *         <td>none (display format is currently fixed at yyyy-MM-dd)</td>
+ *         <td>Will append int as yyyy-MM-dd format</td>
+ *         <td>No validation is performed on months, days, or negative values</td>
+ *     </tr>
+ *     <tr>
+ *         <td>AttributeConstants.ContentTypes.Duration</td>
+ *         <td>ValuePrecision (default is Seconds), DisplayPrecision (default is Seconds)</td>
+ *         <td>Will append int as hh:mm:ss[:SSSSSSSSS] format</td>
+ *         <td>Integer.MIN_VALUE and MAX_VALUE are treated as no value and will not append anything</td>
  *     </tr>
  *     <tr>
  *         <td>AttributeConstants.ContentTypes.Quantity</td>
@@ -81,6 +97,7 @@ final class IntRenderers {
     private static final RenderMethod FLAG = new FlagMethod();
     private static final RenderMethod PACK2 = new Pack2Method();
     private static final RenderMethod PACK4 = new Pack4Method();
+    private static final RenderMethod DATE = new DateMethod();
 
     private IntRenderers() {}
 
@@ -93,6 +110,14 @@ final class IntRenderers {
                 TypeId.Int,
                 AttributeConstants.ContentTypes.Id,
                 sField -> new IntRenderer(sField.field(), NATURAL));
+        registerDefault(
+                TypeId.Int,
+                AttributeConstants.ContentTypes.Date,
+                sField -> new IntRenderer(sField.field(), DATE));
+        registerDefault(
+                TypeId.Int,
+                AttributeConstants.ContentTypes.Duration,
+                sField -> new IntRenderer(sField.field(), durationRenderer(sField.metadata())));
         registerDefault(
                 TypeId.Int,
                 AttributeConstants.ContentTypes.Quantity,
@@ -230,5 +255,38 @@ final class IntRenderers {
             }
             sb.setCharAt(sb.length() - 1, '}');
         }
+    }
+
+    private static final class DateMethod implements RenderMethod {
+        @SuppressWarnings("NeedBraces")
+        @Override
+        public void renderValue(final StringBuilder sb, final int yyyyMMdd) {
+            final int year = yyyyMMdd / 10000;
+            final int month = yyyyMMdd / 100 % 100;
+            final int day = yyyyMMdd % 100;
+            sb.append(year).append('-');
+            if (month < 10) sb.append('0');
+            sb.append(month).append('-');
+            if (day < 10) sb.append('0');
+            sb.append(day);
+        }
+    }
+
+    static RenderMethod durationRenderer(final Metadata metadata) {
+        final ChronoUnit valuePrecision =
+                toChronoUnit(
+                        AttributeConstants.valuePrecision(
+                                metadata, AttributeConstants.Precisions.Timestamp.Second));
+        final ChronoUnit displayPrecision =
+                toChronoUnit(
+                        AttributeConstants.displayPrecision(
+                                metadata, AttributeConstants.Precisions.Timestamp.Second));
+        return (sb, value) -> {
+            if (value == Integer.MIN_VALUE || value == Integer.MAX_VALUE) {
+                return;
+            }
+            final long nanos = normalizeToNanos(value, valuePrecision);
+            writeDuration(nanos, displayPrecision, sb);
+        };
     }
 }

@@ -237,6 +237,12 @@ class TimeRenderersTest {
             assertThat(render(toNanos(0, 0, 0, 123456789)), equalTo("00:00:00.123456789"));
         }
 
+        @Test
+        void shouldNotAppendAnythingWhenAtMinOrMax() {
+            assertThat(render(Long.MAX_VALUE), equalTo(""));
+            assertThat(render(Long.MIN_VALUE), equalTo(""));
+        }
+
         private String render(final long value) {
             sb.setLength(0);
             durationRenderer(metadata()).renderValue(sb, value);

@@ -47,19 +47,20 @@ import java.util.Objects;
  *         <td>AttributeConstants.ContentTypes.Time</td>
  *         <td>DisplayPrecision, ValuePrecision, TimeZone</td>
  *         <td>Renders a time to nano precision</td>
- *         <td>ValuePrecision allows for values in seconds to nanos; Note that it goes thru Instant and ZonedDateTime</td>
+ *         <td>ValuePrecision allows for values in minutes to nanos; Note that it goes thru Instant and ZonedDateTime</td>
  *     </tr>
  *     <tr>
  *         <td>AttributeConstants.ContentTypes.Timestamp</td>
  *         <td>DisplayPrecision, ValuePrecision, TimeZone</td>
  *         <td>Renders a timestamp to nano precision</td>
- *         <td>ValuePrecision allows for values in seconds to nanos; Note that it goes thru Instant and ZonedDateTime</td>
+ *         <td>ValuePrecision allows for values in minutes to nanos; Note that it goes thru Instant and ZonedDateTime</td>
  *     </tr>
  *     <tr>
  *         <td>AttributeConstants.ContentTypes.Duration</td>
  *         <td>DisplayPrecision, ValuePrecision</td>
  *         <td>Renders a duration to nano precision</td>
- *         <td>ValuePrecision allows for values in seconds to nanos</td>
+ *         <td>ValuePrecision allows for values in minutes to nanos; Long.MIN_VALUE and MAX_VALUE
+ *         are treated as no value and will not append anything</td>
  *     </tr>
  *     <tr>
  *         <td>AttributeConstants.ContentTypes.Text</td>
