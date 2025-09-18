@@ -92,25 +92,24 @@ public final class AttributeConstants {
     }
 
     public static byte contentType(final Metadata metadata) {
-        return ByteType.convert(
-                metadata.attributes().getOrDefault(ContentType, ContentTypes.Natural));
+        return ByteType.convert(metadata.getAttribute(ContentType, ContentTypes.Natural));
     }
 
     public static byte valuePrecision(final Metadata metadata, final byte defaultValue) {
-        return ByteType.convert(metadata.attributes().getOrDefault(ValuePrecision, defaultValue));
+        return ByteType.convert(metadata.getAttribute(ValuePrecision, defaultValue));
     }
 
     public static byte displayPrecision(final Metadata metadata, final byte defaultValue) {
-        return ByteType.convert(metadata.attributes().getOrDefault(DisplayPrecision, defaultValue));
+        return ByteType.convert(metadata.getAttribute(DisplayPrecision, defaultValue));
     }
 
     public static String displayFormat(final Metadata metadata) {
-        final Object value = metadata.attributes().get(DisplayFormat);
+        final Object value = metadata.getAttribute(DisplayFormat);
         return value != null ? value.toString() : null;
     }
 
     public static String timeZone(final Metadata metadata) {
-        final Object value = metadata.attributes().get(TimeZone);
+        final Object value = metadata.getAttribute(TimeZone);
         return value != null ? value.toString() : null;
     }
 }

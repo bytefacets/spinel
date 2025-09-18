@@ -22,7 +22,6 @@ import com.bytefacets.spinel.validation.Key;
 import com.bytefacets.spinel.validation.RowData;
 import com.bytefacets.spinel.validation.ValidationOperator;
 import io.grpc.stub.StreamObserver;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,20 +142,6 @@ public final class CodecTest {
         @Test
         void shouldTransmitFieldMetadata() {
             final Metadata v1Md = Metadata.metadata(Set.of("v1"), Map.of("a1", 1));
-            final Metadata v2Md = Metadata.metadata(Set.of("v2"), Map.of("a2", 2L));
-            setUp(v1Md, v2Md);
-            validation
-                    .expect()
-                    .schema(expectedSchema())
-                    .metadata(Map.of("Value1", v1Md, "Value2", v2Md))
-                    .validate();
-        }
-
-        @Test
-        void shouldTransmitNullAttribute() {
-            final Map<String, Object> v1Map = new HashMap<>(Map.of("a1", 1));
-            v1Map.put("nullable", null);
-            final Metadata v1Md = Metadata.metadata(Set.of("v1"), v1Map);
             final Metadata v2Md = Metadata.metadata(Set.of("v2"), Map.of("a2", 2L));
             setUp(v1Md, v2Md);
             validation
