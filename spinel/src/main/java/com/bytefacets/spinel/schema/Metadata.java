@@ -5,8 +5,6 @@ package com.bytefacets.spinel.schema;
 import static java.util.Objects.requireNonNull;
 
 import jakarta.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -20,7 +18,7 @@ public final class Metadata {
     public static Metadata metadata(final Set<String> tags, final Map<String, Object> attributes) {
         return new Metadata(
                 tags != null ? Set.copyOf(tags) : Set.of(),
-                attributes != null ? new HashMap<>(attributes) : Map.of());
+                attributes != null ? Map.copyOf(attributes) : Map.of());
     }
 
     public static Metadata metadata(final Set<String> tags) {
@@ -40,12 +38,12 @@ public final class Metadata {
         if (tags == null) {
             return Set.of();
         } else {
-            return Collections.unmodifiableSet(tags);
+            return tags; // is already unmodifiable
         }
     }
 
     public Map<String, Object> attributes() {
-        return attributes;
+        return attributes; // is already unmodifiable
     }
 
     public boolean hasTag(final String tag) {
@@ -54,6 +52,10 @@ public final class Metadata {
 
     public @Nullable Object getAttribute(final String name) {
         return attributes.get(name);
+    }
+
+    public @Nullable Object getAttribute(final String name, final Object defaultValue) {
+        return attributes.getOrDefault(name, defaultValue);
     }
 
     @SuppressWarnings("NeedBraces")

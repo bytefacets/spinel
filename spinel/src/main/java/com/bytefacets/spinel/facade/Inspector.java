@@ -28,14 +28,14 @@ final class Inspector {
         final var inconsistent =
                 typeInfo.fields().stream().filter(fInfo -> !fInfo.isTypeConsistent()).toList();
         if (!inconsistent.isEmpty()) {
+            // formatting:off
             final String message =
                     inconsistent.stream()
-                            .map(
-                                    f ->
-                                            String.format(
-                                                    "%s type inconsistent between get type(%s) and set type(%s)",
-                                                    f.getName(), f.getType(), f.setType()))
+                            .map(f -> String.format(
+                                "%s type inconsistent between get type(%s) and set type(%s)",
+                                f.getName(), f.getType(), f.setType()))
                             .collect(Collectors.joining(";"));
+            // formatting:on
             throw codeGenException(
                     typeInfo.type(), "inspecting methods", new ClassCastException(message));
         }

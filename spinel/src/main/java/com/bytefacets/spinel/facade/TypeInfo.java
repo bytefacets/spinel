@@ -36,7 +36,7 @@ final class TypeInfo {
         final String fieldName = nameFromGetter(method.getName());
         fieldInfoMap
                 .computeIfAbsent(fieldName, FieldInfo::new)
-                .setReadInfo(method.getName(), method.getReturnType());
+                .setReadInfo(method, method.getName(), method.getReturnType());
     }
 
     void collectSetter(final Method method) {
@@ -44,7 +44,10 @@ final class TypeInfo {
         fieldInfoMap
                 .computeIfAbsent(fieldName, FieldInfo::new)
                 .setWriteInfo(
-                        method.getName(), method.getParameterTypes()[0], method.getReturnType());
+                        method,
+                        method.getName(),
+                        method.getParameterTypes()[0],
+                        method.getReturnType());
     }
 
     void collectSkippedMethod(final Method method) {

@@ -37,12 +37,13 @@ public final class StructTableBuilder<T> {
     private StructTableBuilder(final Class<T> type, final @Nullable TransformBuilder transform) {
         this.type = requireNonNull(type, "type");
         this.name = type.getSimpleName();
-        StructFieldExtractor.getFieldList(type)
-                .forEach(
-                        fd -> {
-                            fieldMap.add(fd.name());
-                            typeMap.computeIfAbsent(fd.fieldType(), ArrayList::new).add(fd);
-                        });
+        StructFieldExtractor.consumeFields(
+                type,
+                fd -> {
+                    fieldMap.add(fd.name());
+                    typeMap.computeIfAbsent(fd.fieldType(), ArrayList::new).add(fd);
+                },
+                fd -> {});
         this.builderSupport = BuilderSupport.builderSupport(this.name, this::internalBuild);
         this.transform = transform;
         if (transform != null) {
