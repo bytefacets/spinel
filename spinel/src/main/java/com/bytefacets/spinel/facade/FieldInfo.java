@@ -4,6 +4,8 @@ package com.bytefacets.spinel.facade;
 
 import static java.util.Objects.requireNonNull;
 
+import java.lang.reflect.Method;
+
 final class FieldInfo {
     private final String name;
     private String getterMethodName;
@@ -11,6 +13,8 @@ final class FieldInfo {
     private Class<?> getterType;
     private Class<?> setterType;
     private Class<?> setterReturnType;
+    private Method getterMethod;
+    private Method setterMethod;
 
     FieldInfo(final String name) {
         this.name = requireNonNull(name, "name");
@@ -44,16 +48,31 @@ final class FieldInfo {
         return getterMethodName != null;
     }
 
-    void setReadInfo(final String methodName, final Class<?> returnType) {
+    FieldInfo setReadInfo(final Method method, final String methodName, final Class<?> returnType) {
+        this.getterMethod = requireNonNull(method, "method");
         this.getterMethodName = requireNonNull(methodName, "getterMethodName");
         this.getterType = requireNonNull(returnType, "returnType");
+        return this;
     }
 
-    void setWriteInfo(
-            final String methodName, final Class<?> paramType, final Class<?> returnType) {
+    FieldInfo setWriteInfo(
+            final Method method,
+            final String methodName,
+            final Class<?> paramType,
+            final Class<?> returnType) {
+        this.setterMethod = requireNonNull(method, "method");
         this.setterMethodName = requireNonNull(methodName, "setterMethodName");
         this.setterType = requireNonNull(paramType, "paramType");
         this.setterReturnType = requireNonNull(returnType, "returnType");
+        return this;
+    }
+
+    Method setterMethod() {
+        return setterMethod;
+    }
+
+    Method getterMethod() {
+        return getterMethod;
     }
 
     String getterMethodName() {

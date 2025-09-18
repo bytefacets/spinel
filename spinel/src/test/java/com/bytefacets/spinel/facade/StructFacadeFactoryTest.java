@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.facade;
 
+import static com.bytefacets.spinel.facade.StructFieldExtractor.consumeFields;
 import static com.bytefacets.spinel.schema.ArrayFieldFactory.writableArrayField;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -9,20 +10,25 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.bytefacets.spinel.gen.CodeGenException;
+import com.bytefacets.spinel.schema.AttributeConstants;
 import com.bytefacets.spinel.schema.BoolField;
 import com.bytefacets.spinel.schema.ByteField;
 import com.bytefacets.spinel.schema.CharField;
+import com.bytefacets.spinel.schema.DisplayMetadata;
 import com.bytefacets.spinel.schema.DoubleField;
 import com.bytefacets.spinel.schema.Field;
 import com.bytefacets.spinel.schema.FieldChangeListener;
+import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.schema.FieldList;
 import com.bytefacets.spinel.schema.FloatField;
 import com.bytefacets.spinel.schema.IntField;
 import com.bytefacets.spinel.schema.LongField;
+import com.bytefacets.spinel.schema.Metadata;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaBindable;
 import com.bytefacets.spinel.schema.ShortField;
 import com.bytefacets.spinel.schema.TypeId;
+import com.bytefacets.spinel.schema.ValueMetadata;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +100,45 @@ class StructFacadeFactoryTest {
     }
 
     @Test
+    void shouldHandleAnnotations() {
+        final Map<String, FieldDescriptor> map = new HashMap<>();
+        consumeFields(WithAnnotations.class, f -> {}, f -> map.put(f.name(), f));
+        // formatting:off
+        assertThat(
+            map.get("SomeLong").metadata(),
+            equalTo(Metadata.metadata(Map.of(
+                AttributeConstants.ContentType, AttributeConstants.ContentTypes.Timestamp,
+                AttributeConstants.ValuePrecision, AttributeConstants.Precisions.Timestamp.Milli,
+                AttributeConstants.DisplayPrecision, AttributeConstants.Precisions.Timestamp.Micro,
+                AttributeConstants.DisplayFormat, "#,000.00",
+                AttributeConstants.TimeZone, "UTC"))));
+        assertThat(map.get("SomeInt").metadata(), equalTo(Metadata.EMPTY));
+        // formatting:on
+    }
+
+    @Test
+    void shouldHandleAnnotationsThruInheritance() {
+        final Map<String, FieldDescriptor> map = new HashMap<>();
+        consumeFields(InheritSetter.class, f -> map.put(f.name(), f), f -> map.put(f.name(), f));
+        // formatting:off
+        assertThat(
+                map.get("SomeLong").metadata(),
+                equalTo(Metadata.metadata(Map.of(
+                        AttributeConstants.ContentType, AttributeConstants.ContentTypes.Timestamp,
+                        AttributeConstants.ValuePrecision, AttributeConstants.Precisions.Timestamp.Milli,
+                        AttributeConstants.DisplayPrecision, AttributeConstants.Precisions.Timestamp.Micro,
+                        AttributeConstants.DisplayFormat, "#,000.00",
+                        AttributeConstants.TimeZone, "UTC"))));
+        assertThat(map.get("SomeInt").metadata(), equalTo(Metadata.EMPTY));
+        assertThat(
+                map.get("SomeDouble").metadata(),
+                equalTo(Metadata.metadata(Map.of(
+                        AttributeConstants.ContentType, AttributeConstants.ContentTypes.Percent,
+                        AttributeConstants.DisplayFormat, "#,000.00%"))));
+        // formatting:on
+    }
+
+    @Test
     void shouldThrowWhenOtherThanGettersAndSetters() {
         final var ex =
                 assertThrows(
@@ -155,5 +200,49 @@ class StructFacadeFactoryTest {
         void setSomeString(String value);
 
         int getSomeString();
+    }
+
+    public interface WithAnnotations {
+        @ValueMetadata(
+                contentType = AttributeConstants.ContentTypes.Timestamp,
+                precision = AttributeConstants.Precisions.Timestamp.Milli)
+        @DisplayMetadata(
+                format = "#,000.00",
+                zoneId = "UTC",
+                precision = AttributeConstants.Precisions.Timestamp.Micro)
+        long getSomeLong();
+
+        @ValueMetadata()
+        @DisplayMetadata()
+        int getSomeInt();
+    }
+
+    public interface InheritGetter {
+        @ValueMetadata(
+                contentType = AttributeConstants.ContentTypes.Timestamp,
+                precision = AttributeConstants.Precisions.Timestamp.Milli)
+        @DisplayMetadata(
+                format = "#,000.00",
+                zoneId = "UTC",
+                precision = AttributeConstants.Precisions.Timestamp.Micro)
+        long getSomeLong();
+
+        @ValueMetadata()
+        @DisplayMetadata()
+        int getSomeInt();
+    }
+
+    public interface InheritSetter extends InheritGetter {
+        @ValueMetadata()
+        @DisplayMetadata()
+        void setSomeLong(long value);
+
+        @ValueMetadata()
+        @DisplayMetadata()
+        void setSomeInt(int value);
+
+        @ValueMetadata(contentType = AttributeConstants.ContentTypes.Percent)
+        @DisplayMetadata(format = "#,000.00%")
+        void setSomeDouble(double value);
     }
 }
