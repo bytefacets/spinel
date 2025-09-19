@@ -1,11 +1,11 @@
 plugins {
     java
-    //application
+    application
 }
 
-//application {
-//    mainClass.set("com.bytefacets.spinel.tools.Main")
-//}
+application {
+    mainClass.set("com.bytefacets.spinel.tools.Main")
+}
 
 val auth0 : String by extra
 val bytefacetsCollectionsVersion : String by extra
