@@ -9,12 +9,12 @@ plugins {
 
 apply(plugin = "com.bytefacets.template_processor")
 
-val grpcVersion = "1.70.0"
-val protobufVersion = "4.29.3";
 val auth0 : String by extra
 val bytefacetsCollectionsVersion : String by extra
+val grpcVersion : String by extra
 val log4jVersion : String by extra
 val nettyVersion : String by extra
+val protobufVersion : String by extra
 
 protobuf {
     protoc {
