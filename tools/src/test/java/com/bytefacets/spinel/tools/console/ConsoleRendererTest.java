@@ -42,7 +42,8 @@ class ConsoleRendererTest {
 
     @BeforeEach
     void setUp() {
-        renderer = new ConsoleRenderer(presenter, rowMapping, control);
+        renderer = new ConsoleRenderer("title", presenter, rowMapping, control);
+        verify(control, times(1)).setTitle("title");
         Connector.connectInputToOutput(renderer, table);
     }
 

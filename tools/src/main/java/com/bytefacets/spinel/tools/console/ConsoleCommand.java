@@ -106,7 +106,8 @@ public final class ConsoleCommand implements Callable<Integer> {
                                         .defaultAll().build())
                         .build();
         // formatting:on
-        Connector.connectInputToOutput(new ConsoleRenderer(), source);
+        final String title = outputName + " @ " + endpoint;
+        Connector.connectInputToOutput(new ConsoleRenderer(title), source);
     }
 
     GrpcClientBuilder maybeWithJwt(final GrpcClientBuilder builder) {
