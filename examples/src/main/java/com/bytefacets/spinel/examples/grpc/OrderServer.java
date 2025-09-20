@@ -7,8 +7,7 @@ import static com.bytefacets.spinel.schema.FieldDescriptor.stringField;
 
 import com.bytefacets.spinel.comms.send.DefaultSubscriptionProvider;
 import com.bytefacets.spinel.comms.send.RegisteredOutputsTable;
-import com.bytefacets.spinel.examples.common.Order;
-import com.bytefacets.spinel.examples.common.OrderSimulator;
+import com.bytefacets.spinel.examples.common.LimitedSetSimulator;
 import com.bytefacets.spinel.grpc.send.GrpcService;
 import com.bytefacets.spinel.grpc.send.GrpcServiceBuilder;
 import com.bytefacets.spinel.join.Join;
@@ -22,6 +21,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -38,8 +38,7 @@ import org.slf4j.event.Level;
  * <p>Refer to the {@link Order Order interface} to see the simplified model of an Order which will
  * get inspected at turned into a table structure.
  *
- * @see Order
- * @see OrderSimulator
+ * @see LimitedSetSimulator
  */
 final class OrderServer {
     private static final Random random = new Random(76598739);
@@ -48,8 +47,8 @@ final class OrderServer {
     private static final int ACTIVE_ORDER_HI = 10;
     private static final int ACTIVE_ORDER_LO = 3;
     private static final int NUM_EVENTS_PER_BATCH = 1;
-    private static final int MIN_DELAY = 10;
-    private static final int MAX_DELAY = 250;
+    private static final Duration MIN_DELAY = Duration.ofMillis(10);
+    private static final Duration MAX_DELAY = Duration.ofMillis(250);
     private final IntIndexedStructTable<Order> orders;
     private final RegisteredOutputsTable outputs;
     private final IntIndexedTable instruments;
@@ -129,20 +128,39 @@ final class OrderServer {
     /**
      * Start the order feed simulator
      *
-     * @see OrderSimulator
+     * @see LimitedSetSimulator
      */
     void start() {
         // this is a "simulator" of an order feed
-        final OrderSimulator orderSimulator =
-                OrderSimulator.mockOrders(orders, eventLoop)
-                        .activeOrderLo(ACTIVE_ORDER_LO)
-                        .activeOrderHi(ACTIVE_ORDER_HI)
-                        .maxDelay(MAX_DELAY)
-                        .minDelay(MIN_DELAY)
-                        .numInstruments(NUM_INSTRUMENTS)
-                        .numEventsPerBatch(NUM_EVENTS_PER_BATCH)
-                        .build();
-        orderSimulator.start();
+        LimitedSetSimulator.limitedSetSimulator(
+                        orders,
+                        this::initializeMockOrder,
+                        this::updateMockOrder,
+                        this::shouldRemoveMockOrder,
+                        eventLoop)
+                .activeItemsLo(ACTIVE_ORDER_LO)
+                .activeItemsHi(ACTIVE_ORDER_HI)
+                .maxDelay(MAX_DELAY)
+                .minDelay(MIN_DELAY)
+                .numEventsPerBatch(NUM_EVENTS_PER_BATCH)
+                .build()
+                .start();
+    }
+
+    private void updateMockOrder(final Order order) {
+        final int curQty = order.getQty();
+        order.setQty(curQty - Math.min(100, curQty));
+    }
+
+    private boolean shouldRemoveMockOrder(final Order order) {
+        return order.getQty() == 0;
+    }
+
+    private void initializeMockOrder(final Order order) {
+        final int orderId = order.getOrderId();
+        order.setInstrumentId(1 + ((orderId * 31) % NUM_INSTRUMENTS))
+                .setQty(100 * (1 + (orderId % 23)))
+                .setPrice(5.2 * (orderId & 127));
     }
 
     private void registerInstruments() {
@@ -156,4 +174,14 @@ final class OrderServer {
         }
         instruments.fireChanges();
     }
+
+    /** A simplified model of an Order which will get inspected at turned into a table structure. */
+    // formatting:off
+    public interface Order {
+        int getOrderId(); // getter only bc it's the key field
+        int getQty();           Order setQty(int value);
+        double getPrice();      Order setPrice(double value);
+        int getInstrumentId();  Order setInstrumentId(int value);
+    }
+    // formatting:on
 }
