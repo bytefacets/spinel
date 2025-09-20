@@ -5,9 +5,10 @@ package com.bytefacets.spinel.examples.grpc;
 import static com.bytefacets.spinel.grpc.send.auth.MultiTenantJwtInterceptor.multiTenantJwt;
 import static com.bytefacets.spinel.schema.FieldDescriptor.stringField;
 
-import com.bytefacets.collections.queue.IntDeque;
 import com.bytefacets.spinel.comms.send.DefaultSubscriptionProvider;
 import com.bytefacets.spinel.comms.send.RegisteredOutputsTable;
+import com.bytefacets.spinel.examples.common.Order;
+import com.bytefacets.spinel.examples.common.OrderSimulator;
 import com.bytefacets.spinel.grpc.send.GrpcService;
 import com.bytefacets.spinel.grpc.send.GrpcServiceBuilder;
 import com.bytefacets.spinel.join.Join;
@@ -23,8 +24,9 @@ import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import net.datafaker.Faker;
 import org.slf4j.event.Level;
 
 /**
@@ -32,13 +34,22 @@ import org.slf4j.event.Level;
  *
  * <p>The data from this server is used to demonstrate a client receiving data from multiple servers
  * and joining the data on the client side by some key.
+ *
+ * <p>Refer to the {@link Order Order interface} to see the simplified model of an Order which will
+ * get inspected at turned into a table structure.
+ *
+ * @see Order
+ * @see OrderSimulator
  */
 final class OrderServer {
+    private static final Random random = new Random(76598739);
     static final int ORDER_PORT = 25001;
     static final int NUM_INSTRUMENTS = 10;
-    private static final int ACTIVE_ORDER_HI = 1000;
-    private static final int ACTIVE_ORDER_LO = 300;
-    private static final int NUM_EVENTS_PER_BATCH = 10;
+    private static final int ACTIVE_ORDER_HI = 10;
+    private static final int ACTIVE_ORDER_LO = 3;
+    private static final int NUM_EVENTS_PER_BATCH = 1;
+    private static final int MIN_DELAY = 10;
+    private static final int MAX_DELAY = 250;
     private final IntIndexedStructTable<Order> orders;
     private final RegisteredOutputsTable outputs;
     private final IntIndexedTable instruments;
@@ -115,97 +126,34 @@ final class OrderServer {
         outputs.register("order-view", join);
     }
 
+    /**
+     * Start the order feed simulator
+     *
+     * @see OrderSimulator
+     */
     void start() {
-        eventLoop.execute(new OrderActivity());
-    }
-
-    /** Little class that creates a batch of orders */
-    private final class OrderActivity implements Runnable {
-        private final Order facade;
-        private final IntDeque activeOrders = new IntDeque(ACTIVE_ORDER_HI);
-        int id = 1;
-
-        private OrderActivity() {
-            // the table provides a facade to the underlying table storage
-            facade = orders.createFacade();
-        }
-
-        @Override
-        public void run() {
-            createBatch();
-            // wait a little and go again!
-            final long waitTime = 100 + (long) (Math.random() * 250);
-            eventLoop.schedule(this, waitTime, TimeUnit.MILLISECONDS);
-        }
-
-        private void createBatch() {
-            for (int i = 0; i < NUM_EVENTS_PER_BATCH; i++) {
-                final int numActive = activeOrders.size();
-                if (numActive < ACTIVE_ORDER_LO) {
-                    createOrder();
-                } else if (numActive >= ACTIVE_ORDER_HI) {
-                    updateOrder();
-                } else if (Math.random() < 0.5) {
-                    createOrder();
-                } else {
-                    updateOrder();
-                }
-            }
-            orders.fireChanges();
-        }
-
-        private void createOrder() {
-            final int orderId = id++;
-            orders.beginAdd(orderId, facade)
-                    .setInstrumentId(1 + ((orderId * 31) % NUM_INSTRUMENTS))
-                    .setQty(100 * (1 + (orderId % 23)))
-                    .setPrice(5.2 * (orderId & 127));
-            orders.endAdd();
-            activeOrders.addLast(orderId);
-        }
-
-        private void updateOrder() {
-            // pick the order to update next
-            final int orderId = activeOrders.removeFirst();
-            // where in the table is it?
-            final int row = orders.lookupKeyRow(orderId);
-            // tell the table to move the facade over the row
-            orders.moveToRow(facade, row);
-            // calculate a new quantity
-            final int curQty = facade.getQty();
-            final int newQty = curQty - Math.min(100, curQty);
-            if (newQty == 0) {
-                // remove the order it if it's zero
-                orders.remove(orderId);
-            } else {
-                // otherwise change the quantity
-                orders.beginChange(orderId, facade);
-                facade.setQty(newQty);
-                orders.endChange();
-                // and queue the order to get updated again
-                activeOrders.addLast(orderId);
-            }
-        }
+        // this is a "simulator" of an order feed
+        final OrderSimulator orderSimulator =
+                OrderSimulator.mockOrders(orders, eventLoop)
+                        .activeOrderLo(ACTIVE_ORDER_LO)
+                        .activeOrderHi(ACTIVE_ORDER_HI)
+                        .maxDelay(MAX_DELAY)
+                        .minDelay(MIN_DELAY)
+                        .numInstruments(NUM_INSTRUMENTS)
+                        .numEventsPerBatch(NUM_EVENTS_PER_BATCH)
+                        .build();
+        orderSimulator.start();
     }
 
     private void registerInstruments() {
+        final var stocks = new Faker(random).stock();
         final TableRow row = instruments.tableRow();
         final int fieldId = instruments.fieldId("Symbol");
         for (int i = 0; i < NUM_INSTRUMENTS; i++) {
             instruments.beginAdd(i);
-            row.setString(fieldId, Integer.toHexString(109010 * (i + 1)).toUpperCase());
+            row.setString(fieldId, stocks.nyseSymbol());
             instruments.endAdd();
         }
         instruments.fireChanges();
     }
-
-    /** A simplified model of an Order which will get inspected at turned into a table structure. */
-    // formatting:off
-    public interface Order {
-        int getOrderId(); // getter only bc it's the key field
-        int getQty();           Order setQty(int value);
-        double getPrice();      Order setPrice(double value);
-        int getInstrumentId();  Order setInstrumentId(int value);
-    }
-    // formatting:on
 }

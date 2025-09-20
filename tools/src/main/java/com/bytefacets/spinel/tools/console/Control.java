@@ -17,6 +17,11 @@ final class Control {
         this.ansi = presenter.ansi();
     }
 
+    void setTitle(final String value) {
+        ansi.append(String.format("\033]0;%s\007", value));
+        presenter.update();
+    }
+
     void emitClear() {
         ansi.eraseScreen();
         ansi.cursor(0, 0);

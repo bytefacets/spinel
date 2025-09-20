@@ -16,13 +16,19 @@ import jakarta.annotation.Nullable;
 public final class ConsoleRenderer implements InputProvider {
     private final RendererRegistry rendererRegistry = RendererRegistry.rendererRegistry();
     private final Input input;
+    private final String title;
 
-    ConsoleRenderer() {
-        this(new Presenter(System.out::println), new RowMapping(), null);
+    ConsoleRenderer(final String title) {
+        this(title, new Presenter(System.out::println), new RowMapping(), null);
     }
 
     // VisibleForTesting
-    ConsoleRenderer(final Presenter presenter, final RowMapping mapping, final Control control) {
+    ConsoleRenderer(
+            final String title,
+            final Presenter presenter,
+            final RowMapping mapping,
+            final Control control) {
+        this.title = requireNonNull(title, "title");
         input =
                 new Input(
                         presenter,
@@ -45,6 +51,7 @@ public final class ConsoleRenderer implements InputProvider {
             this.presenter = requireNonNull(presenter, "presenter");
             this.mapping = requireNonNull(mapping, "mapping");
             this.control = requireNonNull(control, "control");
+            control.setTitle(title);
         }
 
         @Override
