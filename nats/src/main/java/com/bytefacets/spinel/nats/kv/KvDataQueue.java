@@ -87,7 +87,7 @@ final class KvDataQueue implements Runnable {
         free(update);
         if (entry.getOperation().equals(KeyValueOperation.DELETE)
                 || entry.getOperation().equals(KeyValueOperation.PURGE)) {
-            listener.delete(entry.getKey());
+            listener.delete(entry);
         } else {
             listener.update(entry);
         }
@@ -108,7 +108,7 @@ final class KvDataQueue implements Runnable {
     interface Listener {
         void update(KeyValueEntry entry);
 
-        void delete(String key);
+        void delete(KeyValueEntry key);
 
         void fireChanges();
 

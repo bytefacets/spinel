@@ -73,8 +73,6 @@ class NatsKvSourceTest {
                         schemaRegistry,
                         Duration.ofMinutes(1),
                         16);
-        verify(keyValue, times(1)).watchAll(watcherCaptor.capture());
-        watcher = watcherCaptor.getValue();
         final Map<String, Field> fieldMap = new LinkedHashMap<>();
         fieldMap.put("Key", keyField);
         fieldMap.put("V1", v1Field);
@@ -88,6 +86,10 @@ class NatsKvSourceTest {
         encoder.setSchema(5, schema);
         Connector.connectInputToOutput(logger().logLevel(Level.INFO).build(), source);
         Connector.connectInputToOutput(validator, source);
+        //
+        source.open();
+        verify(keyValue, times(1)).watchAll(watcherCaptor.capture());
+        watcher = watcherCaptor.getValue();
     }
 
     @AfterEach

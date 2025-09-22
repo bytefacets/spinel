@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class BucketUtil {
+public final class BucketUtil {
     private static final Logger log = LoggerFactory.getLogger(BucketUtil.class);
     static final String SCHEMA_ID_KEY = "__schema_id";
     static final String SCHEMA_PREFIX = "__s.";
@@ -18,7 +18,12 @@ final class BucketUtil {
 
     private BucketUtil() {}
 
-    static KeyValue getOrCreateBucket(
+    /**
+     * Tries to create a bucket with the provided configuration, but swallows any
+     * JetStreamApiException assuming that it means the bucket is already created. Throws
+     * RuntimeExceptions if there is any IOException.
+     */
+    public static KeyValue getOrCreateBucket(
             final Connection connection, final KeyValueConfiguration kvConfig) {
         try {
             final var status = connection.keyValueManagement().create(kvConfig);
