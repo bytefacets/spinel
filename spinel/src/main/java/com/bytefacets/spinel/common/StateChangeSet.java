@@ -21,6 +21,7 @@ public final class StateChangeSet {
     private final IntIndexedSet addedRows = new IntIndexedSet(16);
     private final IntIndexedSet changedRows = new IntIndexedSet(16);
     private final IntIndexedSet removedRows = new IntIndexedSet(16);
+    private boolean recordFieldChanges = true;
 
     public static StateChangeSet stateChangeSet(final BitSet changeSet) {
         return new StateChangeSet(changeSet);
@@ -68,7 +69,13 @@ public final class StateChangeSet {
     }
 
     public void changeField(final int fieldId) {
-        changedFields.fieldChanged(fieldId);
+        if (recordFieldChanges) {
+            changedFields.fieldChanged(fieldId);
+        }
+    }
+
+    public void recordFieldChanges(final boolean value) {
+        this.recordFieldChanges = value;
     }
 
     /**

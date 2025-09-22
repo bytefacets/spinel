@@ -81,7 +81,7 @@ class KvDataQueueTest {
             when(entry.getOperation()).thenReturn(KeyValueOperation.PURGE);
             watcher.watch(entry);
             queue.run();
-            verify(listener, times(1)).delete("my-key");
+            verify(listener, times(1)).delete(entry);
         }
 
         @Test
@@ -89,7 +89,7 @@ class KvDataQueueTest {
             when(entry.getOperation()).thenReturn(KeyValueOperation.PURGE);
             watcher.watch(entry);
             queue.run();
-            verify(listener, times(1)).delete("my-key");
+            verify(listener, times(1)).delete(entry);
         }
     }
 

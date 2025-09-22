@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class NatsKvSource implements OutputProvider {
     private static final Logger log = LoggerFactory.getLogger(NatsKvSource.class);
+    private final KeyValue keyValueBucket;
     private final BitSet activeRows = new BitSet();
     private final BitSet changedFields = new BitSet();
     private final OutputManager outputManager = outputManager(bitSetRowProvider(activeRows));
@@ -62,12 +63,15 @@ public final class NatsKvSource implements OutputProvider {
             final SchemaBuilder schemaBuilder,
             final SchemaRegistry schemaRegistry,
             final Duration changeBudget,
-            final int initialKeyCapacity)
-            throws JetStreamApiException, IOException, InterruptedException {
+            final int initialKeyCapacity) {
+        this.keyValueBucket = requireNonNull(keyValueBucket, "keyValueBucket");
         this.schemaRegistry = requireNonNull(schemaRegistry, "schemaRegistry");
         this.decoder = new BucketDecoder(changedFields, schemaBuilder, schemaRegistry);
         this.dataQueue = new KvDataQueue(eventLoop, new Listener(), changeBudget, System::nanoTime);
         this.keys = new StringIndexedSet(initialKeyCapacity);
+    }
+
+    public void open() throws JetStreamApiException, IOException, InterruptedException {
         requireNonNull(keyValueBucket, "keyValueBucket").watchAll(dataQueue.kvWatcher());
     }
 
@@ -117,11 +121,11 @@ public final class NatsKvSource implements OutputProvider {
         }
 
         @Override
-        public void delete(final String key) {
+        public void delete(final KeyValueEntry entry) {
             if (caughtUp) {
-                deleted(key);
+                deleted(entry.getKey());
             } else {
-                buffer.remove(key);
+                buffer.remove(entry.getKey());
             }
         }
 
