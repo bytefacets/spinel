@@ -163,6 +163,7 @@ class NatsKvAdapterTest {
         @Test
         void shouldCallbackHandlerWhenUnknownKey() {
             removeEntry("unknown", KeyValueOperation.DELETE);
+            applyEvents();
             verify(handler, times(1)).unknownDeletedEntry(entryCaptor.capture());
             assertThat(entryCaptor.getValue().getKey(), equalTo("unknown"));
         }
