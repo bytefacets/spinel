@@ -7,6 +7,7 @@ import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bytefacets.spinel.exception.FieldNotFoundException;
 import com.bytefacets.spinel.schema.IntWritableField;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.Key;
@@ -157,17 +159,13 @@ class OutputLoggerTest {
 
         @Test
         void shouldForwardSchema() {
-            validation
-                    .expect()
-                    .schema(
-                            Map.of(
-                                    "Key",
-                                    Integer.class,
-                                    "Value1",
-                                    Integer.class,
-                                    "Value2",
-                                    Integer.class))
+            // formatting:off
+            validation.expect()
+                    .schema(Map.of("Key",    Integer.class,
+                                   "Value1", Integer.class,
+                                   "Value2", Integer.class))
                     .validate();
+            // formatting:on
         }
 
         @Test
@@ -205,6 +203,85 @@ class OutputLoggerTest {
             table.fireChanges();
             // then
             validation.expect().removed(Key.key(1)).validate();
+        }
+    }
+
+    @Nested
+    class ForceFieldTests {
+        @BeforeEach
+        void setUp() {
+            lenient().when(logger.isEnabledForLevel(Level.DEBUG)).thenReturn(true);
+            node =
+                    logger("test-logger")
+                            .alwaysShow("Value1", "Key")
+                            .logLevel(Level.DEBUG)
+                            .withLogger(logger)
+                            .build();
+        }
+
+        @Test
+        void shouldThrowWhenForcedFieldIsNotPresent() {
+            node = logger("test-logger").alwaysShow("Foo").withLogger(logger).build();
+            assertThrows(
+                    FieldNotFoundException.class, () -> table.output().attachInput(node.input()));
+        }
+
+        @Test
+        void shouldPrintForcedFieldsInOrderWhenSchemaAdded() {
+            table.output().attachInput(node.input());
+            verifyLogAndCapture(Level.DEBUG, 1);
+            assertThat(
+                    messageCaptor.getValue(),
+                    equalTo(
+                            "e0          SCH table: 3 fields [1,Value1,Int][0,Key,Int][2,Value2,Int]"));
+        }
+
+        @Test
+        void shouldPrintForcedFieldsInOrderWhenRowAdded() {
+            node.enabled(false);
+            table.output().attachInput(node.input());
+            node.enabled(true);
+
+            add(1, 56);
+            table.fireChanges();
+            verifyLogAndCapture(Level.DEBUG, 1);
+            assertThat(
+                    messageCaptor.getValue(),
+                    equalTo("e1          ADD r0     : [Value1=56][Key=1][Value2=0]"));
+        }
+
+        @Test
+        void shouldPrintForcedFieldsInOrderWhenForcedFieldChanged() {
+            node.enabled(false);
+            table.output().attachInput(node.input());
+            add(1, 56);
+            table.fireChanges();
+            node.enabled(true);
+
+            change(1, 57);
+            table.fireChanges();
+            verifyLogAndCapture(Level.DEBUG, 1);
+            assertThat(
+                    messageCaptor.getValue(),
+                    equalTo("e2          CHG r0     : [Value1=57][Key=1]"));
+        }
+
+        @Test
+        void shouldPrintForcedFieldsInOrderWhenNonForcedFieldChanged() {
+            node.enabled(false);
+            table.output().attachInput(node.input());
+            add(1, 56);
+            table.fireChanges();
+            node.enabled(true);
+
+            final int row = table.beginChange(1);
+            ((IntWritableField) table.writableField("Value2")).setValueAt(row, 70);
+            table.endChange();
+            table.fireChanges();
+            verifyLogAndCapture(Level.DEBUG, 1);
+            assertThat(
+                    messageCaptor.getValue(),
+                    equalTo("e2          CHG r0     : [Value1=56][Key=1][Value2=70]"));
         }
     }
 
