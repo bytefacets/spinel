@@ -167,8 +167,8 @@ public final class LimitedSetSimulator<T> {
                 table.remove(itemId);
             } else {
                 table.beginChange(itemId, facade);
-                table.endChange();
                 recordUpdater.accept(facade);
+                table.endChange();
                 // and queue the order to get updated again
                 activeItems.addLast(itemId);
             }

@@ -74,7 +74,7 @@ subprojects {
     project.version = project.parent?.version!!
 
     extra.apply {
-        set("bytefacetsCollectionsVersion", "0.5.0")
+        set("bytefacetsCollectionsVersion", "0.6.0")
         set("findbugsVersion", "4.7.3")
         set("grpcVersion", "1.70.0")
         set("logbackVersion", "1.5.18")
