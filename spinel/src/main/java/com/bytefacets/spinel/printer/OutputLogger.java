@@ -16,6 +16,8 @@ import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.transform.InputProvider;
 import com.bytefacets.spinel.transform.OutputProvider;
 import jakarta.annotation.Nullable;
+import java.util.BitSet;
+import java.util.LinkedHashSet;
 import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
@@ -27,8 +29,9 @@ public final class OutputLogger implements InputProvider, OutputProvider {
             final Logger logger,
             final BiConsumer<Logger, String> logMethod,
             final Level logLevel,
+            final LinkedHashSet<String> forcedFields,
             final RendererRegistry rendererRegistry) {
-        this.input = new Input(logger, logMethod, logLevel, rendererRegistry);
+        this.input = new Input(logger, forcedFields, logMethod, logLevel, rendererRegistry);
     }
 
     @Override
@@ -56,6 +59,9 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         private final StringBuilder sb = new StringBuilder(128);
         private final OutputManager outputManager;
         private final RendererRegistry rendererRegistry;
+        private final LinkedHashSet<String> forcedFields;
+        private final BitSet forceFieldIdSet = new BitSet();
+        private SchemaField[] orderedFields;
         private ValueRenderer[] renderers;
         private TransformOutput source;
         private boolean enabled = true;
@@ -64,6 +70,7 @@ public final class OutputLogger implements InputProvider, OutputProvider {
 
         private Input(
                 final Logger logger,
+                final LinkedHashSet<String> forcedFields,
                 final BiConsumer<Logger, String> logMethod,
                 final Level logLevel,
                 final RendererRegistry rendererRegistry) {
@@ -72,6 +79,7 @@ public final class OutputLogger implements InputProvider, OutputProvider {
             this.logLevel = requireNonNull(logLevel, "logLevel");
             this.rendererRegistry = requireNonNull(rendererRegistry, "rendererRegistry");
             this.outputManager = OutputManager.outputManager(delegatedRowProvider(() -> source));
+            this.forcedFields = forcedFields;
         }
 
         @Override
@@ -91,7 +99,11 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         public void schemaUpdated(final Schema schema) {
             this.schema = schema;
             if (schema != null) {
-                renderers = rendererRegistry.renderers(schema);
+                initializeFields(schema);
+            } else {
+                orderedFields = null;
+                renderers = null;
+                forceFieldIdSet.clear();
             }
             if (doLog()) {
                 if (schema != null) {
@@ -107,8 +119,7 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         private void logSchema(final long id) {
             sb.setLength(0);
             sb.append(String.format("e%-10d SCH %s: %d fields ", id, schema.name(), schema.size()));
-            for (int i = 0, len = schema.size(); i < len; i++) {
-                final SchemaField field = schema.fieldAt(i);
+            for (final SchemaField field : orderedFields) {
                 sb.append(
                         String.format(
                                 "[%d,%s,%s]",
@@ -147,10 +158,9 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         private void printAdd(final int row) {
             sb.setLength(0);
             sb.append(String.format("e%-10d ADD r%-6d: ", eventId, row));
-            for (int i = 0, len = schema.size(); i < len; i++) {
-                final SchemaField field = schema.fieldAt(i);
+            for (final SchemaField field : orderedFields) {
                 sb.append('[').append(field.name()).append('=');
-                renderers[i].render(sb, row);
+                renderers[field.fieldId()].render(sb, row);
                 sb.append(']');
             }
             logIt(sb.toString());
@@ -159,12 +169,21 @@ public final class OutputLogger implements InputProvider, OutputProvider {
         private void printChange(final int row, final ChangedFieldSet changed) {
             sb.setLength(0);
             sb.append(String.format("e%-10d CHG r%-6d: ", eventId, row));
+            final int forcedSize = forcedFields.size();
+            for (int i = 0; i < forcedSize; i++) {
+                final var field = orderedFields[i];
+                sb.append('[').append(field.name()).append('=');
+                renderers[field.fieldId()].render(sb, row);
+                sb.append(']');
+            }
             changed.forEach(
                     fieldId -> {
-                        final var field = schema.fieldAt(fieldId);
-                        sb.append('[').append(field.name()).append('=');
-                        renderers[field.fieldId()].render(sb, row);
-                        sb.append(']');
+                        if (!forceFieldIdSet.get(fieldId)) {
+                            final var field = schema.fieldAt(fieldId);
+                            sb.append('[').append(field.name()).append('=');
+                            renderers[field.fieldId()].render(sb, row);
+                            sb.append(']');
+                        }
                     });
             logIt(sb.toString());
         }
@@ -173,6 +192,23 @@ public final class OutputLogger implements InputProvider, OutputProvider {
             sb.setLength(0);
             sb.append(String.format("e%-10d REM r%-6d:", eventId, row));
             logIt(sb.toString());
+        }
+
+        private void initializeFields(final Schema schema) {
+            orderedFields = new SchemaField[schema.size()];
+            renderers = rendererRegistry.renderers(schema);
+            int nextIx = 0;
+            for (String fieldName : forcedFields) {
+                final SchemaField field = schema.field(fieldName);
+                orderedFields[nextIx++] = field;
+                forceFieldIdSet.set(field.fieldId());
+            }
+            for (int i = 0, len = schema.size(); i < len; i++) {
+                final SchemaField field = schema.fieldAt(i);
+                if (!forcedFields.contains(field.name())) {
+                    orderedFields[nextIx++] = field;
+                }
+            }
         }
     }
 }

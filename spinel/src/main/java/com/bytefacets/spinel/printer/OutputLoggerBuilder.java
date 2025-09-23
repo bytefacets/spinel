@@ -12,6 +12,8 @@ import com.bytefacets.spinel.transform.BuilderSupport;
 import com.bytefacets.spinel.transform.TransformContext;
 import com.bytefacets.spinel.transform.TransformContinuation;
 import jakarta.annotation.Nullable;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ public final class OutputLoggerBuilder {
     private final BuilderSupport<OutputLogger> builderSupport;
     private final TransformContext transformContext;
     private final String name;
+    private final LinkedHashSet<String> forcedFields = new LinkedHashSet<>(4);
     private RendererRegistry rendererRegistry;
     private Level logLevel = Level.TRACE;
     private Logger logger;
@@ -72,6 +75,7 @@ public final class OutputLoggerBuilder {
                         useLogger,
                         method,
                         logLevel,
+                        forcedFields,
                         requireNonNullElseGet(
                                 rendererRegistry, RendererRegistry::rendererRegistry));
         node.enabled(this.enabled);
@@ -95,6 +99,11 @@ public final class OutputLoggerBuilder {
 
     public OutputLoggerBuilder withLogger(final @Nullable Logger logger) {
         this.logger = logger;
+        return this;
+    }
+
+    public OutputLoggerBuilder alwaysShow(final String... fields) {
+        forcedFields.addAll(List.of(fields));
         return this;
     }
 
