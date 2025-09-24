@@ -85,7 +85,8 @@ final class JoinSchemaBuilder {
                     }
                     final int outputId = fieldMap.add(name);
                     final var outField = asMappedField(inField.field(), rowMapper);
-                    fieldMap.putValueAt(outputId, schemaField(outputId, name, outField));
+                    fieldMap.putValueAt(
+                            outputId, schemaField(outputId, name, outField, inField.metadata()));
                     schemaResources.outFieldIds.set(outputId);
                     schemaResources.mappingBuilder.mapInboundToOutbound(
                             inField.fieldId(), outputId);

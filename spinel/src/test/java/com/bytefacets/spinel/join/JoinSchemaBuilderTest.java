@@ -5,6 +5,7 @@ package com.bytefacets.spinel.join;
 import static com.bytefacets.spinel.join.JoinSchemaBuilder.schemaResources;
 import static com.bytefacets.spinel.schema.FieldBitSet.fieldBitSet;
 import static com.bytefacets.spinel.schema.FieldList.fieldList;
+import static com.bytefacets.spinel.schema.Metadata.metadata;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,6 +30,8 @@ import com.bytefacets.spinel.schema.SchemaField;
 import com.bytefacets.spinel.schema.TypeId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -44,12 +47,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class JoinSchemaBuilderTest {
     private final NameConflictResolver resolver = new NameConflictResolver() {};
-    private @Mock(lenient = true) JoinMapper mapper;
-    private @Mock(lenient = true) JoinInterner interner;
-    private @Mock(lenient = true) RowInterner leftRowInterner;
-    private @Mock(lenient = true) RowInterner rightRowInterner;
-    private @Mock(lenient = true) RowMapper leftRowMapper;
-    private @Mock(lenient = true) RowMapper rightRowMapper;
+    private @Mock(strictness = Mock.Strictness.LENIENT) JoinMapper mapper;
+    private @Mock(strictness = Mock.Strictness.LENIENT) JoinInterner interner;
+    private @Mock(strictness = Mock.Strictness.LENIENT) RowInterner leftRowInterner;
+    private @Mock(strictness = Mock.Strictness.LENIENT) RowInterner rightRowInterner;
+    private @Mock(strictness = Mock.Strictness.LENIENT) RowMapper leftRowMapper;
+    private @Mock(strictness = Mock.Strictness.LENIENT) RowMapper rightRowMapper;
 
     @BeforeEach
     void setUp() {
@@ -84,7 +87,14 @@ class JoinSchemaBuilderTest {
         assertThat(outSchema.size(), equalTo(4));
         assertThat(outSchema.name(), equalTo("foo"));
         final List<String> names = new ArrayList<>();
-        outSchema.forEachField(field -> names.add(field.name()));
+        outSchema.forEachField(
+                field -> {
+                    names.add(field.name());
+                    assertThat(field.metadata().tags(), contains("t-" + field.name()));
+                    assertThat(
+                            field.metadata().attributes().get("a-" + field.name()),
+                            equalTo(field.name()));
+                });
         assertThat(names, contains("A", "B", "C", "D"));
     }
 
@@ -257,7 +267,8 @@ class JoinSchemaBuilderTest {
                 .forEach(
                         name -> {
                             final int id = fieldMap.add(name);
-                            fieldMap.putValueAt(id, SchemaField.schemaField(id, name, field()));
+                            final var md = metadata(Set.of("t-" + name), Map.of("a-" + name, name));
+                            fieldMap.putValueAt(id, SchemaField.schemaField(id, name, field(), md));
                         });
         return Schema.schema(schemaName, fieldList(fieldMap));
     }

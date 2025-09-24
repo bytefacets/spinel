@@ -20,7 +20,7 @@ This example simulates 4 servers
       3. join orders with OpenNotional calculated field
       4. aggregation of count and OpenNotional by instrument 
 
-[NATS Example Diagram](https://bytefacets.github.io/site/assets/images/nats-example-diagram.png)
+![NATS Example Diagram](https://bytefacets.github.io/site/assets/images/nats-example-diagram.png)
 
 Start a NATS server with JetStream enabled.
 
@@ -53,7 +53,13 @@ jetstream {
 
 Then run the NatsSinkExample.
 
-Example Output
+Example Console Output:
+- left screen: ` ./tools console --endpoint 0.0.0.0:25001 --output order-view`
+- right screen: ` ./tools console --endpoint 0.0.0.0:25001 --output by-instrument`
+
+![NATS Console Output](https://bytefacets.github.io/site/assets/images/nats-console-example.gif)
+
+Example Log Output:
 ```text
 [main] INFO order-feed    -- e0          SCH Order: 4 fields [3,OrderId,Int][0,Price,Double][1,Qty,Int][2,InstrumentId,Int]
 [main] INFO com.bytefacets.spinel.nats.kv.BucketUtil -- Create Bucket orders-4 result: KeyValueStatus{"entryCount":0,"byteCount":0,"config":{"name":"orders-4","maxBucketSize":-1,"ttl":"PT0S","storageType":"file","replicas":1,"isCompressed":false,"maxHistoryPerKey":1,"maxValueSize":-1,"sources":[],"metaData":{"_nats.ver":"2.11.8","_nats.level":"1","_nats.req.level":"0"}}}
