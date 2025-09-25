@@ -82,7 +82,7 @@ class RecordAggregationFunctionTest {
         @Test
         void shouldAccessGroupField() {
             groupBy.output().detachInput(validator.input());
-            RecordAggregationFunction<Input, OutputWithGroupField> grpFunction =
+            final RecordAggregationFunction<Input, OutputWithGroupField> grpFunction =
                     recordAggregationFunction(
                             Input.class,
                             OutputWithGroupField.class,
@@ -111,7 +111,7 @@ class RecordAggregationFunctionTest {
         @Test
         void shouldAccessCountField() {
             groupBy.output().detachInput(validator.input());
-            RecordAggregationFunction<Input, OutputWithCount> ctFunction =
+            final RecordAggregationFunction<Input, OutputWithCount> ctFunction =
                     recordAggregationFunction(
                             Input.class,
                             OutputWithCount.class,
@@ -154,7 +154,8 @@ class RecordAggregationFunctionTest {
             assertThat(
                     ex.getMessage(),
                     equalTo(
-                            "Name collision setting up test: attempted to use 'MyCount' for CalculatedField, but was already used for CountFieldName"));
+                            "Name collision setting up test: attempted to use 'MyCount' "
+                                    + "for CalculatedField, but was already used for CountFieldName"));
         }
 
         @Test
@@ -171,7 +172,8 @@ class RecordAggregationFunctionTest {
             assertThat(
                     ex.getMessage(),
                     equalTo(
-                            "Name collision setting up test: attempted to use 'CategoryId' for CalculatedField, but was already used for ForwardedField"));
+                            "Name collision setting up test: attempted to use 'CategoryId' "
+                                    + "for CalculatedField, but was already used for ForwardedField"));
         }
 
         @Test
@@ -188,7 +190,8 @@ class RecordAggregationFunctionTest {
             assertThat(
                     ex.getMessage(),
                     equalTo(
-                            "Name collision setting up test: attempted to use 'Category' for CalculatedField, but was already used for GroupByField"));
+                            "Name collision setting up test: attempted to use 'Category' "
+                                    + "for CalculatedField, but was already used for GroupByField"));
         }
 
         private void invalidInterfaceSetup(final RecordAggregationFunction<?, ?> function) {

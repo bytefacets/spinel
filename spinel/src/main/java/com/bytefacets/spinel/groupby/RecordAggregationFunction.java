@@ -21,7 +21,8 @@ import com.bytefacets.spinel.schema.SchemaBindable;
  * <p>The given Accumulator will be called back for all operations: Add, Change, and Remove for the
  * group. For Adds, the `oldValue` argument will only return the default values for the getters on
  * the interface. For Removes, the `newValue` will only return default values for the getters.
- * <code>
+ *
+ * <pre>
  * interface Scores {
  *     int getExam1Score();
  *     int getExam2Score();
@@ -31,16 +32,20 @@ import com.bytefacets.spinel.schema.SchemaBindable;
  *     int getTotalScore();
  *     void setTotalScore(int value);
  * }
- * AggregationFunction function = new AggregationFunction() {
- *     void accumulate(EventType eventType, FinalGrade finalGrade, Scores prev, Scores current) {
- *         int delta1Score = current.getExam1Score() - prev.getExam1Score();
- *         int delta2Score = current.getExam2Score() - prev.getExam2Score();
- *         int deltaPaperScore = current.getPaperScore() - prev.getPaperScore();
- *         int deltaForRow = delta1Score + delta2Score + deltaPaperScore;
- *         finalGrade.setTotalScore(finalGrade.getTotalScore() + deltaForRow);
- *     }
- * };
- * </code>
+ * RecordAggregationFunction.Accumulator&lt;Scores,FinalGrade&gt; accumulator =
+ *     new RecordAggregationFunction.Accumulator&lt;&gt;() {
+ *          void accumulate(EventType eventType, FinalGrade finalGrade, Scores prev, Scores current) {
+ *              int delta1Score = current.getExam1Score() - prev.getExam1Score();
+ *              int delta2Score = current.getExam2Score() - prev.getExam2Score();
+ *              int deltaPaperScore = current.getPaperScore() - prev.getPaperScore();
+ *              int deltaForRow = delta1Score + delta2Score + deltaPaperScore;
+ *              finalGrade.setTotalScore(finalGrade.getTotalScore() + deltaForRow);
+ *          }
+ *     };
+ *
+ * RecordAggregationFunction&lt;Scores,FinalGrade&gt function =
+ *      recordAggregationFunction(Scores.class, FinalGrades.class, accumulator);
+ * </pre>
  *
  * @param <INPUT> the input type which should only have getters
  * @param <OUTPUT> the output type which should have getters (to read the current group value) and
