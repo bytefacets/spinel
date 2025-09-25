@@ -113,6 +113,14 @@ public final class GroupByBuilder {
     }
 
     public GroupByBuilder groupByFields(final String... fields) {
+        for (String field : fields) {
+            NameType.groupFunction.throwIfCollides(name, field, NameType.count, countFieldName);
+            NameType.groupFunction.throwIfCollides(
+                    name, field, NameType.forwarded, forwardedFields);
+            NameType.groupFunction.throwIfCollides(
+                    name, field, NameType.calculated, outboundAggFieldNames);
+            NameType.groupFunction.throwIfCollides(name, field, NameType.groupId, groupIdFieldName);
+        }
         // defer instantiating the function so that it can get the initialOutboundSize
         this.groupFunction = null;
         this.groupFunctionFields = List.of(fields);
@@ -125,6 +133,8 @@ public final class GroupByBuilder {
                 name, groupIdFieldName, NameType.forwarded, forwardedFields);
         NameType.groupId.throwIfCollides(
                 name, groupIdFieldName, NameType.calculated, outboundAggFieldNames);
+        NameType.groupId.throwIfCollides(
+                name, groupIdFieldName, NameType.groupFunction, groupFunctionFields);
         this.groupIdFieldName = requireNonNull(groupIdFieldName, "groupIdFieldName");
         return this;
     }
@@ -134,6 +144,8 @@ public final class GroupByBuilder {
         NameType.count.throwIfCollides(name, countFieldName, NameType.forwarded, forwardedFields);
         NameType.count.throwIfCollides(
                 name, countFieldName, NameType.calculated, outboundAggFieldNames);
+        NameType.count.throwIfCollides(
+                name, countFieldName, NameType.groupFunction, groupFunctionFields);
         this.countFieldName = requireNonNull(countFieldName, "countFieldName");
         return this;
     }
@@ -143,6 +155,7 @@ public final class GroupByBuilder {
             NameType.forwarded.throwIfCollides(name, f, NameType.groupId, groupIdFieldName);
             NameType.forwarded.throwIfCollides(name, f, NameType.count, countFieldName);
             NameType.forwarded.throwIfCollides(name, f, NameType.calculated, outboundAggFieldNames);
+            // allow "collision" with groupByFields
             this.forwardedFields.add(f);
         }
         return this;
@@ -202,6 +215,8 @@ public final class GroupByBuilder {
             NameType.calculated.throwIfCollides(name, aggFieldName, NameType.count, countFieldName);
             NameType.calculated.throwIfCollides(
                     name, aggFieldName, NameType.forwarded, forwardedFields);
+            NameType.calculated.throwIfCollides(
+                    name, aggFieldName, NameType.groupFunction, groupFunctionFields);
             outboundAggFieldNames.add(aggFieldName);
         }
     }
@@ -210,6 +225,7 @@ public final class GroupByBuilder {
         groupId("GroupIdFieldName"),
         count("CountFieldName"),
         forwarded("ForwardedField"),
+        groupFunction("GroupByField"),
         calculated("CalculatedField");
         private final String type;
 
@@ -222,6 +238,9 @@ public final class GroupByBuilder {
                 final String request,
                 final NameType existingType,
                 final Collection<String> existingCollection) {
+            if (existingCollection == null) {
+                return;
+            }
             existingCollection.forEach(
                     existing -> throwIfCollides(name, request, existingType, existing));
         }

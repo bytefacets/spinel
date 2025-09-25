@@ -34,6 +34,7 @@ class GroupByBuilderTest {
             shouldThrowOnCalcField("CountFieldName");
             shouldThrowOnForwardedField("CountFieldName");
             shouldThrowOnGroupIdField("CountFieldName");
+            shouldThrowOnGroupByField("CountFieldName");
             builder.includeCountField("foo"); // allow resetting
         }
 
@@ -43,6 +44,7 @@ class GroupByBuilderTest {
             shouldThrowOnCalcField("GroupIdFieldName");
             shouldThrowOnForwardedField("GroupIdFieldName");
             shouldThrowOnCountField("GroupIdFieldName");
+            shouldThrowOnGroupByField("GroupIdFieldName");
             builder.includeGroupIdField("foo"); // allow resetting
         }
 
@@ -52,6 +54,7 @@ class GroupByBuilderTest {
             shouldThrowOnCalcField("ForwardedField");
             shouldThrowOnGroupIdField("ForwardedField");
             shouldThrowOnCountField("ForwardedField");
+            shouldThrowOnGroupByField("ForwardedField");
             builder.addForwardedFields("foo"); // allow setting again
         }
 
@@ -61,6 +64,7 @@ class GroupByBuilderTest {
             shouldThrowOnForwardedField("CalculatedField");
             shouldThrowOnGroupIdField("CalculatedField");
             shouldThrowOnCountField("CalculatedField");
+            shouldThrowOnGroupByField("CalculatedField");
             builder.addAggregation(funcWithOutboundName("foo")); // allow multiple refs
         }
 
@@ -84,6 +88,10 @@ class GroupByBuilderTest {
         private void shouldThrowOnForwardedField(final String existingType) {
             validateException(
                     "ForwardedField", existingType, () -> builder.addForwardedFields("foo"));
+        }
+
+        private void shouldThrowOnGroupByField(final String existingType) {
+            validateException("GroupByField", existingType, () -> builder.groupByFields("foo"));
         }
 
         private void validateException(
