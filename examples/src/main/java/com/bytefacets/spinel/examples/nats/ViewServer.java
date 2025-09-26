@@ -102,11 +102,7 @@ final class ViewServer {
         orderBucket =
                 BucketUtil.getOrCreateBucket(
                         connection, KeyValueConfiguration.builder().name(orderBucketName).build());
-        orderSource =
-                NatsKvSourceBuilder.natsKvSource()
-                        .keyValueBucket(connection, orderBucketName)
-                        .eventLoop(eventLoop)
-                        .build();
+        orderSource = NatsKvSourceBuilder.natsKvSource().eventLoop(eventLoop).build();
         // market data is put into the KeyValue bucket by another type of writer, so use
         // the MdKeyValueHandler to decode the values
         // also note that there are 2 processes populating the bucket, but we only need the
@@ -227,10 +223,10 @@ final class ViewServer {
     @SuppressWarnings("resource")
     void start() throws IOException, JetStreamApiException, InterruptedException {
         server.start(); // open the gRPC server to serve the registered outputs
-        mdAdapter.watchAll(); // start watching the KeyValue bucket for market data
+        // start watching the KeyValue bucket for market data
         mdBucket.watchAll(mdAdapter.keyValueWatcher());
-        orderBucket.watchAll(
-                orderSource.keyValueWatcher()); // start watching the KeyValue bucket for orders
+        // start watching the KeyValue bucket for orders
+        orderBucket.watchAll(orderSource.keyValueWatcher());
     }
 
     private Server initServer(final OutputRegistry outputRegistry, final EventLoop eventLoop) {
