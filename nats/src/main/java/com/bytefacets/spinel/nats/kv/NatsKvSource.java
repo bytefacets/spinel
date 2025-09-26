@@ -17,11 +17,9 @@ import com.bytefacets.spinel.common.StateChangeSet;
 import com.bytefacets.spinel.grpc.receive.SchemaBuilder;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.OutputProvider;
-import io.nats.client.JetStreamApiException;
-import io.nats.client.KeyValue;
 import io.nats.client.api.KeyValueEntry;
+import io.nats.client.api.KeyValueWatcher;
 import io.netty.channel.EventLoop;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.BitSet;
 import org.slf4j.Logger;
@@ -47,7 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class NatsKvSource implements OutputProvider {
     private static final Logger log = LoggerFactory.getLogger(NatsKvSource.class);
-    private final KeyValue keyValueBucket;
     private final BitSet activeRows = new BitSet();
     private final BitSet changedFields = new BitSet();
     private final OutputManager outputManager = outputManager(bitSetRowProvider(activeRows));
@@ -58,21 +55,19 @@ public final class NatsKvSource implements OutputProvider {
     private final StateChangeSet changeSet = stateChangeSet(changedFields);
 
     NatsKvSource(
-            final KeyValue keyValueBucket,
             final EventLoop eventLoop,
             final SchemaBuilder schemaBuilder,
             final SchemaRegistry schemaRegistry,
             final Duration changeBudget,
             final int initialKeyCapacity) {
-        this.keyValueBucket = requireNonNull(keyValueBucket, "keyValueBucket");
         this.schemaRegistry = requireNonNull(schemaRegistry, "schemaRegistry");
         this.decoder = new BucketDecoder(changedFields, schemaBuilder, schemaRegistry);
         this.dataQueue = new KvDataQueue(eventLoop, new Listener(), changeBudget, System::nanoTime);
         this.keys = new StringIndexedSet(initialKeyCapacity);
     }
 
-    public void open() throws JetStreamApiException, IOException, InterruptedException {
-        requireNonNull(keyValueBucket, "keyValueBucket").watchAll(dataQueue.kvWatcher());
+    public KeyValueWatcher keyValueWatcher() {
+        return dataQueue.kvWatcher();
     }
 
     @Override

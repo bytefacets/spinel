@@ -11,10 +11,7 @@ import com.bytefacets.spinel.common.StateChangeSet;
 import com.bytefacets.spinel.schema.FieldDescriptor;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.SchemaField;
-import io.nats.client.Connection;
 import io.nats.client.JetStreamApiException;
-import io.nats.client.KeyValue;
-import io.nats.client.api.KeyValueConfiguration;
 import io.netty.channel.EventLoop;
 import java.io.IOException;
 import java.time.Duration;
@@ -30,7 +27,6 @@ public final class NatsKvAdapterBuilder {
     private final Map<Byte, List<FieldDescriptor>> typeMap = new HashMap<>();
     private final StringGenericIndexedMap<SchemaField> fieldMap = new StringGenericIndexedMap<>(16);
     private final String name;
-    private KeyValue keyValueBucket;
     private int initialSize = 128;
     private int chunkSize = 128;
     private KvUpdateHandler updateHandler;
@@ -46,16 +42,6 @@ public final class NatsKvAdapterBuilder {
 
     public static NatsKvAdapterBuilder natsKvAdapter(final String name) {
         return new NatsKvAdapterBuilder(resolveName("NatsKvAdapter", name));
-    }
-
-    public NatsKvAdapterBuilder keyValueBucket(final KeyValue keyValue) {
-        this.keyValueBucket = requireNonNull(keyValue, "keyValue");
-        return this;
-    }
-
-    public NatsKvAdapterBuilder keyValueBucket(
-            final Connection connection, final KeyValueConfiguration config) {
-        return keyValueBucket(BucketUtil.getOrCreateBucket(connection, config));
     }
 
     public NatsKvAdapterBuilder updateHandler(final KvUpdateHandler updateHandler) {
@@ -77,10 +63,6 @@ public final class NatsKvAdapterBuilder {
             addField(f);
         }
         return this;
-    }
-
-    public NatsKvAdapterBuilder keyValueBucket(final Connection connection, final String name) {
-        return keyValueBucket(connection, KeyValueConfiguration.builder().name(name).build());
     }
 
     public NatsKvAdapterBuilder initialSize(final int initialSize) {
@@ -109,7 +91,6 @@ public final class NatsKvAdapterBuilder {
                         matrixStoreFieldFactory(initialSize, chunkSize, stateChangeSet::changeField)
                                 .createFieldList(copy, typeMap));
         return new NatsKvAdapter(
-                keyValueBucket,
                 eventLoop,
                 schema,
                 stateChangeSet,

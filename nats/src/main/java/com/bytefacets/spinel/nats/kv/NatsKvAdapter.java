@@ -12,11 +12,9 @@ import com.bytefacets.spinel.common.OutputManager;
 import com.bytefacets.spinel.common.StateChangeSet;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.OutputProvider;
-import io.nats.client.JetStreamApiException;
-import io.nats.client.KeyValue;
 import io.nats.client.api.KeyValueEntry;
+import io.nats.client.api.KeyValueWatcher;
 import io.netty.channel.EventLoop;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.BitSet;
 
@@ -34,7 +32,6 @@ import java.util.BitSet;
  * thread.
  */
 public final class NatsKvAdapter implements OutputProvider {
-    private final KeyValue keyValueBucket;
     private final BitSet activeRows = new BitSet();
     private final OutputManager outputManager = outputManager(bitSetRowProvider(activeRows));
     private final KvDataQueue dataQueue;
@@ -43,14 +40,12 @@ public final class NatsKvAdapter implements OutputProvider {
     private final KvUpdateHandler updateHandler;
 
     NatsKvAdapter(
-            final KeyValue keyValueBucket,
             final EventLoop eventLoop,
             final Schema schema,
             final StateChangeSet changeSet,
             final KvUpdateHandler updateHandler,
             final Duration changeBudget,
             final int initialKeyCapacity) {
-        this.keyValueBucket = requireNonNull(keyValueBucket, "keyValueBucket");
         this.dataQueue = new KvDataQueue(eventLoop, new Listener(), changeBudget, System::nanoTime);
         this.keys = new StringIndexedSet(initialKeyCapacity);
         this.changeSet = requireNonNull(changeSet, "changeSet");
@@ -59,8 +54,8 @@ public final class NatsKvAdapter implements OutputProvider {
         outputManager.updateSchema(schema);
     }
 
-    public void open() throws JetStreamApiException, IOException, InterruptedException {
-        requireNonNull(keyValueBucket, "keyValueBucket").watchAll(dataQueue.kvWatcher());
+    public KeyValueWatcher keyValueWatcher() {
+        return dataQueue.kvWatcher();
     }
 
     @Override
