@@ -26,7 +26,6 @@ import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.validation.RowData;
 import com.bytefacets.spinel.validation.ValidationOperator;
-import io.nats.client.KeyValue;
 import io.nats.client.api.KeyValueEntry;
 import io.nats.client.api.KeyValueOperation;
 import io.nats.client.api.KeyValueWatcher;
@@ -54,20 +53,17 @@ class NatsKvSourceTest {
     private final IntWritableField keyField = writableIntArrayField(8, 0, i -> {});
     private final IntWritableField v1Field = writableIntArrayField(8, 1, i -> {});
     private final IntWritableField v2Field = writableIntArrayField(8, 2, i -> {});
-    private @Mock KeyValue keyValue;
     private @Mock EventLoop eventLoop;
-    private @Captor ArgumentCaptor<KeyValueWatcher> watcherCaptor;
     private @Captor ArgumentCaptor<Runnable> runnableCaptor;
     private KeyValueWatcher watcher;
     private SchemaUpdate schemaUpdate;
     private final RowData.RowDataTemplate template = RowData.template("V1", "V2");
 
     @BeforeEach
-    void setUp() throws Exception {
-        final SchemaRegistry schemaRegistry = new SchemaRegistry(keyValue);
+    void setUp() {
+        final SchemaRegistry schemaRegistry = new SchemaRegistry();
         final NatsKvSource source =
                 new NatsKvSource(
-                        keyValue,
                         eventLoop,
                         schemaBuilder(matrixStoreFieldFactory(16, 16, i -> {})),
                         schemaRegistry,
@@ -87,9 +83,7 @@ class NatsKvSourceTest {
         Connector.connectInputToOutput(logger().logLevel(Level.INFO).build(), source);
         Connector.connectInputToOutput(validator, source);
         //
-        source.open();
-        verify(keyValue, times(1)).watchAll(watcherCaptor.capture());
-        watcher = watcherCaptor.getValue();
+        watcher = source.keyValueWatcher();
     }
 
     @AfterEach

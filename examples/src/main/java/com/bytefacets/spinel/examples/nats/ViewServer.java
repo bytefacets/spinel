@@ -23,6 +23,7 @@ import com.bytefacets.spinel.grpc.send.GrpcServiceBuilder;
 import com.bytefacets.spinel.join.Join;
 import com.bytefacets.spinel.join.JoinBuilder;
 import com.bytefacets.spinel.join.JoinKeyHandling;
+import com.bytefacets.spinel.nats.kv.BucketUtil;
 import com.bytefacets.spinel.nats.kv.KvUpdateHandler;
 import com.bytefacets.spinel.nats.kv.NatsKvAdapter;
 import com.bytefacets.spinel.nats.kv.NatsKvAdapterBuilder;
@@ -42,8 +43,10 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.nats.client.Connection;
 import io.nats.client.JetStreamApiException;
+import io.nats.client.KeyValue;
 import io.nats.client.Nats;
 import io.nats.client.Options;
+import io.nats.client.api.KeyValueConfiguration;
 import io.nats.client.api.KeyValueEntry;
 import io.netty.channel.EventLoop;
 import java.io.IOException;
@@ -67,6 +70,8 @@ final class ViewServer {
             MetadataBuilder.metadataBuilder()
                     .contentType(AttributeConstants.ContentTypes.Text)
                     .build();
+    private final KeyValue orderBucket;
+    private final KeyValue mdBucket;
 
     public static void main(final String[] args) throws Exception {
         new ViewServer(
@@ -94,6 +99,9 @@ final class ViewServer {
 
         // orders are put into the KeyValue bucket by a NatsKvSink, so use a NatsKvSource
         // to consume the data
+        orderBucket =
+                BucketUtil.getOrCreateBucket(
+                        connection, KeyValueConfiguration.builder().name(orderBucketName).build());
         orderSource =
                 NatsKvSourceBuilder.natsKvSource()
                         .keyValueBucket(connection, orderBucketName)
@@ -103,9 +111,11 @@ final class ViewServer {
         // the MdKeyValueHandler to decode the values
         // also note that there are 2 processes populating the bucket, but we only need the
         // one adapter to watch the bucket
+        mdBucket =
+                BucketUtil.getOrCreateBucket(
+                        connection, KeyValueConfiguration.builder().name(mdBucketName).build());
         mdAdapter =
                 NatsKvAdapterBuilder.natsKvAdapter()
-                        .keyValueBucket(connection, mdBucketName)
                         // custom handler for decoding and writing data to schema fields
                         .updateHandler(new MdKeyValueHandler())
                         // adapter must know the schema ahead of time
@@ -214,10 +224,13 @@ final class ViewServer {
         server = initServer(outputRegistry, eventLoop);
     }
 
+    @SuppressWarnings("resource")
     void start() throws IOException, JetStreamApiException, InterruptedException {
         server.start(); // open the gRPC server to serve the registered outputs
-        mdAdapter.open(); // start watching the KeyValue bucket for market data
-        orderSource.open(); // start watching the KeyValue bucket for orders
+        mdAdapter.watchAll(); // start watching the KeyValue bucket for market data
+        mdBucket.watchAll(mdAdapter.keyValueWatcher());
+        orderBucket.watchAll(
+                orderSource.keyValueWatcher()); // start watching the KeyValue bucket for orders
     }
 
     private Server initServer(final OutputRegistry outputRegistry, final EventLoop eventLoop) {

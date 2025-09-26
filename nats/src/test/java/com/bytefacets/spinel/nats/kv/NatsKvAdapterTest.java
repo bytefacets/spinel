@@ -27,7 +27,6 @@ import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.validation.Key;
 import com.bytefacets.spinel.validation.RowData;
 import com.bytefacets.spinel.validation.ValidationOperator;
-import io.nats.client.KeyValue;
 import io.nats.client.api.KeyValueEntry;
 import io.nats.client.api.KeyValueOperation;
 import io.nats.client.api.KeyValueWatcher;
@@ -49,10 +48,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class NatsKvAdapterTest {
     private final ValidationOperator validator =
             new ValidationOperator(new String[] {"Key"}, "V1", "V2");
-    private @Mock KeyValue keyValue;
     private @Mock EventLoop eventLoop;
     private @Mock(strictness = Mock.Strictness.LENIENT) KvUpdateHandler handler;
-    private @Captor ArgumentCaptor<KeyValueWatcher> watcherCaptor;
     private @Captor ArgumentCaptor<Runnable> runnableCaptor;
     private @Captor ArgumentCaptor<KeyValueEntry> entryCaptor;
     private final FieldBitSet fieldBitSet = FieldBitSet.fieldBitSet();
@@ -62,7 +59,7 @@ class NatsKvAdapterTest {
     private Schema schema;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         final var fieldMap =
                 Map.of(
                         TypeId.Int,
@@ -77,16 +74,13 @@ class NatsKvAdapterTest {
         setUpHandler();
         adapter =
                 new NatsKvAdapter(
-                        keyValue,
                         eventLoop,
                         schema,
                         stateChangeSet(fieldBitSet),
                         handler,
                         Duration.ofMinutes(1),
                         4);
-        adapter.open();
-        verify(keyValue, times(1)).watchAll(watcherCaptor.capture());
-        watcher = watcherCaptor.getValue();
+        watcher = adapter.keyValueWatcher();
         Connector.connectInputToOutput(validator, adapter);
         validator.clearChanges();
     }

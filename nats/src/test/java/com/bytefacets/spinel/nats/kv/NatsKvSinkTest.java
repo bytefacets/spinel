@@ -39,7 +39,7 @@ class NatsKvSinkTest {
     private final Data facade = source.createFacade();
     private final FieldReader fieldReader = new FieldReader();
     private @Mock KeyValue kv;
-    private @Mock SchemaRegistry schemaRegistry;
+    private @Mock SchemaRegistryPublisher schemaRegistry;
     private @Captor ArgumentCaptor<SchemaUpdate> schemaCaptor;
     private @Captor ArgumentCaptor<String> keyCaptor;
     private @Captor ArgumentCaptor<byte[]> valueCaptor;

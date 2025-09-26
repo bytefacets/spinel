@@ -62,6 +62,6 @@ public final class NatsKvSinkBuilder {
                 keyValueBucket,
                 subjectBuilder,
                 new StringChunkStore(initialSize, chunkSize),
-                new SchemaRegistry(keyValueBucket));
+                new SchemaRegistryPublisher(keyValueBucket));
     }
 }

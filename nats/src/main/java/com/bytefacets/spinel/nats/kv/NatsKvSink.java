@@ -46,7 +46,7 @@ public final class NatsKvSink implements InputProvider {
             final KeyValue kv,
             final NatsSubjectBuilder subjBuilder,
             final StringChunkStore keyStore,
-            final SchemaRegistry schemaRegistry) {
+            final SchemaRegistryPublisher schemaRegistry) {
         this.input = new Input(kv, subjBuilder, keyStore, schemaRegistry);
     }
 
@@ -62,14 +62,14 @@ public final class NatsKvSink implements InputProvider {
         private final BitSet subjectDependencies = new BitSet();
         private final SchemaFieldResolver fieldResolver =
                 schemaFieldResolver(subjectDependencies::set);
-        private final SchemaRegistry schemaRegistry;
+        private final SchemaRegistryPublisher schemaRegistry;
         private final BucketEncoder valueEncoder = new BucketEncoder();
 
         Input(
                 final KeyValue kv,
                 final NatsSubjectBuilder subjBuilder,
                 final StringChunkStore keyStore,
-                final SchemaRegistry schemaRegistry) {
+                final SchemaRegistryPublisher schemaRegistry) {
             this.subjBuilder = requireNonNull(subjBuilder, "subjBuilder");
             this.kv = requireNonNull(kv, "kv");
             this.keyStore = requireNonNull(keyStore, "keyStore");

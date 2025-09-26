@@ -2,39 +2,25 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.nats.kv;
 
-import static com.bytefacets.spinel.nats.kv.BucketUtil.SCHEMA_ID_KEY;
 import static com.bytefacets.spinel.nats.kv.BucketUtil.SCHEMA_PREFIX;
-import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.collections.hash.GenericIntIndexedMap;
 import com.bytefacets.collections.hash.IntGenericIndexedMap;
 import com.bytefacets.spinel.grpc.proto.SchemaUpdate;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.nats.client.JetStreamApiException;
-import io.nats.client.KeyValue;
 import io.nats.client.api.KeyValueEntry;
 import jakarta.annotation.Nullable;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class SchemaRegistry {
+sealed class SchemaRegistry permits SchemaRegistryPublisher {
     private static final Logger log = LoggerFactory.getLogger(SchemaRegistry.class);
-    private final GenericIntIndexedMap<SchemaUpdate> schemas = new GenericIntIndexedMap<>(16);
-    private final IntGenericIndexedMap<SchemaUpdate> schemasIdMap = new IntGenericIndexedMap<>(16);
-    private final DistributedCounter schemaIdCounter;
+    protected final GenericIntIndexedMap<SchemaUpdate> schemas = new GenericIntIndexedMap<>(16);
+    protected final IntGenericIndexedMap<SchemaUpdate> schemasIdMap =
+            new IntGenericIndexedMap<>(16);
     private final Latest latest = new Latest();
-    private final KeyValue kv;
 
-    SchemaRegistry(final KeyValue kv)
-            throws JetStreamApiException, IOException, InterruptedException {
-        this(kv, new DistributedCounter(kv, SCHEMA_ID_KEY));
-    }
-
-    SchemaRegistry(final KeyValue kv, final DistributedCounter counter) {
-        this.kv = requireNonNull(kv, "kv");
-        this.schemaIdCounter = requireNonNull(counter, "counter");
-    }
+    SchemaRegistry() {}
 
     Latest latest() {
         return latest;
@@ -61,25 +47,6 @@ final class SchemaRegistry {
             schemas.put(encodedSchema, schemaId);
             schemasIdMap.put(schemaId, encodedSchema);
         }
-    }
-
-    int register(final SchemaUpdate encodedSchema) throws IOException {
-        final int before = schemas.size();
-        final int entry = schemas.add(encodedSchema);
-        if (schemas.size() != before) {
-            final int schemaId = schemaIdCounter.increment();
-            schemas.putValueAt(entry, schemaId);
-            schemasIdMap.put(schemaId, encodedSchema);
-            try {
-                final String key = SCHEMA_PREFIX + schemaId;
-                kv.put(SCHEMA_PREFIX + schemaId, encodedSchema.toByteArray());
-                log.info("Registered Schema {} at key: {}", schemaId, key);
-                return schemaId;
-            } catch (JetStreamApiException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return schemas.getValueAt(entry);
     }
 
     private static int readSchemaId(final String key) {

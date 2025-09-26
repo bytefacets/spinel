@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 public final class BucketUtil {
     private static final Logger log = LoggerFactory.getLogger(BucketUtil.class);
-    static final String SCHEMA_ID_KEY = "__schema_id";
-    static final String SCHEMA_PREFIX = "__s.";
-    static final String DATA_PREFIX = "__d.";
+    public static final String SCHEMA_ID_KEY = "__schema_id";
+    public static final String SCHEMA_PREFIX = "__s.";
+    public static final String DATA_PREFIX = "__d.";
 
     private BucketUtil() {}
 
