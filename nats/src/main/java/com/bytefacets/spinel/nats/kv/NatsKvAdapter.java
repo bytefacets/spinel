@@ -14,7 +14,6 @@ import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.OutputProvider;
 import io.nats.client.api.KeyValueEntry;
 import io.nats.client.api.KeyValueWatcher;
-import io.nats.client.impl.NatsKeyValueWatchSubscription;
 import io.netty.channel.EventLoop;
 import java.time.Duration;
 import java.util.BitSet;
@@ -39,7 +38,6 @@ public final class NatsKvAdapter implements OutputProvider {
     private final StringIndexedSet keys;
     private final StateChangeSet changeSet;
     private final KvUpdateHandler updateHandler;
-    private NatsKeyValueWatchSubscription subscription;
 
     NatsKvAdapter(
             final EventLoop eventLoop,
