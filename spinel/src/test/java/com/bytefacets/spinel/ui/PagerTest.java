@@ -92,6 +92,16 @@ class PagerTest {
             assertRowOrder(5, 10);
             assertThat(pager.size(), equalTo(2));
         }
+
+        @Test
+        void shouldClear() {
+            pager.add(iterable(rowsInRandomOrder(100, 400)));
+            pager.clear();
+            assertThat(pager.size(), equalTo(0));
+            final int[] newRows = rowsInRandomOrder(10, 20);
+            pager.add(iterable(newRows));
+            assertRowOrder(newRows);
+        }
     }
 
     @Nested

@@ -9,9 +9,7 @@ import com.bytefacets.collections.store.IntChunkStore;
 import com.bytefacets.collections.store.IntStore;
 import java.util.Arrays;
 
-/**
- * A Paging utility that keeps a compact, bidirectional mapping of row to view port position.
- */
+/** A Paging utility that keeps a compact, bidirectional mapping of row to view port position. */
 public final class Pager {
     private final IntStore activeRows;
     private final IntStore rowToPosition;
@@ -39,6 +37,11 @@ public final class Pager {
     public void remove(final IntIterable rows) {
         rows.forEach(this::internalRemove);
         compact();
+    }
+
+    public void clear() {
+        limit = 0;
+        // don't need to do anything else here
     }
 
     public void rowsInRange(final int offset, final int limit, final IntConsumer consumer) {
