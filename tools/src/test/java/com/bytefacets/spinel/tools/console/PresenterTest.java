@@ -3,7 +3,6 @@
 package com.bytefacets.spinel.tools.console;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,9 +52,9 @@ class PresenterTest {
         presenter.ansi().append("this is a test");
         presenter.update();
         presenter.update();
-        //
-        verify(emitter, times(2)).accept(outputCaptor.capture());
-        assertThat(outputCaptor.getAllValues(), contains("this is a test", ""));
+        // only once because empty string is avoided
+        verify(emitter, times(1)).accept(outputCaptor.capture());
+        assertThat(outputCaptor.getValue(), equalTo("this is a test"));
     }
 
     @Nested
@@ -70,7 +69,8 @@ class PresenterTest {
             presenter.update();
             verify(emitter, times(1)).accept(outputCaptor.capture());
             assertEquals(
-                    String.format(" %5s  %6s  %4s ", "abc", "abcd", "ab"), outputCaptor.getValue());
+                    String.format(" %-5s  %6s  %4s ", "abc", "abcd", "ab"),
+                    outputCaptor.getValue());
         }
 
         @Test
@@ -83,7 +83,8 @@ class PresenterTest {
 
             verify(emitter, times(1)).accept(outputCaptor.capture());
             assertEquals(
-                    String.format(" %5s  %6s  %4s ", "abc", "abcd", "ab"), outputCaptor.getValue());
+                    String.format(" %-5s  %6s  %4s ", "abc", "abcd", "ab"),
+                    outputCaptor.getValue());
         }
     }
 
@@ -134,7 +135,7 @@ class PresenterTest {
 
             verify(emitter, times(1)).accept(outputCaptor.capture());
             assertEquals(
-                    String.format(" %5s  %6s  %4s ", "12", "34", "5"), outputCaptor.getValue());
+                    String.format(" %-5s  %6s  %4s ", "12", "34", "5"), outputCaptor.getValue());
         }
     }
 

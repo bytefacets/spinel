@@ -10,7 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.bytefacets.collections.functional.IntConsumer;
+import com.bytefacets.collections.functional.IntIntConsumer;
 import com.bytefacets.collections.functional.IntIterable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,36 +111,28 @@ class PagerTest {
             final int[] rows = rowsInRandomOrder(0, 100);
             pager.add(iterable(rows));
             final int[] view = new int[35];
-            pager.rowsInRange(
-                    40,
-                    35,
-                    new IntConsumer() {
-                        int pos = 0;
-
-                        @Override
-                        public void accept(final int row) {
-                            view[pos++] = row;
-                        }
-                    });
+            // formatting:off
+            pager.rowsInRange(40, 35, (relativePosition, row) -> view[relativePosition] = row);
+            // formatting:on
             for (int i = 0; i < view.length; i++) {
-                assertThat(pager.position(view[i]), equalTo(i + 40));
+                assertThat(pager.positionForRow(view[i]), equalTo(i + 40));
             }
         }
 
         @Test
         void shouldReturnNothingWhenStartIsPastLimit() {
             pager.add(iterable(IntStream.range(30, 45).toArray()));
-            final IntConsumer consumer = mock(IntConsumer.class);
+            final IntIntConsumer consumer = mock(IntIntConsumer.class);
             pager.rowsInRange(15, 1, consumer);
-            verify(consumer, never()).accept(anyInt());
+            verify(consumer, never()).accept(anyInt(), anyInt());
         }
 
         @Test
         void shouldReturnFewerItemsWhenLimitIsPastEnd() {
             pager.add(iterable(IntStream.range(30, 45).toArray()));
-            final IntConsumer consumer = mock(IntConsumer.class);
+            final IntIntConsumer consumer = mock(IntIntConsumer.class);
             pager.rowsInRange(0, 20, consumer);
-            verify(consumer, times(15)).accept(anyInt());
+            verify(consumer, times(15)).accept(anyInt(), anyInt());
         }
     }
 
@@ -153,8 +145,8 @@ class PagerTest {
     private void assertRowOrder(final int... rows) {
         for (int pos = 0; pos < rows.length; pos++) {
             final int row = rows[pos];
-            assertThat(pager.position(row), equalTo(pos));
-            assertThat(pager.row(pos), equalTo(row));
+            assertThat(pager.positionForRow(row), equalTo(pos));
+            assertThat(pager.rowPosition(pos), equalTo(row));
         }
     }
 
