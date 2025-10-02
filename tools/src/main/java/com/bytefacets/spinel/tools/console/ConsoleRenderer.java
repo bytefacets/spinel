@@ -11,6 +11,7 @@ import com.bytefacets.spinel.printer.RendererRegistry;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.transform.InputProvider;
+import com.bytefacets.spinel.ui.Pager;
 import jakarta.annotation.Nullable;
 
 public final class ConsoleRenderer implements InputProvider {
@@ -19,21 +20,21 @@ public final class ConsoleRenderer implements InputProvider {
     private final String title;
 
     ConsoleRenderer(final String title) {
-        this(title, new Presenter(System.out::println), new RowMapping(), null);
+        this(title, new Presenter(System.out::println), Pager.pager(128, 128), null);
     }
 
     // VisibleForTesting
     ConsoleRenderer(
             final String title,
             final Presenter presenter,
-            final RowMapping mapping,
+            final Pager pager,
             final Control control) {
         this.title = requireNonNull(title, "title");
         input =
                 new Input(
                         presenter,
-                        mapping,
-                        requireNonNullElseGet(control, () -> new Control(presenter, mapping)));
+                        pager,
+                        requireNonNullElseGet(control, () -> new Control(presenter, pager)));
     }
 
     @Override
@@ -43,13 +44,13 @@ public final class ConsoleRenderer implements InputProvider {
 
     private final class Input implements TransformInput {
         private final Presenter presenter;
-        private final RowMapping mapping;
+        private final Pager pager;
         private final Control control;
         private boolean repaint = true;
 
-        Input(final Presenter presenter, final RowMapping mapping, final Control control) {
+        Input(final Presenter presenter, final Pager pager, final Control control) {
             this.presenter = requireNonNull(presenter, "presenter");
-            this.mapping = requireNonNull(mapping, "mapping");
+            this.pager = requireNonNull(pager, "pager");
             this.control = requireNonNull(control, "control");
             control.setTitle(title);
         }
@@ -71,7 +72,7 @@ public final class ConsoleRenderer implements InputProvider {
                 presenter.update();
             } else {
                 presenter.reset();
-                mapping.reset();
+                pager.clear();
                 control.emitClear();
             }
         }
@@ -102,7 +103,8 @@ public final class ConsoleRenderer implements InputProvider {
 
         @Override
         public void rowsRemoved(final IntIterable rows) {
-            rows.forEach(this::clearRow);
+            pager.remove(rows);
+            control.repaint();
             presenter.update();
         }
 
@@ -111,7 +113,7 @@ public final class ConsoleRenderer implements InputProvider {
             if (presenter.calculateColumnWidths(row)) {
                 repaint = true;
             }
-            mapping.mapRow(row);
+            pager.add(row);
         }
 
         /** Called on updated rows to recalculate widths */
@@ -119,11 +121,6 @@ public final class ConsoleRenderer implements InputProvider {
             if (presenter.calculateColumnWidth(row, fieldId)) {
                 repaint = true;
             }
-        }
-
-        /** Called on removed rows */
-        private void clearRow(final int row) {
-            control.clearRow(mapping.freeRow(row));
         }
     }
 }

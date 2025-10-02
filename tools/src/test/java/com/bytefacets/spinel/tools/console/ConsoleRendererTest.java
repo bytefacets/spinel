@@ -13,12 +13,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.bytefacets.spinel.common.Connector;
 import com.bytefacets.spinel.schema.Schema;
 import com.bytefacets.spinel.schema.TypeId;
 import com.bytefacets.spinel.table.IntIndexedStructTable;
+import com.bytefacets.spinel.ui.Pager;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConsoleRendererTest {
     private @Mock Control control;
     private @Mock Presenter presenter;
-    private @Mock RowMapping rowMapping;
+    private @Mock Pager pager;
     private @Captor ArgumentCaptor<Integer> rowCaptor;
     final IntIndexedStructTable<Data> table = intIndexedStructTable(Data.class).build();
     final Data facade = table.createFacade();
@@ -42,7 +42,7 @@ class ConsoleRendererTest {
 
     @BeforeEach
     void setUp() {
-        renderer = new ConsoleRenderer("title", presenter, rowMapping, control);
+        renderer = new ConsoleRenderer("title", presenter, pager, control);
         verify(control, times(1)).setTitle("title");
         Connector.connectInputToOutput(renderer, table);
     }
@@ -76,16 +76,16 @@ class ConsoleRendererTest {
 
         @Test
         void shouldResetPresenterWhenSchemaReset() {
-            reset(presenter, rowMapping, control);
+            resetMocks();
             renderer.input().schemaUpdated(null);
             verify(presenter, times(1)).reset();
         }
 
         @Test
         void shouldResetRowMappingWhenSchemaReset() {
-            reset(presenter, rowMapping, control);
+            resetMocks();
             renderer.input().schemaUpdated(null);
-            verify(rowMapping, times(1)).reset();
+            verify(pager, times(1)).clear();
         }
 
         @Test
@@ -97,7 +97,7 @@ class ConsoleRendererTest {
 
         @Test
         void shouldClearScreenWithSchemaReset() {
-            reset(presenter, rowMapping, control);
+            resetMocks();
             renderer.input().schemaUpdated(null);
             verify(control, times(1)).emitClear();
         }
@@ -115,7 +115,7 @@ class ConsoleRendererTest {
             final int r1 = upsert(10, 20, "foo");
             final int r2 = upsert(12, 30, "bar");
             table.fireChanges();
-            verify(rowMapping, times(2)).mapRow(rowCaptor.capture());
+            verify(pager, times(2)).add(rowCaptor.capture());
             assertThat(rowCaptor.getAllValues(), containsInAnyOrder(r1, r2));
         }
 
@@ -187,13 +187,10 @@ class ConsoleRendererTest {
 
     @Nested
     class RemoveTests {
-        int r1;
-        int r2;
-
         @BeforeEach
         void setUp() {
-            r1 = upsert(10, 20, "foo");
-            r2 = upsert(12, 30, "bar");
+            upsert(10, 20, "foo");
+            upsert(12, 30, "bar");
             table.fireChanges();
             resetMocks();
         }
@@ -207,28 +204,12 @@ class ConsoleRendererTest {
         @Test
         void shouldUnmapRows() {
             fireRemoves();
-            verify(rowMapping, times(2)).freeRow(rowCaptor.capture());
-            assertThat(rowCaptor.getAllValues(), containsInAnyOrder(r1, r2));
-        }
-
-        @Test
-        void shouldClearRows() {
-            when(rowMapping.freeRow(r1)).thenReturn(5);
-            when(rowMapping.freeRow(r2)).thenReturn(6);
-            fireRemoves();
-            verify(control, times(2)).clearRow(rowCaptor.capture());
-            assertThat(rowCaptor.getAllValues(), containsInAnyOrder(5, 6));
-        }
-
-        @Test
-        void shouldUpdate() {
-            fireRemoves();
-            verify(presenter, times(1)).update();
+            verify(pager, times(1)).remove(any());
         }
     }
 
     private void resetMocks() {
-        reset(presenter, rowMapping, control);
+        reset(presenter, pager, control);
     }
 
     private int upsert(final int key, final int value1, final String value2) {

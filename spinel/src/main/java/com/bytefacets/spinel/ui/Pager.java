@@ -3,7 +3,7 @@
 package com.bytefacets.spinel.ui;
 
 import com.bytefacets.collections.arrays.IntArray;
-import com.bytefacets.collections.functional.IntConsumer;
+import com.bytefacets.collections.functional.IntIntConsumer;
 import com.bytefacets.collections.functional.IntIterable;
 import com.bytefacets.collections.store.IntChunkStore;
 import com.bytefacets.collections.store.IntStore;
@@ -34,6 +34,10 @@ public final class Pager {
         rows.forEach(this::internalAdd);
     }
 
+    public void add(final int row) {
+        internalAdd(row);
+    }
+
     public void remove(final IntIterable rows) {
         rows.forEach(this::internalRemove);
         compact();
@@ -44,11 +48,18 @@ public final class Pager {
         // don't need to do anything else here
     }
 
-    public void rowsInRange(final int offset, final int limit, final IntConsumer consumer) {
+    /**
+     * Calls back the consumer for each row in the range
+     *
+     * @param offset the absolute start position
+     * @param limit the absolute end position
+     * @param consumer called back with (relative-position, row)
+     */
+    public void rowsInRange(final int offset, final int limit, final IntIntConsumer consumer) {
         final int end = Math.min(this.limit, offset + limit);
         final int start = Math.min(offset, this.limit);
-        for (int position = start; position < end; position++) {
-            consumer.accept(activeRows.getInt(position));
+        for (int position = start, relPosition = 0; position < end; position++, relPosition++) {
+            consumer.accept(relPosition, activeRows.getInt(position));
         }
     }
 
@@ -100,13 +111,11 @@ public final class Pager {
         numRemoved = 0;
     }
 
-    // VisibleForTesting
-    int position(final int row) {
+    public int positionForRow(final int row) {
         return rowToPosition.getInt(row);
     }
 
-    // VisibleForTesting
-    int row(final int position) {
+    public int rowPosition(final int position) {
         return activeRows.getInt(position);
     }
 }
