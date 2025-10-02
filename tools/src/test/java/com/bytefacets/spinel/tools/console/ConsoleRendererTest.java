@@ -187,13 +187,10 @@ class ConsoleRendererTest {
 
     @Nested
     class RemoveTests {
-        int r1;
-        int r2;
-
         @BeforeEach
         void setUp() {
-            r1 = upsert(10, 20, "foo");
-            r2 = upsert(12, 30, "bar");
+            upsert(10, 20, "foo");
+            upsert(12, 30, "bar");
             table.fireChanges();
             resetMocks();
         }
