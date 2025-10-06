@@ -41,7 +41,7 @@ public final class DefaultSubscriptionContainer implements SubscriptionContainer
             final TransformOutput output,
             final ModificationHandlerRegistry modificationHandler) {
         return new DefaultSubscriptionContainer(
-                sessionInfo, subscriptionConfig, List.of(), output, modificationHandler);
+                sessionInfo, subscriptionConfig, initialModifications, output, modificationHandler);
     }
 
     public static DefaultSubscriptionContainer defaultSubscriptionContainer(
