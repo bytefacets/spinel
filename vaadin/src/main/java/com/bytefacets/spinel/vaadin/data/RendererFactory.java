@@ -5,7 +5,6 @@ package com.bytefacets.spinel.vaadin.data;
 import static com.bytefacets.spinel.vaadin.data.LastValueSupportFactory.lastValueSupport;
 import static java.util.Objects.requireNonNull;
 
-import com.bytefacets.spinel.printer.RendererRegistry;
 import com.bytefacets.spinel.printer.ValueRenderer;
 import com.bytefacets.spinel.schema.SchemaField;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -20,7 +19,7 @@ public final class RendererFactory {
      * Creates a TextRenderer based on SchemaField. The SchemaField metadata is used to create a
      * ValueRenderer.
      *
-     * @see RendererRegistry#renderer(SchemaField)
+     * @see com.bytefacets.spinel.printer.RendererRegistry#renderer(SchemaField)
      */
     public static Renderer<TransformRow> textRenderer(final SchemaField field) {
         return new SchemaFieldRenderer(new FormattedValueProvider(field));

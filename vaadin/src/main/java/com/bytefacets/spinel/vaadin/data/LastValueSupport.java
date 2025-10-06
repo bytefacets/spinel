@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.vaadin.data;
 
-import com.bytefacets.spinel.schema.SchemaField;
-
 /**
  * Support interface for managing rendering decisions based on the previous value
  *
@@ -16,7 +14,7 @@ public interface LastValueSupport {
      * User-specified callback to evaluate the new value, old value, and the comparison result. The
      * result can be used to specify a css class name, for example.
      *
-     * @see RendererFactory#changedRenderer(SchemaField, String)
+     * @see RendererFactory#changedRenderer(com.bytefacets.spinel.schema.SchemaField, String)
      */
     interface Callback {
 
