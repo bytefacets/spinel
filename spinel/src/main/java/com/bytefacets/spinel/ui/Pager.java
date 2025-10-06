@@ -43,6 +43,11 @@ public final class Pager {
         compact();
     }
 
+    public void remove(final int row) {
+        internalRemove(row);
+        compact();
+    }
+
     public void clear() {
         limit = 0;
         // don't need to do anything else here

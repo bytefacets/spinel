@@ -74,7 +74,8 @@ subprojects {
     project.version = project.parent?.version!!
 
     extra.apply {
-        set("bytefacetsCollectionsVersion", "0.6.0")
+        set("auth0", "4.4.0")
+        set("bytefacetsCollectionsVersion", "0.7.0")
         set("findbugsVersion", "4.7.3")
         set("grpcVersion", "1.70.0")
         set("logbackVersion", "1.5.18")
@@ -83,7 +84,6 @@ subprojects {
         set("protobufVersion", "4.29.3")
         set("slfApiVersion", "2.0.17")
         set("spotbugsVersion", "4.8.6")
-        set("auth0", "4.4.0")
     }
 
     val spotbugsVersion: String by extra
