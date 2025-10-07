@@ -40,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TransformDataProviderTest {
     private @Mock SubscriptionContainer subscription;
     private @Mock TransformOutput subscriptionOutput;
-    private @Mock EventLoop eventLoop;
+    private @Mock(strictness = Mock.Strictness.LENIENT) EventLoop eventLoop;
     private @Mock TransformConsumer eventLoopConsumer;
     private @Mock UIThreadConsumer uiThreadConsumer;
     private @Mock(strictness = Mock.Strictness.LENIENT) Query<TransformRow, ModificationRequest>
