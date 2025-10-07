@@ -35,6 +35,7 @@ public final class Cache {
     private final StringGenericIndexedMap<SchemaField> fieldMap;
     private final Resolver resolver = new Resolver();
     private final Copier copier = new Copier();
+    private Schema cacheSchema;
 
     Cache(final Set<String> fields, final int initialSize, final int chunkSize) {
         this.matrixStoreFactory = matrixStoreFieldFactory(initialSize, chunkSize, i -> {});
@@ -47,7 +48,12 @@ public final class Cache {
         return resolver;
     }
 
+    public Schema schema() {
+        return cacheSchema;
+    }
+
     public void unbind() {
+        cacheSchema = null;
         resolver.isBoundToSchema = false;
         inboundIdToCopier.clear();
         // We don't have a good way of resetting all internal data of the writable field/store,
@@ -61,6 +67,7 @@ public final class Cache {
         final Map<Byte, List<FieldDescriptor>> typeMap = buildTypeMap(inSchema);
         final FieldList cacheFields = matrixStoreFactory.createFieldList(fieldMap, typeMap);
         buildAndMapCache(inSchema, cacheFields);
+        cacheSchema = Schema.schema(inSchema.name() + ".cache", cacheFields);
         resolver.isBoundToSchema = true;
     }
 
