@@ -165,6 +165,7 @@ subprojects {
 
     spotbugs {
         showProgress.set(true)
+        excludeFilter.set(rootProject.file("config/spotbugs/exclude.xml"))
         if(file("config/spotbugs/exclude.xml").exists()) {
             excludeFilter.set(file("config/spotbugs/exclude.xml"))
         }
