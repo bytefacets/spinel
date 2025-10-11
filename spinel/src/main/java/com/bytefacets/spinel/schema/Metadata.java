@@ -5,6 +5,8 @@ package com.bytefacets.spinel.schema;
 import static java.util.Objects.requireNonNull;
 
 import jakarta.annotation.Nullable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,6 +34,23 @@ public final class Metadata {
     private Metadata(final Set<String> tags, final Map<String, Object> attributes) {
         this.tags = requireNonNull(tags, "tags");
         this.attributes = requireNonNull(attributes, "attributes");
+    }
+
+    public Metadata update(final Metadata updates) {
+        final Set<String> newTags;
+        if (!updates.tags.isEmpty()) {
+            newTags = new HashSet<>(tags);
+        } else {
+            newTags = tags;
+        }
+        final Map<String, Object> newAttributes;
+        if (!updates.attributes.isEmpty()) {
+            newAttributes = new HashMap<>(attributes);
+            newAttributes.putAll(updates.attributes);
+        } else {
+            newAttributes = attributes;
+        }
+        return new Metadata(newTags, newAttributes);
     }
 
     public Set<String> tags() {
