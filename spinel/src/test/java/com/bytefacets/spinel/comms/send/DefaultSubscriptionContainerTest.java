@@ -4,6 +4,7 @@ package com.bytefacets.spinel.comms.send;
 
 import static com.bytefacets.spinel.comms.send.DefaultSubscriptionContainer.defaultSubscriptionContainer;
 import static com.bytefacets.spinel.comms.subscription.ModificationRequestFactory.applyFilterExpression;
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,10 +12,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.bytefacets.spinel.TransformInput;
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.common.Connector;
 import com.bytefacets.spinel.comms.SubscriptionConfig;
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.schema.IntWritableField;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.Key;
@@ -71,7 +72,7 @@ class DefaultSubscriptionContainerTest {
 
     private void init(final SubscriptionConfig config, final TransformOutput output) {
         createContainer(config, output);
-        Connector.connectOutputToInput(container, OutputPrinter.printer());
+        Connector.connectOutputToInput(container, logger().build());
         Connector.connectOutputToInput(container, validation);
     }
 
@@ -85,7 +86,7 @@ class DefaultSubscriptionContainerTest {
         final TransformOutput mockOutput = mock(TransformOutput.class);
         init(SubscriptionConfig.subscriptionConfig("foo").build(), mockOutput);
         container.terminateSubscription();
-        verify(mockOutput, times(1)).detachInput(any());
+        verify(mockOutput, times(1)).detachInput(any(TransformInput.class));
     }
 
     @Nested

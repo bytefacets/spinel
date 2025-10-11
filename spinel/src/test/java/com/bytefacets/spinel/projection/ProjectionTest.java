@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.projection;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.projection.lib.IntCalculation;
 import com.bytefacets.spinel.projection.lib.IntFieldCalculation;
 import com.bytefacets.spinel.schema.FieldResolver;
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class ProjectionTest {
-    private static final boolean print = true;
     private final ProjectionBuilder builder = ProjectionBuilder.projection();
     private ValidationOperator validation =
             new ValidationOperator(new String[] {"Id"}, "Value1", "Value2", "Sum", "Value2^2");
@@ -51,9 +50,7 @@ class ProjectionTest {
 
     void initialize() {
         projection = builder.build();
-        if (print) {
-            projection.output().attachInput(OutputPrinter.printer().input());
-        }
+        projection.output().attachInput(logger().build());
         projection.output().attachInput(validation.input());
         table.output().attachInput(projection.input());
     }

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.join;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static com.bytefacets.spinel.validation.Key.key;
 import static com.bytefacets.spinel.validation.RowData.template;
 
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.testing.IntTableHandle;
 import com.bytefacets.spinel.validation.RowData;
@@ -71,7 +71,7 @@ class LookupJoinTest {
             left.output().attachInput(join.leftInput());
         }
         join.output().attachInput(validation.input());
-        join.output().attachInput(OutputPrinter.printer().input());
+        join.output().attachInput(logger().build());
     }
 
     private void addLeft() {
@@ -101,7 +101,7 @@ class LookupJoinTest {
         @BeforeEach
         void setUp() {
             join = builder.joinOn(List.of("LKey"), List.of("RKey"), 2).build();
-            join.output().attachInput(OutputPrinter.printer().input());
+            join.output().attachInput(logger().build());
             join.output().attachInput(validation.input());
         }
 

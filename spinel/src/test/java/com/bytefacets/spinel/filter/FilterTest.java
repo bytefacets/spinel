@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.filter;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bytefacets.spinel.filter.lib.IntPredicate;
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.schema.FieldResolver;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.Key;
@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class FilterTest {
-    private static final boolean print = true;
     private final ValidationOperator validation =
             new ValidationOperator(new String[] {"Id"}, "Value1", "Value2");
     private IntIndexedTable table;
@@ -62,9 +61,7 @@ class FilterTest {
 
     void initialize(final FilterBuilder filterBuilder) {
         filter = filterBuilder.build();
-        if (print) {
-            filter.output().attachInput(OutputPrinter.printer().input());
-        }
+        filter.output().attachInput(logger().build());
         filter.output().attachInput(validation.input());
         table.output().attachInput(filter.input());
     }
