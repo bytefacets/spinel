@@ -28,6 +28,7 @@ template_processor {
         excludedFiles.set(listOf(
             "BoolIndexedTableTest.java",
             "BoolIndexedStructTableTest.java",
+            "BoolIndexedStructTableBuilderTest.java",
             "BoolIndexedSetTest.java"))
     }
     testFixtures {
