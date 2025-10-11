@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bytefacets.collections.functional.IntIntConsumer;
+import com.bytefacets.spinel.TransformInput;
 import com.bytefacets.spinel.TransformOutput;
 import com.bytefacets.spinel.comms.send.ModificationResponse;
 import com.bytefacets.spinel.comms.send.SubscriptionContainer;
@@ -63,7 +64,7 @@ class TransformDataProviderTest {
 
     @Test
     void shouldConnectOnEventLoopThread() {
-        verify(subscriptionOutput, never()).attachInput(any());
+        verify(subscriptionOutput, never()).attachInput(any(TransformInput.class));
         runEventLoop();
         verify(subscriptionOutput, times(1)).attachInput(eventLoopConsumer);
     }
