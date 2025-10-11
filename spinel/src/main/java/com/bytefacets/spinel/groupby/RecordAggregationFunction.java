@@ -43,7 +43,7 @@ import com.bytefacets.spinel.schema.SchemaBindable;
  *          }
  *     };
  *
- * RecordAggregationFunction&lt;Scores,FinalGrade&gt function =
+ * RecordAggregationFunction&lt;Scores,FinalGrade&gt; function =
  *      recordAggregationFunction(Scores.class, FinalGrades.class, accumulator);
  * </pre>
  *
