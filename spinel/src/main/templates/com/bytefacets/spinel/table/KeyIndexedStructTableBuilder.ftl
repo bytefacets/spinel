@@ -115,16 +115,19 @@ public final class ${type.name}IndexedStructTableBuilder${classGenerics} {
         return new ${type.name}IndexedStructTableBuilder${classGenerics}(name, structType, transformContext);
     }
 
+    /** Use the original name derived from the method to target the field for replacing metadata. */
     public ${type.name}IndexedStructTableBuilder${classGenerics} replaceMetadata(final String fieldName, final Metadata metadata) {
         modifyMetadata(fieldName, metadata, this::replaceMetadataOnFd);
         return this;
     }
 
+    /** Use the original name derived from the method to target the field for updating metadata. */
     public ${type.name}IndexedStructTableBuilder${classGenerics} updateMetadata(final String fieldName, final Metadata metadata) {
         modifyMetadata(fieldName, metadata, this::updateMetadataOnFd);
         return this;
     }
 
+    /** When building the schema, transform the field names according to the given strategy. */
     public ${type.name}IndexedStructTableBuilder${classGenerics} fieldNamingStrategy(final FieldNamingStrategy fieldNamingStrategy) {
         this.fieldNamingStrategy = Objects.requireNonNullElse(fieldNamingStrategy, FieldNamingStrategy.Identity);
         return this;
@@ -136,6 +139,7 @@ public final class ${type.name}IndexedStructTableBuilder${classGenerics} {
             final BiFunction<FieldDescriptor, Metadata, FieldDescriptor> modFunction) {
         if(fieldName.equals(keyField.name())) {
             keyField = modFunction.apply(keyField, metadata);
+            return;
         }
         for (int i = 0, len = writableFields.size(); i < len; i++) {
             final FieldDescriptor fd = writableFields.get(i);

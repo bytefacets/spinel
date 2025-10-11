@@ -52,16 +52,19 @@ public final class StructTableBuilder<T> {
         }
     }
 
+    /** Use the original name derived from the method to target the field for replacing metadata. */
     public StructTableBuilder<T> replaceMetadata(final String fieldName, final Metadata metadata) {
         modifyMetadata(fieldName, metadata, this::replaceMetadataOnFd);
         return this;
     }
 
+    /** Use the original name derived from the method to target the field for updating metadata. */
     public StructTableBuilder<T> updateMetadata(final String fieldName, final Metadata metadata) {
         modifyMetadata(fieldName, metadata, this::updateMetadataOnFd);
         return this;
     }
 
+    /** When building the schema, transform the field names according to the given strategy. */
     public StructTableBuilder<T> fieldNamingStrategy(
             final FieldNamingStrategy fieldNamingStrategy) {
         this.fieldNamingStrategy =
