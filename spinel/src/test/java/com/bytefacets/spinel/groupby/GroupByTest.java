@@ -38,6 +38,7 @@ class GroupByTest {
                 intIndexedTable("table")
                         .addField(intField("Value1"))
                         .addField(intField("Value2"))
+                        .addField(intField("Value3"))
                         .keyFieldName("Id")
                         .build();
         value1FieldId = table.fieldId("Value1");
@@ -191,6 +192,16 @@ class GroupByTest {
             changeValue1(2, 6);
             table.fireChanges();
             childValidation.expect().changed(key(2), childRowData(2, 6, null)).validate();
+        }
+
+        @Test
+        void shouldNotForwardChangesWhenNotInOutput() {
+            final var row = table.tableRow();
+            table.beginChange(2);
+            row.setInt(table.fieldId("Value3"), 5);
+            table.endChange();
+            table.fireChanges();
+            validation.expect().validate();
         }
     }
 
