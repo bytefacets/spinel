@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.conflation;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static com.bytefacets.spinel.validation.Key.key;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.testing.IntTableHandle;
 import com.bytefacets.spinel.transform.TransformBuilder;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class ChangeConflatorTest {
-    private static final boolean print = true;
     private final ChangeConflatorBuilder builder = ChangeConflatorBuilder.changeConflator();
     private final ValidationOperator validation =
             new ValidationOperator(new String[] {"Id"}, "Value1", "Value2");
@@ -48,9 +47,7 @@ class ChangeConflatorTest {
 
     void initialize() {
         conflation = builder.build();
-        if (print) {
-            conflation.output().attachInput(OutputPrinter.printer().input());
-        }
+        conflation.output().attachInput(logger().build());
         conflation.output().attachInput(validation.input());
         table.output().attachInput(conflation.input());
     }

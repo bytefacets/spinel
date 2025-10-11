@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.grpc;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static org.mockito.Mockito.mock;
@@ -14,7 +15,6 @@ import com.bytefacets.spinel.grpc.proto.SubscriptionResponse;
 import com.bytefacets.spinel.grpc.receive.ReceivePackageAccess;
 import com.bytefacets.spinel.grpc.send.GrpcSink;
 import com.bytefacets.spinel.grpc.send.SendPackageAccess;
-import com.bytefacets.spinel.printer.OutputLoggerBuilder;
 import com.bytefacets.spinel.schema.Metadata;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.testing.IntTableHandle;
@@ -29,7 +29,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.event.Level;
 
 public final class CodecTest {
     private static final boolean print = true;
@@ -190,8 +189,7 @@ public final class CodecTest {
         // client ---------
         receiver = ReceivePackageAccess.decoder();
         if (print) {
-            receiver.output()
-                    .attachInput(OutputLoggerBuilder.logger().logLevel(Level.INFO).build().input());
+            receiver.output().attachInput(logger().build().input());
         }
         // receiver goes to the validator
         receiver.output().attachInput(validation.input());

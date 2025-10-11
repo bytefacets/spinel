@@ -66,7 +66,7 @@ class GrpcSessionTest {
                             return null;
                         })
                 .when(output)
-                .attachInput(any());
+                .attachInput(any(TransformInput.class));
     }
 
     @Test
@@ -83,7 +83,7 @@ class GrpcSessionTest {
         // when running the data thread
         verify(dataExecutor, times(1)).execute(runnableCaptor.capture());
         runnableCaptor.getValue().run();
-        verify(output, times(1)).detachInput(any());
+        verify(output, times(1)).detachInput(any(TransformInput.class));
         assertThat(session.activeAdapters(), equalTo(0));
     }
 
@@ -114,7 +114,7 @@ class GrpcSessionTest {
             session.requestHandler().onNext(subscribeRequest("foo", List.of()));
 
             verify(registry, times(1)).lookup("foo");
-            verify(output, times(1)).attachInput(any());
+            verify(output, times(1)).attachInput(any(TransformInput.class));
             assertThat(session.activeAdapters(), equalTo(1));
         }
 

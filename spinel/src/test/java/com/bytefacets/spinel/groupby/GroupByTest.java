@@ -3,11 +3,11 @@
 package com.bytefacets.spinel.groupby;
 
 import static com.bytefacets.spinel.interner.IntRowInterner.intInterner;
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 
 import com.bytefacets.spinel.groupby.lib.SumFactory;
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.Key;
 import com.bytefacets.spinel.validation.RowData;
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class GroupByTest {
-    private static final boolean print = true;
     private final GroupByBuilder builder = GroupByBuilder.groupBy();
     private final ValidationOperator validation =
             new ValidationOperator(new String[] {"GroupId"}, "Count", "Value1", "Sum2");
@@ -57,10 +56,8 @@ class GroupByTest {
 
     void initialize() {
         groupBy = builder.build();
-        if (print) {
-            // groupBy.parentOutput().attachInput(OutputPrinter.printer().input());
-            groupBy.childOutput().attachInput(OutputPrinter.printer().input());
-        }
+        groupBy.parentOutput().attachInput(logger("parent").build());
+        groupBy.childOutput().attachInput(logger("child").build());
         groupBy.parentOutput().attachInput(validation.input());
         groupBy.childOutput().attachInput(childValidation.input());
         table.output().attachInput(groupBy.input());

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.prototype;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.prototype.PrototypeBuilder.prototype;
 import static com.bytefacets.spinel.schema.FieldDescriptor.doubleField;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
@@ -11,7 +12,6 @@ import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable
 import static com.bytefacets.spinel.testing.IntTableHandle.intTableHandle;
 import static com.bytefacets.spinel.validation.Key.key;
 
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.testing.IntTableHandle;
 import com.bytefacets.spinel.validation.RowData;
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class PrototypeTest {
-    private static final boolean print = true;
     private final ValidationOperator validation =
             new ValidationOperator(new String[] {"Id"}, "Value1", "Value2");
     private final RowData.RowDataTemplate template = RowData.template("Value1", "Value2");
@@ -50,9 +49,7 @@ class PrototypeTest {
 
     void initialize() {
         prototype = builder.build();
-        if (print) {
-            prototype.output().attachInput(OutputPrinter.printer().input());
-        }
+        prototype.output().attachInput(logger().build());
         prototype.output().attachInput(validation.input());
         table.output().attachInput(prototype.input());
     }

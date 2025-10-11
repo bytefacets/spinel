@@ -6,6 +6,7 @@ import static com.bytefacets.spinel.common.Connector.connectOutputToInput;
 import static com.bytefacets.spinel.comms.send.FilterExpressionManager.filterExpressionManager;
 import static com.bytefacets.spinel.comms.subscription.ModificationRequestFactory.applyFilterExpression;
 import static com.bytefacets.spinel.filter.FilterBuilder.filter;
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 import static com.bytefacets.spinel.validation.Key.key;
@@ -16,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.bytefacets.spinel.common.jexl.JexlEngineProvider;
 import com.bytefacets.spinel.filter.Filter;
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.schema.IntWritableField;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.RowData;
@@ -47,7 +47,7 @@ class FilterExpressionManagerTest {
     @BeforeEach
     void setUp() {
         connectOutputToInput(table, filter);
-        connectOutputToInput(filter, OutputPrinter.printer());
+        connectOutputToInput(filter, logger().build());
         connectOutputToInput(filter, validation);
         IntStream.rangeClosed(1, 10)
                 .forEach(

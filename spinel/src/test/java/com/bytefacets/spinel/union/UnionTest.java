@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 package com.bytefacets.spinel.union;
 
+import static com.bytefacets.spinel.printer.OutputLoggerBuilder.logger;
 import static com.bytefacets.spinel.schema.FieldDescriptor.intField;
 import static com.bytefacets.spinel.table.IntIndexedTableBuilder.intIndexedTable;
 
-import com.bytefacets.spinel.printer.OutputPrinter;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.Key;
 import com.bytefacets.spinel.validation.RowData;
@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class UnionTest {
-    private static final boolean print = true;
     private final UnionBuilder builder = UnionBuilder.union("TestUnion");
     private final ValidationOperator validation =
             new ValidationOperator(
@@ -46,9 +45,7 @@ class UnionTest {
 
     void initialize() {
         union = builder.build();
-        if (print) {
-            union.output().attachInput(OutputPrinter.printer().input());
-        }
+        union.output().attachInput(logger().build());
         union.output().attachInput(validation.input());
         table1.output().attachInput(union.newInput("t1"));
         table2.output().attachInput(union.newInput("t2"));
@@ -68,9 +65,7 @@ class UnionTest {
         @Test
         void shouldForwardRowsAsInputIsAdded() {
             union = builder.build();
-            if (print) {
-                union.output().attachInput(OutputPrinter.printer().input());
-            }
+            union.output().attachInput(logger().build());
             table1.output().attachInput(union.newInput("t1"));
             union.output().attachInput(validation.input());
             populateTables();
