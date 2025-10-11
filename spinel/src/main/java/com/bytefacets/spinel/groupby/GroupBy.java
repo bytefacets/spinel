@@ -204,12 +204,14 @@ public final class GroupBy implements InputProvider, OutputProvider {
         private void processChangesForStableGroups(
                 final IntIterable rows,
                 final GenericIndexedSet<AggregationFunction> changedFunctions) {
-            rows.forEach(
-                    row -> {
-                        final int oldGroup = groupMapping.groupOfInboundRow(row);
-                        processGroupUpdateFromChange(oldGroup, row);
-                    });
-            updateChangedFunctions(changedFunctions);
+            if (!changedFunctions.isEmpty()) {
+                rows.forEach(
+                        row -> {
+                            final int oldGroup = groupMapping.groupOfInboundRow(row);
+                            processGroupUpdateFromChange(oldGroup, row);
+                        });
+                updateChangedFunctions(changedFunctions);
+            }
         }
 
         @Override
