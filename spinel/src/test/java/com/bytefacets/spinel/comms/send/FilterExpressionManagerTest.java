@@ -13,10 +13,15 @@ import static com.bytefacets.spinel.validation.Key.key;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.bytefacets.spinel.common.jexl.JexlEngineProvider;
 import com.bytefacets.spinel.filter.Filter;
+import com.bytefacets.spinel.filter.RowPredicate;
 import com.bytefacets.spinel.schema.IntWritableField;
 import com.bytefacets.spinel.table.IntIndexedTable;
 import com.bytefacets.spinel.validation.RowData;
@@ -29,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -116,6 +122,19 @@ class FilterExpressionManagerTest {
         assertThrows(JexlException.class, () -> manager.add(applyFilterExpression("a sju97")));
         assertThrows(JexlException.class, () -> manager.add(applyFilterExpression("a sju97")));
         assertThat(manager.expressionCount(), equalTo(0));
+    }
+
+    @Test
+    void shouldPassNullPredicateWhenAllExpressionsRemoved() {
+        final Filter mockFilter = mock(Filter.class);
+        final FilterExpressionManager manager2 =
+                filterExpressionManager(mockFilter, JexlEngineProvider.defaultJexlEngine(), "test");
+        manager2.add(applyFilterExpression("a == 70"));
+        manager2.remove(applyFilterExpression("a == 70"));
+        final ArgumentCaptor<RowPredicate> predicateCaptor =
+                ArgumentCaptor.forClass(RowPredicate.class);
+        verify(mockFilter, times(2)).updatePredicate(predicateCaptor.capture());
+        assertThat(predicateCaptor.getAllValues().getLast(), nullValue());
     }
 
     @Nested
