@@ -25,10 +25,7 @@ public final class FilterExpressionManager implements ModificationHandler {
     private static final Logger log = LoggerFactory.getLogger(FilterExpressionManager.class);
     private static final ModificationResponse NOT_UNDERSTOOD =
             new ModificationResponse(
-                    false,
-                    "Modification not understood by "
-                            + FilterExpressionManager.class.getSimpleName(),
-                    null);
+                    false, "Modification not understood by FilterExpressionManager", null);
     private final StringGenericIndexedMap<PredicateHolder> expressionPredicates =
             new StringGenericIndexedMap<>(4);
     private final Filter filter;
@@ -147,12 +144,12 @@ public final class FilterExpressionManager implements ModificationHandler {
         private int index = 0;
 
         private void reset(final int size) {
-            predicates = GenericArray.create(RowPredicate.class, size);
+            predicates = size != 0 ? GenericArray.create(RowPredicate.class, size) : null;
             index = 0;
         }
 
         private RowPredicate build() {
-            return orPredicate(predicates);
+            return predicates == null ? null : orPredicate(predicates);
         }
 
         @Override
