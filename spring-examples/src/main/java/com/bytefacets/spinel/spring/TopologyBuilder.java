@@ -167,13 +167,13 @@ public class TopologyBuilder {
     // formatting:off
     interface Order {
         int getOrderId();
-        int getQuantity(); Order setQuantity(int value);
+        int getQuantity();     Order setQuantity(int value);
         int getInstrumentId(); Order setInstrumentId(int value);
-        double getPrice(); Order setPrice(double value);
+        double getPrice();     Order setPrice(double value);
     }
     interface Instrument {
         int getInstrumentId();
-        String getSymbol(); void setSymbol(String symbol);
+        String getSymbol();    void setSymbol(String symbol);
     }
     // formatting:on
 }

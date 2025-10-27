@@ -53,7 +53,7 @@ Event flow into an Operator begins with a Schema update, which describes the dat
 but also *is* how the operator will access the data. Data in Spinel is typically *column-oriented*
 and accessible through the Field interfaces.
 
-## 🏗️ Example Architecture Overview
+## Example Architecture Overview
 
 ```
          +-----------+     +-----------+
@@ -94,7 +94,7 @@ and accessible through the Field interfaces.
 
 **Integration & Communication**
 - **Subscription Management**: Multi-client subscription handling
-- **Protocol Adapters**: WebSocket, gRPC, and custom protocol support
+- **Protocol Adapters**: WebSocket, gRPC, NATS.io, and custom protocol support
 
 ## Performance Characteristics
 
@@ -112,32 +112,88 @@ and accessible through the Field interfaces.
 - Incremental updates reduce network traffic by 90%
 - Built-in conflation prevents message flooding
 
-## 📦 Integration Examples
+## Integration Examples
+
+### NATS.io Integration ([NATS Examples](./examples/src/main/java/com/bytefacets/spinel/examples/nats/README.md))
+
+Tables can be emitted to and sourced from NATS KV Buckets. There are two varieties of sourcing from a KV bucket:
+#### Custom KV (a non-spinel KV Bucket publisher) exposed as a Spinel Table
+You control the deserialization of the bucket's entries.
+```java
+KeyValue mdKeyValue = connection.keyValue(mdBucketName);
+mdAdapter = NatsKvAdapterBuilder.natsKvAdapter()
+            // custom handler for decoding and writing data to schema fields
+            .updateHandler(new MdKeyValueHandler())
+            // adapter must know the schema ahead of time
+            .addFields(marketDataBucketFields())
+            .eventLoop(eventLoop)
+            .build();
+mdKeyValue.watchAll(mdAdapter.keyValueWatcher());
+```
+
+#### Spinel KV (a spinel KV Bucket Sink) exposed as a Spinel Table
+The framework encodes the schema into the bucket allowing some flexibility with schema changes 
+between publisher and consumer
+```java
+// Server/Publisher side
+Connection connection = Nats.connect(options);
+KeyValue ordersKeyValue = connection.keyValue(bucketName);
+NatsKvSink sink =
+       NatsKvSinkBuilder.natsKvSink()
+               .keyValueBucket(ordersKeyValue)
+               .subjectBuilder(
+                       FieldSequenceNatsSubjectBuilder.fieldSequenceNatsSubjectBuilder(
+                               List.of("InstrumentId", "OrderId")))
+               .build();
+Connector.connectInputToOutput(sink, orders);
+
+// Client/Consumer side
+KeyValue ordersKeyValue = connection.keyValue(bucketName);
+NatsKvSource orderSource = NatsKvSourceBuilder.natsKvSource().eventLoop(eventLoop).build();
+ordersKeyValue.watchAll(orderSource.keyValueWatcher());
+```
+
+### Vaadin Integration (in development)
+([Vaadin Integration README](./vaadin/README.md))
 
 ### Spring Boot Integration (in development)
 ```java
 @Configuration
-public class SpinelConfig {
-    @Bean
-    public IntIndexedStructTable<Order> orderTable() {
-        return intIndexedStructTable(Order.class).build();
-    }
-    
-    @Bean
-    public WebSocketHandler spinelHandler(OutputRegistry registry) {
-        return new SpinelWebSocketHandler(
-            defaultSubscriptionProvider(registry), eventLoop);
-    }
-}
+public class TopologyBuilder {
+   private final RegisteredOutputsTable outputs = RegisteredOutputsTable.registeredOutputsTable();
+   private final EventLoop eventLoop;
+   private final DefaultSubscriptionProvider subscriptionProvider;
+
+   public TopologyBuilder() {
+      this.eventLoop = new DefaultEventLoop(r -> { return new Thread(r, "server-thread"); });
+      // .... setup transforms and register them in the RegisteredOutputsTable 
+      outputs.register("orders", orders);
+      outputs.register("instruments", instruments);
+      outputs.register("order-view", join.output());
+      subscriptionProvider = DefaultSubscriptionProvider.defaultSubscriptionProvider(outputs);
+   }
+
+   @Bean
+   HandlerMapping handlerMapping() {
+      final var mapping =
+              new SimpleUrlHandlerMapping(
+                      Map.of("/ws/spinel", new SpinelWebSocketHandler(subscriptionProvider, eventLoop)));
+      mapping.setOrder(-1);
+      return mapping;
+   }
+
+   @Bean
+   public OutputRegistry registry() {
+      return outputs;
+   }
+   ...
 ```
 
 ### Kafka Streams Integration (coming soon)
 Use Spinel transformations to operate over state stores.
 
-### NATS.io Integration (coming soon)
-Use Spinel transformations to operate over KV stores.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Basic Table Operations
 ```java
@@ -306,14 +362,16 @@ Real-time dashboard example with:
 
 1. **Add Spinel to your project:**
    ```gradle
-   implementation 'com.bytefacets:spinel:latest'
-   implementation 'com.bytefacets:spinel-grpc:latest' // For gRPC integration
+   implementation 'com.bytefacets:spinel:+'
+   implementation 'com.bytefacets:spinel-grpc:+' // For gRPC integration
    ```
 
 2. **Define your data model:**
    ```java
+   // This is the reflection-based way to define a model for a table. The reflection is only performed 
+   // on setup. There is also a non-reflection based method to declare a table's fields.
    interface Order {
-       int getOrderId();
+       int getOrderId(); // getter-only for table that is keyed by this field
        String getSymbol(); Order setSymbol(String value);
        int getQuantity(); Order setQuantity(int value);
        double getPrice(); Order setPrice(double value);
@@ -333,7 +391,7 @@ Real-time dashboard example with:
    orders.fireChanges();
    ```
 
-4. **Set up real-time streaming:**
+4. **Register outputs for client connections to this server:**
    ```java
    RegisteredOutputsTable registry = RegisteredOutputsTable.registeredOutputsTable()e;
    registry.register("orders", orders);
