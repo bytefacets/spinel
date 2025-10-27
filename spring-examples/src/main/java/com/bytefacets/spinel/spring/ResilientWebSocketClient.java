@@ -22,8 +22,8 @@ import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
 /**
- * This is an example of a WebSocketClient that is pointing at the spring boot server
- * in this package.
+ * This is an example of a WebSocketClient that is pointing at the spring boot server in this
+ * package.
  */
 public final class ResilientWebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(ResilientWebSocketClient.class);
