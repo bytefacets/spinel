@@ -70,14 +70,14 @@ final class FluxAdapter<T> {
     }
 
     private class ReactivePublisher implements Runnable {
-        private final FluxSink<T> sink;
         private final LinkedBlockingDeque<T> queue = new LinkedBlockingDeque<>();
-        private final EventLoop dataLoop;
         private final AtomicBoolean connected = new AtomicBoolean(true);
+        private final FluxSink<T> sink;
+        private final EventLoop dataLoop;
 
         ReactivePublisher(final FluxSink<T> sink, final EventLoop dataLoop) {
             this.sink = requireNonNull(sink, "sink");
-            this.dataLoop = dataLoop;
+            this.dataLoop = requireNonNull(dataLoop, "dataLoop");
             this.sink.onCancel(this::disconnect);
             this.sink.onDispose(this::disconnect);
         }
