@@ -362,8 +362,8 @@ Real-time dashboard example with:
 
 1. **Add Spinel to your project:**
    ```gradle
-   implementation 'com.bytefacets:spinel:latest'
-   implementation 'com.bytefacets:spinel-grpc:latest' // For gRPC integration
+   implementation 'com.bytefacets:spinel:+'
+   implementation 'com.bytefacets:spinel-grpc:+' // For gRPC integration
    ```
 
 2. **Define your data model:**
