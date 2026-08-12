@@ -4,7 +4,7 @@ plugins {
     `bytefacets-central-portal-publishing-convention`
     id("pl.allegro.tech.build.axion-release") version "1.18.18" // https://plugins.gradle.org/plugin/pl.allegro.tech.build.axion-release
     id("com.github.spotbugs") version "6.0.25"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
-    id("com.diffplug.spotless") version "6.19.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
+    id("com.diffplug.spotless") version "8.8.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
 }
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
@@ -77,23 +77,22 @@ subprojects {
         set("auth0", "4.4.0")
         set("bytefacetsCollectionsVersion", "0.7.0")
         set("findbugsVersion", "4.7.3")
-        set("grpcVersion", "1.70.0")
-        set("logbackVersion", "1.5.18")
-        set("natsVersion", "2.21.5")
-        set("nettyVersion", "4.2.3.Final")
-        set("protobufVersion", "4.29.3")
-        set("slfApiVersion", "2.0.17")
-        set("spotbugsVersion", "4.8.6")
+        set("grpcVersion", "1.82.2")          // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
+        set("logbackVersion", "1.5.38")       // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+        set("natsVersion", "2.26.0")          // https://mvnrepository.com/artifact/io.nats/jnats
+        set("nettyVersion", "4.2.16.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
+        set("protobufVersion", "4.36.0-RC1")  // https://mvnrepository.com/artifact/com.google.protobuf/protoc
+        set("slfApiVersion", "2.0.18")        // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+        set("spotbugsVersion", "4.10.3")      // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
     }
 
     val spotbugsVersion: String by extra
     val findbugsVersion: String by extra
     val logbackVersion: String by extra
     val slfApiVersion: String by extra
-    val junitVersion = "5.7.0"
+    val junitVersion = "5.13.4"
     val hamcrestVersion = "2.2"
-    val mockitoVersion = "5.18.0"
-    val junitPioneerVersion = "0.9.0"
+    val mockitoVersion = "5.23.0" // https://mvnrepository.com/artifact/org.mockito/mockito-core
     val jakartaAnnotationVersion = "2.1.1"
 
     val mockitoAgent = configurations.create("mockitoAgent")
@@ -108,10 +107,17 @@ subprojects {
 
         testImplementation("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
         testImplementation("org.hamcrest:hamcrest:${hamcrestVersion}")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
-        testImplementation("org.junit-pioneer:junit-pioneer:${junitPioneerVersion}")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+
+        testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testImplementation("org.junit.jupiter:junit-jupiter-params")
+
+        // Explicitly align the launcher with the engine version from the BOM.
+        // Without this, Gradle auto-adds junit-platform-launcher at a version
+        // that may not match junit-platform-engine, causing:
+        // "OutputDirectoryProvider not available; probably due to unaligned versions..."
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
         testCompileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}") // for the module-info resolution
         testCompileOnly("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
         mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") {
