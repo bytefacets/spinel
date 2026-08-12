@@ -29,7 +29,7 @@ public final class FieldMapping {
     }
 
     /** Separate class to avoid the lambda allocation */
-    private class Translator implements IntConsumer {
+    private final class Translator implements IntConsumer {
         IntConsumer outboundFieldIdConsumer;
 
         Translator set(final IntConsumer outboundFieldIdConsumer) {

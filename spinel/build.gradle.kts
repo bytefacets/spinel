@@ -43,13 +43,15 @@ tasks.named("compileJava") {
         "generate-typed-test-sources",
         "generate-typed-testFixtures-sources")
 }
-val bytefacetsCollectionsVersion : String by extra
+val bytefacetsCollectionsVersion: String by extra
+val javassistVersion = "3.32.0-GA"
+val jexlVersion = "3.7.0"
 
 dependencies {
     implementation("com.bytefacets:bytefacets-collections:${bytefacetsCollectionsVersion}")
-    implementation("org.javassist:javassist:3.30.2-GA") // https://mvnrepository.com/artifact/org.javassist/javassist
-    testFixturesImplementation("com.bytefacets:bytefacets-collections:0.3.0")
-    implementation("org.apache.commons:commons-jexl3:3.5.0") // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
+    implementation("org.javassist:javassist:${javassistVersion}") // https://mvnrepository.com/artifact/org.javassist/javassist
+    testFixturesImplementation("com.bytefacets:bytefacets-collections:${bytefacetsCollectionsVersion}")
+    implementation("org.apache.commons:commons-jexl3:${jexlVersion}") // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
 }
 
 tasks.named<Jar>("jar") {

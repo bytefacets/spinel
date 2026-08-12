@@ -101,7 +101,7 @@ class DependencyMap {
         }
     }
 
-    private class Resolver implements FieldResolver {
+    private final class Resolver implements FieldResolver {
         private AggregationFunction function;
         private Schema inboundSchema;
         private final BitSet inboundIds = new BitSet();

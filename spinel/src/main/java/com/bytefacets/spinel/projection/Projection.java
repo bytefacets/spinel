@@ -38,7 +38,7 @@ public final class Projection implements InputProvider, OutputProvider {
         return input;
     }
 
-    private class Input implements TransformInput {
+    private final class Input implements TransformInput {
         private final BitSet outChanges = new BitSet();
         private final StateChange changes = StateChange.stateChange(outChanges);
         private TransformOutput source;

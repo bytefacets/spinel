@@ -141,7 +141,7 @@ final class ClientServerFilter {
     }
 
     /** A periodic task which logs connection and out-of-band events on the subscription. */
-    private static class Listener implements SubscriptionListener {
+    private static final class Listener implements SubscriptionListener {
         private Runnable dumper;
 
         @Override

@@ -127,7 +127,7 @@ final class KvDataQueue implements Runnable {
         }
     }
 
-    private static class Update {
+    private static final class Update {
         private KeyValueEntry entry;
         private boolean endOfData;
 

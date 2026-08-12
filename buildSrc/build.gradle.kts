@@ -19,11 +19,11 @@ kotlin {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "$jvmTargetVer"
-    }
-}
+//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+//    kotlinOptions {
+//        jvmTarget = "$jvmTargetVer"
+//    }
+//}
 
 dependencies {
     implementation("io.github.gradle-nexus:publish-plugin:1.3.0")

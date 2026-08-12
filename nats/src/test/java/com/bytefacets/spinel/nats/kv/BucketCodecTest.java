@@ -302,7 +302,7 @@ final class BucketCodecTest {
         return Schema.schema("TEST", fieldList(fieldMap));
     }
 
-    private static class NameSelector {
+    private static final class NameSelector {
         private final Set<String> used = new HashSet<>();
 
         String createName(final int type) {

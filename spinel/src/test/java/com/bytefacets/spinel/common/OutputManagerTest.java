@@ -71,7 +71,7 @@ class OutputManagerTest {
         assertThat(trigger.received, nullValue());
     }
 
-    private static class InputShell implements TransformInput {
+    private static final class InputShell implements TransformInput {
         private Schema received;
         private Runnable onSchema;
         private Runnable onAdd;

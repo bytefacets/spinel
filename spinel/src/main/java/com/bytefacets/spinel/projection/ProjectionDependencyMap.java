@@ -70,7 +70,7 @@ class ProjectionDependencyMap {
         return inboundFieldReferences[inboundFieldId];
     }
 
-    private class Resolver implements FieldResolver {
+    private final class Resolver implements FieldResolver {
         private int outboundFieldId = -1;
         private Schema inboundSchema;
         private Schema outboundSchema;

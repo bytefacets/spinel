@@ -160,7 +160,7 @@ public final class GrpcClient implements Receiver {
         }
     }
 
-    private class SendRequestAdapter implements ConnectionHandle {
+    private final class SendRequestAdapter implements ConnectionHandle {
         private final Object lock = new Object();
         private volatile boolean isClientSubscribed;
         private StreamObserver<SubscriptionRequest> requester;
@@ -236,7 +236,7 @@ public final class GrpcClient implements Receiver {
      * Because we're creating the stub with a specific executor, we'll always be called back in that
      * executor.
      */
-    private class ReceiveResponseAdapter implements StreamObserver<SubscriptionResponse> {
+    private final class ReceiveResponseAdapter implements StreamObserver<SubscriptionResponse> {
         @Override
         public void onNext(final SubscriptionResponse response) {
             if (response.getResponseType().equals(ResponseType.RESPONSE_TYPE_INIT)) {

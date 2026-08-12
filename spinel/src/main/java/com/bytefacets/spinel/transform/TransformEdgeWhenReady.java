@@ -25,7 +25,7 @@ class TransformEdgeWhenReady implements TransformEdge {
         connectOutputToInput(output, new WhenSchemaReady());
     }
 
-    private class WhenSchemaReady implements TransformInput {
+    private final class WhenSchemaReady implements TransformInput {
         private boolean waiting = true;
 
         @Override
