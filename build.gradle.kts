@@ -26,8 +26,8 @@ allprojects {
         withSourcesJar()
         modularity.inferModulePath.set(true)
 
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
     repositories {
@@ -152,7 +152,7 @@ subprojects {
     spotless {
         java {
             target("src/main/java/**/*.java", "src/test/java/**/*.java")
-            googleJavaFormat("1.25.2").aosp()
+            googleJavaFormat("1.35.0").aosp()
             indentWithSpaces()
             importOrder()
             removeUnusedImports()

@@ -13,9 +13,6 @@ val nettyVersion : String by extra
 java {
     withSourcesJar()
     modularity.inferModulePath.set(true)
-
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
 }
 
 configurations.spotbugs {
