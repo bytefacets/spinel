@@ -21,10 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class LookupJoinMapperTest {
-    private @Mock(lenient = true) JoinListener listener;
-    private @Mock(lenient = true) JoinInterner interner;
-    private @Mock(lenient = true) RowInterner left;
-    private @Mock(lenient = true) RowInterner right;
+    private @Mock(strictness = Mock.Strictness.LENIENT) JoinListener listener;
+    private @Mock(strictness = Mock.Strictness.LENIENT) JoinInterner interner;
+    private @Mock(strictness = Mock.Strictness.LENIENT) RowInterner left;
+    private @Mock(strictness = Mock.Strictness.LENIENT) RowInterner right;
     private LookupJoinMapper mapper;
 
     @BeforeEach

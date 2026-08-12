@@ -134,7 +134,7 @@ final class GrpcSession {
      * Server should be created with executor event loop corresponding to the data thread, so all
      * callbacks will be on the data event loop.
      */
-    private class RequestHandler implements StreamObserver<SubscriptionRequest> {
+    private final class RequestHandler implements StreamObserver<SubscriptionRequest> {
         @Override
         public void onNext(final SubscriptionRequest request) {
             log.debug(

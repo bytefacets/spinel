@@ -11,10 +11,10 @@ import com.bytefacets.spinel.comms.send.ChangeEncoder;
 import com.bytefacets.spinel.schema.ChangedFieldSet;
 import com.bytefacets.spinel.schema.Schema;
 import io.netty.channel.EventLoop;
+import jakarta.annotation.Nullable;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -36,7 +36,7 @@ final class FluxAdapter<T> {
         source.attachInput(input);
     }
 
-    private class Input implements TransformInput {
+    private final class Input implements TransformInput {
         @Override
         public void schemaUpdated(@Nullable final Schema schema) {
             if (schema != null) {
@@ -69,7 +69,7 @@ final class FluxAdapter<T> {
                 });
     }
 
-    private class ReactivePublisher implements Runnable {
+    private final class ReactivePublisher implements Runnable {
         private final LinkedBlockingDeque<T> queue = new LinkedBlockingDeque<>();
         private final AtomicBoolean connected = new AtomicBoolean(true);
         private final FluxSink<T> sink;

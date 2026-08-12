@@ -2,9 +2,9 @@ plugins {
     java
     `bytefacets-publishing-convention` apply false
     `bytefacets-central-portal-publishing-convention`
-    id("pl.allegro.tech.build.axion-release") version "1.18.18" // https://plugins.gradle.org/plugin/pl.allegro.tech.build.axion-release
-    id("com.github.spotbugs") version "6.0.25"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
-    id("com.diffplug.spotless") version "8.8.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
+    id("pl.allegro.tech.build.axion-release") version "1.21.1"  // https://plugins.gradle.org/plugin/pl.allegro.tech.build.axion-release
+    id("com.github.spotbugs") version "6.4.12"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
+    id("com.diffplug.spotless") version "8.4.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
 }
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
@@ -26,8 +26,8 @@ allprojects {
         withSourcesJar()
         modularity.inferModulePath.set(true)
 
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     repositories {
@@ -76,18 +76,16 @@ subprojects {
     extra.apply {
         set("auth0", "4.4.0")
         set("bytefacetsCollectionsVersion", "0.7.0")
-        set("findbugsVersion", "4.7.3")
         set("grpcVersion", "1.82.2")          // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
         set("logbackVersion", "1.5.38")       // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
         set("natsVersion", "2.26.0")          // https://mvnrepository.com/artifact/io.nats/jnats
         set("nettyVersion", "4.2.16.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
-        set("protobufVersion", "4.36.0-RC1")  // https://mvnrepository.com/artifact/com.google.protobuf/protoc
+        set("protobufVersion", "4.35.1")      // https://mvnrepository.com/artifact/com.google.protobuf/protoc
         set("slfApiVersion", "2.0.18")        // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
         set("spotbugsVersion", "4.10.3")      // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
     }
 
     val spotbugsVersion: String by extra
-    val findbugsVersion: String by extra
     val logbackVersion: String by extra
     val slfApiVersion: String by extra
     val junitVersion = "5.13.4"
@@ -97,10 +95,9 @@ subprojects {
 
     val mockitoAgent = configurations.create("mockitoAgent")
     dependencies {
-        spotbugs("com.github.spotbugs:spotbugs:${spotbugsVersion}")
-        compileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}") // for the module-info resolution
-        compileOnly("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
+        compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
         compileOnly("org.slf4j:slf4j-api:${slfApiVersion}")
+        implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
 
         testImplementation("org.slf4j:slf4j-api:${slfApiVersion}")
         testImplementation("ch.qos.logback:logback-classic:${logbackVersion}")
@@ -119,7 +116,7 @@ subprojects {
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
         testCompileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}") // for the module-info resolution
-        testCompileOnly("com.github.spotbugs:spotbugs-annotations:${findbugsVersion}")
+        testCompileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
         mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") {
             isTransitive = false
         }

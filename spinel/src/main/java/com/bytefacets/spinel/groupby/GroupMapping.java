@@ -60,7 +60,7 @@ final class GroupMapping {
         return passThruRowMapper;
     }
 
-    private class FirstGroupRowMapper implements RowMapper {
+    private final class FirstGroupRowMapper implements RowMapper {
         @Override
         public int sourceRowOf(final int group) {
             // iterator is re-used

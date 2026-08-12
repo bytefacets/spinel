@@ -10,7 +10,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.gen.ClassBuilder;
 import com.bytefacets.spinel.schema.TypeId;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +60,6 @@ final class DefaultValueImplBuilder implements ClassBuilder {
         state.defineClass();
     }
 
-    @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
     private final class DefinitionState {
         private final Class<?> type;
         private final CtClass dynamicClass;

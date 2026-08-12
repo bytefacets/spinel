@@ -163,7 +163,7 @@ final class PermissionFilter {
     /**
      * This factory intercepts the call the create the subscription and injects a permission filter.
      */
-    private static class PermissionedSubscriptionFactory implements SubscriptionFactory {
+    private static final class PermissionedSubscriptionFactory implements SubscriptionFactory {
         private static final Logger log =
                 LoggerFactory.getLogger("PermissionedSubscriptionFactory");
 

@@ -45,7 +45,7 @@ public final class GrpcSink implements InputProvider {
         }
     }
 
-    private class Input implements TransformInput {
+    private final class Input implements TransformInput {
         @Override
         public void setSource(@Nullable final TransformOutput output) {
             source = output;

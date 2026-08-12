@@ -56,7 +56,7 @@ public final class PerfHarness {
         }
     }
 
-    private static class Collector implements TransformInput {
+    private static final class Collector implements TransformInput {
         private final Counter adds = new Counter("adds");
         private final Counter chgs = new Counter("chgs");
         private final Counter rems = new Counter("rems");

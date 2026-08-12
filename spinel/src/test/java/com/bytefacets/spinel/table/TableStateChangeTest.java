@@ -174,7 +174,7 @@ class TableStateChangeTest {
         state.fire(consumer, consumer::removedRowCleanup);
     }
 
-    private static class RowConsumer implements InputNotifier {
+    private static final class RowConsumer implements InputNotifier {
         private final List<Integer> added = new ArrayList<>(4);
         private final List<Integer> changed = new ArrayList<>(4);
         private final List<Integer> removed = new ArrayList<>(4);

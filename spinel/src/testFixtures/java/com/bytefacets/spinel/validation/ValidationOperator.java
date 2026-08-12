@@ -74,7 +74,7 @@ public final class ValidationOperator implements InputProvider {
         input.currentChangeSet = new ChangeSet();
     }
 
-    private class Input implements TransformInput {
+    private final class Input implements TransformInput {
         private final Set<Integer> calculatedActiveRows = new TreeSet<>();
         private ChangeSet currentChangeSet = new ChangeSet();
         private Schema schema;
