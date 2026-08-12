@@ -138,7 +138,7 @@ subprojects {
     tasks.test {
         useJUnitPlatform()
         setForkEvery(1)
-        jvmArgs("-javaagent:${mockitoAgent.asPath}")
+        jvmArgs("-javaagent:${mockitoAgent.asPath}", "-Xshare:off")
         maxParallelForks = 4
         testLogging {
             showStandardStreams = true
