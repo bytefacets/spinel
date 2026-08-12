@@ -5,7 +5,6 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7" // https://plugins.gradle.org/plugin/io.spring.dependency-management
 }
 
-val reactorNettyVersion = "1.3.6"
 val bytefacetsCollectionsVersion : String by extra
 val protobufVersion: String by extra
 val nettyVersion : String by extra
@@ -28,6 +27,5 @@ dependencies {
     implementation(project(":grpc"))
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("io.projectreactor.netty:reactor-netty-http:${reactorNettyVersion}") // https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty-http
     implementation("com.google.protobuf:protobuf-java:${protobufVersion}") // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
 }
