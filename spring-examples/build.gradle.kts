@@ -17,7 +17,7 @@ java {
 configurations.spotbugs {
     resolutionStrategy {
         force("com.github.spotbugs:spotbugs-annotations:4.10.3")
-        force("org.apache.commons:commons-lang3:3.17.0")
+        force("org.apache.commons:commons-lang3:3.20.0")
     }
 }
 
