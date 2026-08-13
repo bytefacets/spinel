@@ -4,6 +4,7 @@ plugins {
     `bytefacets-central-portal-publishing-convention`
     id("com.github.spotbugs") version "6.4.12"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
     id("com.diffplug.spotless") version "8.4.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
+    checkstyle
 }
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
@@ -13,6 +14,10 @@ apply(plugin = "com.tddworks.central-portal-publisher")
 
 project.version = System.getenv("GIT_TAG") ?: "0.0.1-SNAPSHOT"
 System.out.printf("VERSION '%s'%n", version)
+
+checkstyle {
+    toolVersion = "13.10.0"
+}
 
 allprojects {
     apply(plugin = "idea")
