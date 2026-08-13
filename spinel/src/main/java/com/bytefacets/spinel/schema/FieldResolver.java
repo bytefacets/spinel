@@ -9,7 +9,7 @@ public interface FieldResolver {
     @Nullable
     Field findField(String name);
 
-    default Field getField(String name) {
+    default Field getField(final String name) {
         return Objects.requireNonNull(findField(name), name + " not found in schema");
     }
 

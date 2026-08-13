@@ -8,7 +8,7 @@ import com.bytefacets.spinel.schema.Schema;
 import jakarta.annotation.Nullable;
 
 public interface TransformInput {
-    default void setSource(@Nullable TransformOutput output) {}
+    default void setSource(final @Nullable TransformOutput output) {}
 
     void schemaUpdated(@Nullable Schema schema);
 
