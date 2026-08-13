@@ -15,16 +15,16 @@ apply(plugin = "com.tddworks.central-portal-publisher")
 project.version = System.getenv("GIT_TAG") ?: "0.0.1-SNAPSHOT"
 System.out.printf("VERSION '%s'%n", version)
 
-checkstyle {
-    toolVersion = "13.10.0"
-}
-
 allprojects {
     apply(plugin = "idea")
     apply(plugin = "java")
     apply(plugin = "checkstyle")
     apply(plugin = "com.diffplug.spotless")
     apply(plugin = "com.github.spotbugs")
+
+    checkstyle {
+        toolVersion = "13.10.0"
+    }
 
     java {
         withSourcesJar()
