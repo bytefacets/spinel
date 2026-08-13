@@ -73,10 +73,10 @@ subprojects {
     project.version = project.parent?.version!!
 
     extra.apply {
-        set("auth0", "4.4.0")
+        set("auth0", "4.6.0")
         set("bytefacetsCollectionsVersion", "0.7.0")
         set("grpcVersion", "1.83.1")          // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
-        set("logbackVersion", "1.5.38")       // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+        set("logbackVersion", "1.6.1")       // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
         set("natsVersion", "2.26.0")          // https://mvnrepository.com/artifact/io.nats/jnats
         set("nettyVersion", "4.2.16.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
         set("protobufVersion", "4.35.1")      // https://mvnrepository.com/artifact/com.google.protobuf/protoc
