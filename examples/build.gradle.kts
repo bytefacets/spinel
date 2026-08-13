@@ -7,7 +7,7 @@ tasks.withType<PublishToMavenLocal>().configureEach { enabled = false }
 
 val auth0: String by extra
 val bytefacetsCollectionsVersion: String by extra
-val grpcVersion = "1.70.0"
+val grpcVersion = "1.83.1"
 val logbackVersion: String by extra
 val natsVersion: String by extra
 val nettyVersion: String by extra
