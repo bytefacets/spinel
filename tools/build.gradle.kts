@@ -7,15 +7,15 @@ application {
     mainClass.set("com.bytefacets.spinel.tools.Main")
 }
 
-val auth0 : String by extra
-val bytefacetsCollectionsVersion : String by extra
-val grpcVersion : String by extra
-val log4jVersion : String by extra
-val logbackVersion: String by extra
-val nettyVersion : String by extra
-val protobufVersion : String by extra
+val auth0  = extra["auth0"] as String
+val bytefacetsCollectionsVersion  = extra["bytefacetsCollectionsVersion"] as String
+val grpcVersion  = extra["grpcVersion"] as String
+val logbackVersion = extra["logbackVersion"] as String
+val nettyVersion  = extra["nettyVersion"] as String
+val protobufVersion  = extra["protobufVersion"] as String
 var picocliVersion = "4.7.7"
-val slfApiVersion: String by extra
+var jansiVersion  = "4.3.1"
+val slfApiVersion = extra["slfApiVersion"] as String
 
 dependencies {
     implementation(project(":spinel"))
@@ -37,5 +37,5 @@ dependencies {
     implementation("info.picocli:picocli:${picocliVersion}")
 
     // https://mvnrepository.com/artifact/org.jline/jansi
-    implementation("org.jline:jansi:4.3.1")
+    implementation("org.jline:jansi:${jansiVersion}")
 }

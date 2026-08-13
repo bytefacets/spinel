@@ -5,9 +5,9 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7" // https://plugins.gradle.org/plugin/io.spring.dependency-management
 }
 
-val bytefacetsCollectionsVersion : String by extra
-val protobufVersion: String by extra
-val nettyVersion : String by extra
+val bytefacetsCollectionsVersion = extra["bytefacetsCollectionsVersion"] as String
+val protobufVersion = extra["protobufVersion"] as String
+val nettyVersion = extra["nettyVersion"] as String
 
 java {
     withSourcesJar()

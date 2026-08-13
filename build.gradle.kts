@@ -2,7 +2,6 @@ plugins {
     java
     `bytefacets-publishing-convention` apply false
     `bytefacets-central-portal-publishing-convention`
-    id("pl.allegro.tech.build.axion-release") version "1.21.1"  // https://plugins.gradle.org/plugin/pl.allegro.tech.build.axion-release
     id("com.github.spotbugs") version "6.4.12"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
     id("com.diffplug.spotless") version "8.4.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
 }
@@ -85,9 +84,9 @@ subprojects {
         set("spotbugsVersion", "4.10.3")      // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
     }
 
-    val spotbugsVersion: String by extra
-    val logbackVersion: String by extra
-    val slfApiVersion: String by extra
+    val spotbugsVersion = extra["spotbugsVersion"] as String
+    val logbackVersion = extra["logbackVersion"] as String
+    val slfApiVersion = extra["slfApiVersion"] as String
     val junitVersion = "5.13.4"
     val hamcrestVersion = "2.2"
     val mockitoVersion = "5.23.0" // https://mvnrepository.com/artifact/org.mockito/mockito-core

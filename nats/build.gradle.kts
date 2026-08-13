@@ -20,12 +20,12 @@ tasks.named("compileJava") {
     dependsOn("create-generated-source-dir", "generate-typed-main-sources")
 }
 
-val bytefacetsCollectionsVersion : String by extra
-val logbackVersion: String by extra // temporary
-val natsVersion: String by extra
-val nettyVersion: String by extra
-val protobufVersion: String by extra
-val slfApiVersion: String by extra // temporary
+val bytefacetsCollectionsVersion  = extra["bytefacetsCollectionsVersion"] as String
+val logbackVersion = extra["logbackVersion"] as String // temporary
+val natsVersion = extra["natsVersion"] as String
+val nettyVersion = extra["nettyVersion"] as String
+val protobufVersion = extra["protobufVersion"] as String
+val slfApiVersion = extra["slfApiVersion"] as String // temporary
 
 dependencies {
     implementation("org.slf4j:slf4j-api:${slfApiVersion}") // temporary
