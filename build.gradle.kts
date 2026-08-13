@@ -152,7 +152,7 @@ subprojects {
         java {
             target("src/main/java/**/*.java", "src/test/java/**/*.java")
             googleJavaFormat("1.35.0").aosp()
-            indentWithSpaces()
+            leadingTabsToSpaces()
             importOrder()
             removeUnusedImports()
             trimTrailingWhitespace()
