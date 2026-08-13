@@ -23,7 +23,7 @@ val logbackVersion = extra["logbackVersion"] as String
 val natsVersion = extra["natsVersion"] as String
 val nettyVersion = extra["nettyVersion"] as String
 val slfApiVersion = extra["slfApiVersion"] as String
-val vaadinVersion = "24.8.8"
+val vaadinVersion = "25.2.5"
 
 dependencies {
     implementation(project(":spinel"))
