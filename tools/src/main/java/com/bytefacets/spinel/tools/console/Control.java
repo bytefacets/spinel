@@ -5,7 +5,7 @@ package com.bytefacets.spinel.tools.console;
 import static java.util.Objects.requireNonNull;
 
 import com.bytefacets.spinel.ui.Pager;
-import org.fusesource.jansi.Ansi;
+import org.jline.jansi.Ansi;
 
 final class Control {
     private static final int TABLE_OFFSET = 3;

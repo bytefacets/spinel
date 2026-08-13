@@ -24,8 +24,8 @@ import io.netty.channel.EventLoop;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
+import org.jline.jansi.Ansi;
+import org.jline.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 

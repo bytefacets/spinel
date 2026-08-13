@@ -9,7 +9,7 @@ import com.bytefacets.collections.arrays.IntArray;
 import com.bytefacets.spinel.printer.ValueRenderer;
 import com.bytefacets.spinel.schema.TypeId;
 import java.util.function.Consumer;
-import org.fusesource.jansi.Ansi;
+import org.jline.jansi.Ansi;
 
 /** Owns the instance of Ansi and is responsible for dealing with the text, but no control. */
 final class Presenter {
