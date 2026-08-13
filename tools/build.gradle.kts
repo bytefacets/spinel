@@ -36,6 +36,6 @@ dependencies {
     // https://mvnrepository.com/artifact/info.picocli/picocli
     implementation("info.picocli:picocli:${picocliVersion}")
 
-    // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
-    implementation("org.fusesource.jansi:jansi:2.4.3")
+    // https://mvnrepository.com/artifact/org.jline/jansi
+    implementation("org.jline:jansi:4.3.1")
 }
