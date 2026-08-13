@@ -16,13 +16,13 @@ tasks.named("compileJava") {
         "generate-typed-test-sources")
 }
 
-val auth0: String by extra
-val bytefacetsCollectionsVersion: String by extra
-val grpcVersion: String by extra
-val logbackVersion: String by extra
-val natsVersion: String by extra
-val nettyVersion: String by extra
-val slfApiVersion: String by extra
+val auth0 = extra["auth0"] as String
+val bytefacetsCollectionsVersion = extra["bytefacetsCollectionsVersion"] as String
+val grpcVersion = extra["grpcVersion"] as String
+val logbackVersion = extra["logbackVersion"] as String
+val natsVersion = extra["natsVersion"] as String
+val nettyVersion = extra["nettyVersion"] as String
+val slfApiVersion = extra["slfApiVersion"] as String
 val vaadinVersion = "24.8.8"
 
 dependencies {

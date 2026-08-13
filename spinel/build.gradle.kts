@@ -43,7 +43,7 @@ tasks.named("compileJava") {
         "generate-typed-test-sources",
         "generate-typed-testFixtures-sources")
 }
-val bytefacetsCollectionsVersion: String by extra
+val bytefacetsCollectionsVersion = extra["bytefacetsCollectionsVersion"] as String
 val javassistVersion = "3.32.0-GA"
 val jexlVersion = "3.7.0"
 
