@@ -24,8 +24,8 @@ public interface KvUpdateHandler {
     default void caughtUp() {}
 
     /** Callback for deleted or purged entries */
-    default void deleted(int row, KeyValueEntry entry) {}
+    default void deleted(final int row, final KeyValueEntry entry) {}
 
     /** Callback in the event the key update that was received was not known to the adapter */
-    default void unknownDeletedEntry(KeyValueEntry entry) {}
+    default void unknownDeletedEntry(final KeyValueEntry entry) {}
 }

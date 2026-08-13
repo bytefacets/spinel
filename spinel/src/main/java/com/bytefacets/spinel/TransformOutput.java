@@ -9,7 +9,7 @@ import jakarta.annotation.Nullable;
 public interface TransformOutput {
     void attachInput(TransformInput input);
 
-    default void attachInput(InputProvider inputProvider) {
+    default void attachInput(final InputProvider inputProvider) {
         attachInput(inputProvider.input());
     }
 
@@ -20,7 +20,7 @@ public interface TransformOutput {
 
     void detachInput(TransformInput input);
 
-    default void detachInput(InputProvider inputProvider) {
+    default void detachInput(final InputProvider inputProvider) {
         detachInput(inputProvider.input());
     }
 }

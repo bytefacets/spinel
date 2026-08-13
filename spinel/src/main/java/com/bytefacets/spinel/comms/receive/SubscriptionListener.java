@@ -7,8 +7,8 @@ import com.bytefacets.spinel.comms.subscription.ModificationRequest;
 
 public interface SubscriptionListener {
     default void onModificationAddResponse(
-            ModificationRequest request, ModificationResponse response) {}
+            final ModificationRequest request, final ModificationResponse response) {}
 
     default void onModificationRemoveResponse(
-            ModificationRequest request, ModificationResponse response) {}
+            final ModificationRequest request, final ModificationResponse response) {}
 }
