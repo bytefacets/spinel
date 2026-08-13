@@ -76,7 +76,7 @@ subprojects {
     extra.apply {
         set("auth0", "4.4.0")
         set("bytefacetsCollectionsVersion", "0.7.0")
-        set("grpcVersion", "1.82.2")          // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
+        set("grpcVersion", "1.83.1")          // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
         set("logbackVersion", "1.5.38")       // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
         set("natsVersion", "2.26.0")          // https://mvnrepository.com/artifact/io.nats/jnats
         set("nettyVersion", "4.2.16.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
