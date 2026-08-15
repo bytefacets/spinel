@@ -29,5 +29,5 @@ dependencies {
     implementation("com.auth0:java-jwt:${auth0}")
 
     implementation("io.nats:jnats:${natsVersion}") // https://mvnrepository.com/artifact/io.nats/jnats
-    implementation("net.datafaker:datafaker:2.5.0") // https://mvnrepository.com/artifact/net.datafaker/datafaker
+    implementation("net.datafaker:datafaker:2.7.0") // https://mvnrepository.com/artifact/net.datafaker/datafaker
 }
