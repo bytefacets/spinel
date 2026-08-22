@@ -93,7 +93,7 @@ subprojects {
     val logbackVersion = extra["logbackVersion"] as String
     val slfApiVersion = extra["slfApiVersion"] as String
     val junitVersion = "5.13.4"
-    val hamcrestVersion = "2.2"
+    val hamcrestVersion = "3.0"
     val mockitoVersion = "5.23.0" // https://mvnrepository.com/artifact/org.mockito/mockito-core
     val jakartaAnnotationVersion = "2.1.1"
 
