@@ -83,7 +83,7 @@ subprojects {
         set("grpcVersion", "1.83.1")          // https://mvnrepository.com/artifact/io.grpc/protoc-gen-grpc-java
         set("logbackVersion", "1.6.2")       // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
         set("natsVersion", "2.26.0")          // https://mvnrepository.com/artifact/io.nats/jnats
-        set("nettyVersion", "4.2.16.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
+        set("nettyVersion", "4.2.17.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
         set("protobufVersion", "4.35.1")      // https://mvnrepository.com/artifact/com.google.protobuf/protoc
         set("slfApiVersion", "2.0.18")        // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
         set("spotbugsVersion", "4.10.3")      // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
