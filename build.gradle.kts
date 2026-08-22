@@ -2,7 +2,7 @@ plugins {
     java
     `bytefacets-publishing-convention` apply false
     `bytefacets-central-portal-publishing-convention`
-    id("com.github.spotbugs") version "6.4.12"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
+    id("com.github.spotbugs") version "6.5.10"                  // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-gradle-plugin
     id("com.diffplug.spotless") version "8.4.0"                 // https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-plugin-gradle
     checkstyle
 }
