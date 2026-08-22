@@ -22,5 +22,5 @@ kotlin {
 dependencies {
     implementation("io.github.gradle-nexus:publish-plugin:1.3.0")
     implementation("com.tddworks.central-portal-publisher:com.tddworks.central-portal-publisher.gradle.plugin:0.0.5")
-    implementation("com.gradle.publish:plugin-publish-plugin:1.2.1")
+    implementation("com.gradle.publish:plugin-publish-plugin:2.1.1")
 }
