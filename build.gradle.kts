@@ -86,7 +86,7 @@ subprojects {
         set("nettyVersion", "4.2.17.Final")   // https://mvnrepository.com/artifact/io.netty/netty-all
         set("protobufVersion", "4.35.1")      // https://mvnrepository.com/artifact/com.google.protobuf/protoc
         set("slfApiVersion", "2.0.18")        // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-        set("spotbugsVersion", "4.10.3")      // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
+        set("spotbugsVersion", "4.10.4")      // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
     }
 
     val spotbugsVersion = extra["spotbugsVersion"] as String
